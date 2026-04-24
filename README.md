@@ -1,17 +1,17 @@
 # MockMind
 
-MockMind is a TypeScript mock server for OpenAI-compatible and major LLM provider APIs. It is designed for local development, CI testing, SDK compatibility checks, and agent/RAG workflow debugging.
+MockMind 是一个使用 TypeScript 编写的模拟服务，用于兼容 OpenAI 以及主流 LLM 提供商 API。它适合本地开发、CI 测试、SDK 兼容性验证，以及 Agent/RAG 工作流调试。
 
-MockMind does not run real LLM inference and does not proxy real provider APIs by default. It returns protocol-shaped mock responses from YAML scenarios.
+MockMind 不执行真实 LLM 推理，默认也不会代理真实提供商 API。它会根据 YAML 场景返回符合对应协议结构的模拟响应。
 
-## Quick Start
+## 快速开始
 
 ```bash
 npm install
 npm run dev -- start --config mockmind.yaml --port 4000
 ```
 
-Call the OpenAI-compatible endpoint:
+调用 OpenAI 兼容端点：
 
 ```bash
 curl http://127.0.0.1:4000/v1/chat/completions \
@@ -23,7 +23,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
   }'
 ```
 
-Expected response:
+预期响应：
 
 ```json
 {
@@ -43,7 +43,7 @@ Expected response:
 }
 ```
 
-## CLI
+## 命令行
 
 ```bash
 npm run dev -- init
@@ -51,15 +51,19 @@ npm run dev -- validate --config mockmind.yaml
 npm run dev -- start --config mockmind.yaml --port 4000
 ```
 
-MockMind starts all implemented protocols by default. The `providers` section is metadata for documentation, model ownership, and Admin API output rather than a route enable/disable switch.
+MockMind 默认启动所有已实现的协议。`providers` 配置节仅作为文档、模型归属和 Admin API 输出的元数据，而不是路由启用/禁用开关。
 
-## Implemented MVP
+## 已实现能力
 
 - `GET /health`
 - `GET /v1/models`
 - `POST /v1/chat/completions`
 - `POST /v1/embeddings`
 - `POST /compatible-mode/v1/chat/completions`
+- `POST /deepseek/v1/chat/completions`
+- `POST /moonshot/v1/chat/completions`
+- `POST /zhipu/v1/chat/completions`
+- `POST /api/paas/v4/chat/completions`
 - `POST /v1/messages`
 - `POST /anthropic/v1/messages`
 - `POST /v1beta/models/:model:generateContent`
@@ -68,16 +72,17 @@ MockMind starts all implemented protocols by default. The `providers` section is
 - `POST /gemini/v1beta/models/:model:streamGenerateContent`
 - `POST /api/v1/services/aigc/text-generation/generation`
 - `POST /dashscope/api/v1/services/aigc/text-generation/generation`
-- OpenAI-compatible text, streaming, error, embeddings, and tool calls
-- DeepSeek-style `reasoning_content`
-- Anthropic Messages text, streaming, errors, and `tool_use`
-- Gemini `generateContent`, streaming, errors, and `functionCall`
-- DashScope text generation, SSE result events, usage, and provider-style errors
-- YAML config loading, scenario matching, fallback, recorder, Admin API, and Provider Registry
+- OpenAI 兼容的文本、流式、错误、嵌入向量和工具调用响应
+- DeepSeek 风格的 `reasoning_content`
+- DeepSeek、Moonshot/Kimi 和智谱的 OpenAI 兼容命名空间路由
+- Anthropic Messages 的文本、流式、错误和 `tool_use` 响应
+- Gemini `generateContent`、流式、错误和 `functionCall` 响应
+- DashScope 文本生成、SSE 结果事件、用量信息和提供商风格错误
+- YAML 配置加载、场景匹配、兜底响应、请求记录器、Admin API 和提供商注册表
 
-## OpenAI-Compatible Examples
+## OpenAI 兼容示例
 
-### Chat Completion
+### 聊天补全
 
 ```bash
 curl http://127.0.0.1:4000/v1/chat/completions \
@@ -89,7 +94,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
   }'
 ```
 
-### Streaming With Usage
+### 带用量信息的流式响应
 
 ```bash
 curl -N http://127.0.0.1:4000/v1/chat/completions \
@@ -102,7 +107,7 @@ curl -N http://127.0.0.1:4000/v1/chat/completions \
   }'
 ```
 
-The response is Server-Sent Events:
+响应为 Server-Sent Events：
 
 ```txt
 data: {"id":"chatcmpl_mock_0001","object":"chat.completion.chunk","choices":[{"delta":{"role":"assistant"},"finish_reason":null}]}
@@ -116,9 +121,9 @@ data: {"id":"chatcmpl_mock_0001","object":"chat.completion.chunk","choices":[{"d
 data: [DONE]
 ```
 
-### Tool Calls
+### 工具调用
 
-The default `mockmind.yaml` contains a weather tool-call scenario.
+默认的 `mockmind.yaml` 包含一个天气工具调用场景。
 
 ```bash
 curl http://127.0.0.1:4000/v1/chat/completions \
@@ -143,7 +148,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
   }'
 ```
 
-Expected response:
+预期响应：
 
 ```json
 {
@@ -173,7 +178,7 @@ Expected response:
 }
 ```
 
-### Streaming Tool Calls
+### 流式工具调用
 
 ```bash
 curl -N http://127.0.0.1:4000/v1/chat/completions \
@@ -187,11 +192,11 @@ curl -N http://127.0.0.1:4000/v1/chat/completions \
   }'
 ```
 
-The stream includes a `tool_calls` delta and ends with `finish_reason: "tool_calls"`.
+流式响应会包含 `tool_calls` 增量，并以 `finish_reason: "tool_calls"` 结束。
 
-### Error Mock
+### 错误模拟
 
-The default config contains a rate-limit scenario triggered by `trigger-rate-limit`.
+默认配置包含一个由 `trigger-rate-limit` 触发的限流场景。
 
 ```bash
 curl -i http://127.0.0.1:4000/v1/chat/completions \
@@ -203,7 +208,7 @@ curl -i http://127.0.0.1:4000/v1/chat/completions \
   }'
 ```
 
-Expected HTTP status: `429`.
+预期 HTTP 状态码：`429`。
 
 ```json
 {
@@ -216,7 +221,7 @@ Expected HTTP status: `429`.
 }
 ```
 
-### Embeddings
+### 嵌入向量
 
 ```bash
 curl http://127.0.0.1:4000/v1/embeddings \
@@ -228,9 +233,9 @@ curl http://127.0.0.1:4000/v1/embeddings \
   }'
 ```
 
-## DeepSeek Reasoning Example
+## DeepSeek 推理示例
 
-DeepSeek uses the OpenAI-compatible endpoint and is routed by model name.
+DeepSeek 使用 OpenAI 兼容端点，并根据模型名称进行路由。
 
 ```bash
 curl http://127.0.0.1:4000/v1/chat/completions \
@@ -242,7 +247,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
   }'
 ```
 
-Expected response includes `reasoning_content`:
+预期响应包含 `reasoning_content`：
 
 ```json
 {
@@ -258,9 +263,63 @@ Expected response includes `reasoning_content`:
 }
 ```
 
-## Anthropic Messages Examples
+DeepSeek 也提供命名空间端点：
 
-### Text Message
+```bash
+curl http://127.0.0.1:4000/deepseek/v1/chat/completions \
+  -H 'Authorization: Bearer test-key' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "deepseek-reasoner",
+    "messages": [{"role":"user","content":"explain"}]
+  }'
+```
+
+## Moonshot / Kimi 示例
+
+```bash
+curl http://127.0.0.1:4000/moonshot/v1/chat/completions \
+  -H 'Authorization: Bearer test-key' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "moonshot-v1-8k",
+    "messages": [{"role":"user","content":"hello"}]
+  }'
+```
+
+预期响应包含：
+
+```json
+{
+  "model": "moonshot-v1-8k",
+  "choices": [{"message":{"content":"Hello from mock Moonshot / Kimi."}}]
+}
+```
+
+## 智谱 GLM 示例
+
+```bash
+curl http://127.0.0.1:4000/api/paas/v4/chat/completions \
+  -H 'Authorization: Bearer test-key' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "glm-4",
+    "messages": [{"role":"user","content":"hello"}]
+  }'
+```
+
+预期响应包含：
+
+```json
+{
+  "model": "glm-4",
+  "choices": [{"message":{"content":"Hello from mock Zhipu GLM."}}]
+}
+```
+
+## Anthropic Messages 示例
+
+### 文本消息
 
 ```bash
 curl http://127.0.0.1:4000/v1/messages \
@@ -274,7 +333,7 @@ curl http://127.0.0.1:4000/v1/messages \
   }'
 ```
 
-Expected response:
+预期响应：
 
 ```json
 {
@@ -287,7 +346,7 @@ Expected response:
 }
 ```
 
-### Tool Use
+### 工具使用
 
 ```bash
 curl http://127.0.0.1:4000/v1/messages \
@@ -302,7 +361,7 @@ curl http://127.0.0.1:4000/v1/messages \
   }'
 ```
 
-Expected response:
+预期响应：
 
 ```json
 {
@@ -319,7 +378,7 @@ Expected response:
 }
 ```
 
-### Streaming
+### 流式响应
 
 ```bash
 curl -N http://127.0.0.1:4000/v1/messages \
@@ -333,11 +392,11 @@ curl -N http://127.0.0.1:4000/v1/messages \
   }'
 ```
 
-The stream emits Anthropic-style events such as `message_start`, `content_block_delta`, `message_delta`, and `message_stop`.
+流式响应会发送 Anthropic 风格的事件，例如 `message_start`、`content_block_delta`、`message_delta` 和 `message_stop`。
 
-## Gemini Examples
+## Gemini 示例
 
-### generateContent
+### generateContent 示例
 
 ```bash
 curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:generateContent \
@@ -352,7 +411,7 @@ curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:generateContent \
   }'
 ```
 
-Expected response:
+预期响应：
 
 ```json
 {
@@ -369,7 +428,7 @@ Expected response:
 }
 ```
 
-### functionCall
+### functionCall 示例
 
 ```bash
 curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:generateContent \
@@ -391,7 +450,7 @@ curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:generateContent \
   }'
 ```
 
-Expected response:
+预期响应：
 
 ```json
 {
@@ -414,7 +473,7 @@ Expected response:
 }
 ```
 
-### streamGenerateContent
+### streamGenerateContent 示例
 
 ```bash
 curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:streamGenerateContent \
@@ -424,11 +483,11 @@ curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:streamGenerateContent \
   }'
 ```
 
-MockMind returns a JSON array of Gemini-style streamed chunks.
+MockMind 会返回由 Gemini 风格流式分块组成的 JSON 数组。
 
-## DashScope / Alibaba Bailian Examples
+## DashScope / 阿里云百炼示例
 
-### Text Generation
+### 文本生成
 
 ```bash
 curl http://127.0.0.1:4000/api/v1/services/aigc/text-generation/generation \
@@ -445,7 +504,7 @@ curl http://127.0.0.1:4000/api/v1/services/aigc/text-generation/generation \
   }'
 ```
 
-Expected response:
+预期响应：
 
 ```json
 {
@@ -464,7 +523,7 @@ Expected response:
 }
 ```
 
-### Streaming
+### 流式响应
 
 ```bash
 curl -N http://127.0.0.1:4000/api/v1/services/aigc/text-generation/generation \
@@ -483,7 +542,7 @@ curl -N http://127.0.0.1:4000/api/v1/services/aigc/text-generation/generation \
   }'
 ```
 
-MockMind emits SSE events:
+MockMind 会发送 SSE 事件：
 
 ```txt
 event: result
@@ -493,9 +552,9 @@ event: result
 data: {"request_id":"req_mock_dashscope_0001","output":{"choices":[{"finish_reason":"stop","message":{"role":"assistant","content":""}}]},"usage":{"input_tokens":0,"output_tokens":0,"total_tokens":0}}
 ```
 
-### Error
+### 错误
 
-Create a scenario with `response.type: error`, or use your own config to trigger a provider-style error:
+可以创建 `response.type: error` 场景，或使用自定义配置触发提供商风格错误：
 
 ```yaml
 scenarios:
@@ -511,7 +570,7 @@ scenarios:
       message: mock throttling
 ```
 
-Expected response:
+预期响应：
 
 ```json
 {
@@ -521,9 +580,9 @@ Expected response:
 }
 ```
 
-## Scenario Configuration Examples
+## 场景配置示例
 
-### Tool Call Scenario
+### 工具调用场景
 
 ```yaml
 scenarios:
@@ -540,7 +599,7 @@ scenarios:
         city: Shanghai
 ```
 
-### Streaming Scenario
+### 流式场景
 
 ```yaml
 scenarios:
@@ -561,7 +620,7 @@ scenarios:
         totalTokens: 14
 ```
 
-### Reasoning Stream Scenario
+### 推理流式场景
 
 ```yaml
 scenarios:
@@ -579,7 +638,7 @@ scenarios:
         - This is the final answer.
 ```
 
-### Stream Error Scenario
+### 流式错误场景
 
 ```yaml
 scenarios:
@@ -598,7 +657,42 @@ scenarios:
         message: mock stream interrupted
 ```
 
-## Admin API
+### 高级匹配场景
+
+可使用 `lastUserMessageContains`、`messageRole`、`bodyPath` 和 `query`，相比原始 JSON 子串匹配实现更精确的匹配。
+
+```yaml
+scenarios:
+  - id: dashscope-message-format
+    provider: aliyun-bailian
+    endpoint: /api/v1/services/aigc/text-generation/generation
+    match:
+      model: qwen-plus
+      messageRole: user
+      lastUserMessageContains: 你好
+      bodyPath:
+        parameters.result_format: message
+      query:
+        debug: 'true'
+    response:
+      type: text
+      content: Matched by body path and query.
+```
+
+支持的匹配字段：
+
+- `model`：精确匹配模型。
+- `stream`：精确匹配布尔类型的流式开关。
+- `messagesContain`：对序列化后的消息进行子串匹配。
+- `lastUserMessageContains`：对最后一条用户消息进行子串匹配。
+- `messageRole`：要求至少存在一条指定角色的消息。
+- `hasTools`：要求工具存在或不存在。
+- `body`：浅层顶级请求体匹配。
+- `bodyPath`：点路径形式的嵌套请求体匹配，例如 `parameters.result_format`。
+- `headers`：精确匹配小写请求头。
+- `query`：精确匹配查询参数。
+
+## 管理 API
 
 ```txt
 GET  /__admin/config
@@ -611,19 +705,19 @@ POST /__admin/reset
 POST /__admin/reload
 ```
 
-Inspect recorded requests:
+查看已记录的请求：
 
 ```bash
 curl http://127.0.0.1:4000/__admin/requests
 ```
 
-Reset recorded requests:
+重置已记录的请求：
 
 ```bash
 curl -X POST http://127.0.0.1:4000/__admin/reset
 ```
 
-## SDK Example
+## SDK 示例
 
 ```ts
 import OpenAI from "openai";
@@ -641,7 +735,7 @@ const result = await client.chat.completions.create({
 console.log(result.choices[0]?.message.content);
 ```
 
-## Programmatic API
+## 编程式 API
 
 ```ts
 import { createMockLLMServer } from "mockmind";
@@ -656,14 +750,14 @@ const requests = await server.getRequests();
 await server.stop();
 ```
 
-## Safety Notes
+## 安全说明
 
-- MockMind is intended for local development and CI.
-- Admin APIs are not designed for public internet exposure.
-- MockMind does not include real provider API keys.
-- MockMind does not proxy real LLM requests by default.
-- MockMind is pre-1.0; configuration fields and Admin APIs may evolve between minor versions.
+- MockMind 适用于本地开发和 CI。
+- Admin API 不适合暴露到公网。
+- MockMind 不包含真实提供商 API Key。
+- MockMind 默认不会代理真实 LLM 请求。
+- MockMind 仍处于 1.0 之前版本；配置字段和 Admin API 可能会在小版本之间演进。
 
-## License
+## 许可证
 
 MIT
