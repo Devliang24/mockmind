@@ -17,4 +17,5 @@ RUN npm install --omit=dev
 COPY --from=build /app/dist ./dist
 COPY mockmind.yaml ./mockmind.yaml
 EXPOSE 4000
+HEALTHCHECK CMD wget -qO- http://127.0.0.1:4000/health || exit 1
 CMD ["node", "dist/cli/index.js", "start", "--config", "mockmind.yaml", "--host", "0.0.0.0"]

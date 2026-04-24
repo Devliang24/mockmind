@@ -35,5 +35,36 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "license": "MIT",
+  "author": "MockMind contributors",
+  "homepage": "https://github.com/Devliang24/mockmind#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Devliang24/mockmind.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Devliang24/mockmind/issues"
+  },
+  "keywords": [
+    "llm",
+    "mock-server",
+    "openai",
+    "anthropic",
+    "gemini",
+    "dashscope",
+    "fastify",
+    "testing",
+    "agent",
+    "rag",
+    "sdk-testing"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
   }
 }
