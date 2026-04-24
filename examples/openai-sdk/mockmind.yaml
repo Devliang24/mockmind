@@ -1,0 +1,17 @@
+server:
+  host: 127.0.0.1
+  port: 4000
+
+auth:
+  mode: permissive
+
+scenarios:
+  - id: openai-sdk-hello
+    provider: openai
+    endpoint: /v1/chat/completions
+    match:
+      model: gpt-4o-mini
+      messagesContain: hello
+    response:
+      type: text
+      content: Hello from the MockMind OpenAI SDK example.

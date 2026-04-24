@@ -1,0 +1,43 @@
+import { describe, expect, it } from "vitest";
+import { createMockMindServer } from "../../src/server/create-server.js";
+import type { MockMindConfig } from "../../src/core/scenario/types.js";
+
+const config: MockMindConfig = {
+  server: { host: "127.0.0.1", port: 0 },
+  providers: { enabled: "all" },
+  auth: { mode: "permissive", apiKeys: ["test-key"] },
+  models: [
+    { id: "claude-3-5-sonnet-latest", provider: "anthropic" },
+    { id: "gemini-1.5-pro", provider: "gemini" },
+    { id: "qwen-plus", provider: "aliyun-bailian" }
+  ],
+  defaults: { latencyMs: 0, streamChunkDelayMs: 0 },
+  fallback: { enabled: true, response: { type: "text", content: "fallback" } },
+  scenarios: []
+};
+
+describe("native protocol routes", () => {
+  it("returns an Anthropic message", async () => {
+    const { app } = await createMockMindServer(config);
+    const response = await app.inject({ method: "POST", url: "/v1/messages", payload: { model: "claude-3-5-sonnet-latest", messages: [{ role: "user", content: "hello" }] } });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().type).toBe("message");
+    await app.close();
+  });
+
+  it("returns a Gemini candidate", async () => {
+    const { app } = await createMockMindServer(config);
+    const response = await app.inject({ method: "POST", url: "/v1beta/models/gemini-1.5-pro:generateContent", payload: { contents: [{ role: "user", parts: [{ text: "hello" }] }] } });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().candidates[0].content.parts[0].text).toBe("fallback");
+    await app.close();
+  });
+
+  it("returns a DashScope generation", async () => {
+    const { app } = await createMockMindServer(config);
+    const response = await app.inject({ method: "POST", url: "/api/v1/services/aigc/text-generation/generation", payload: { model: "qwen-plus", input: { messages: [{ role: "user", content: "你好" }] } } });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().output.choices[0].message.content).toBe("fallback");
+    await app.close();
+  });
+});

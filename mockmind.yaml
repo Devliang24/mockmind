@@ -1,0 +1,85 @@
+server:
+  host: 127.0.0.1
+  port: 4000
+
+providers:
+  # MockMind starts all implemented protocols by default.
+  # This field is metadata for compatibility with the project plan and Admin API.
+  enabled: all
+
+auth:
+  mode: permissive
+  apiKeys:
+    - test-key
+
+models:
+  - id: gpt-4o-mini
+    provider: openai
+  - id: deepseek-chat
+    provider: deepseek
+  - id: deepseek-reasoner
+    provider: deepseek
+  - id: qwen-plus
+    provider: aliyun-bailian
+  - id: claude-3-5-sonnet-latest
+    provider: anthropic
+  - id: gemini-1.5-pro
+    provider: gemini
+
+defaults:
+  latencyMs: 30
+  streamChunkDelayMs: 25
+
+fallback:
+  enabled: true
+  response:
+    type: text
+    content: This is a default mock response from mockmind.
+
+scenarios:
+  - id: openai-basic
+    provider: openai
+    endpoint: /v1/chat/completions
+    match:
+      model: gpt-4o-mini
+      messagesContain: hello
+    response:
+      type: text
+      content: Hello from OpenAI-compatible mock.
+
+  - id: deepseek-reasoning
+    provider: deepseek
+    endpoint: /v1/chat/completions
+    match:
+      model: deepseek-reasoner
+    response:
+      type: text
+      reasoningContent: This is mock reasoning content.
+      content: This is the final DeepSeek mock answer.
+
+  - id: anthropic-basic
+    provider: anthropic
+    endpoint: /v1/messages
+    match:
+      model: claude-3-5-sonnet-latest
+    response:
+      type: text
+      content: Hello from mock Anthropic.
+
+  - id: gemini-basic
+    provider: gemini
+    endpoint: /v1beta/models/gemini-1.5-pro:generateContent
+    match:
+      model: gemini-1.5-pro
+    response:
+      type: text
+      content: Hello from mock Gemini.
+
+  - id: dashscope-basic
+    provider: aliyun-bailian
+    endpoint: /api/v1/services/aigc/text-generation/generation
+    match:
+      model: qwen-plus
+    response:
+      type: text
+      content: 你好，我是模拟的 DashScope 原生响应。
