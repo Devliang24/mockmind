@@ -18,7 +18,14 @@ const mockResultSchema = z.object({
   reasoningContent: z.string().optional(),
   json: z.unknown().optional(),
   chunks: z.array(z.string()).optional(),
+  reasoningChunks: z.array(z.string()).optional(),
+  streamError: z.object({
+    code: z.string().optional(),
+    message: z.string()
+  }).optional(),
   toolCalls: z.array(z.unknown()).optional(),
+  toolName: z.string().optional(),
+  toolArguments: z.record(z.string(), z.unknown()).optional(),
   embedding: z.array(z.number()).optional(),
   usage: z.object({
     promptTokens: z.number().int().nonnegative().optional(),
@@ -27,10 +34,12 @@ const mockResultSchema = z.object({
   }).optional(),
   error: z.object({
     status: z.number().int().min(100).max(599),
+    type: z.string().optional(),
     code: z.string().optional(),
     message: z.string()
   }).optional(),
   status: z.number().int().min(100).max(599).optional(),
+  errorType: z.string().optional(),
   code: z.string().optional(),
   message: z.string().optional()
 }).transform((value) => {
@@ -39,6 +48,7 @@ const mockResultSchema = z.object({
       ...value,
       error: {
         status: value.status ?? 500,
+        type: value.errorType,
         code: value.code,
         message: value.message ?? "mock error"
       }

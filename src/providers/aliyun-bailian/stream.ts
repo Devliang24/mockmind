@@ -1,6 +1,11 @@
 import type { FastifyReply } from "fastify";
 import type { MockResult } from "../../core/scenario/types.js";
 import { delay } from "../../shared/time.js";
+import { formatDashScopeUsage } from "./dashscope.js";
+
+function dashScopeEvent(data: unknown): string {
+  return `event: result\ndata: ${JSON.stringify(data)}\n\n`;
+}
 
 export async function sendDashScopeStream(reply: FastifyReply, result: MockResult, chunkDelayMs: number): Promise<void> {
   reply.raw.writeHead(200, {
@@ -11,21 +16,25 @@ export async function sendDashScopeStream(reply: FastifyReply, result: MockResul
 
   const chunks = result.chunks?.length ? result.chunks : [result.content ?? ""];
   for (const content of chunks) {
-    reply.raw.write(`data: ${JSON.stringify({
+    reply.raw.write(dashScopeEvent({
+      request_id: "req_mock_dashscope_0001",
       output: {
         choices: [{ finish_reason: null, message: { role: "assistant", content } }]
       }
-    })}\n\n`);
+    }));
     if (chunkDelayMs > 0) await delay(chunkDelayMs);
   }
 
-  reply.raw.write(`data: ${JSON.stringify({
+  if (result.streamError) {
+    reply.raw.write(`event: error\ndata: ${JSON.stringify({ request_id: "req_mock_dashscope_error_0001", code: result.streamError.code ?? "ServiceUnavailable", message: result.streamError.message })}\n\n`);
+    reply.raw.end();
+    return;
+  }
+
+  reply.raw.write(dashScopeEvent({
+    request_id: "req_mock_dashscope_0001",
     output: { choices: [{ finish_reason: "stop", message: { role: "assistant", content: "" } }] },
-    usage: {
-      input_tokens: result.usage?.promptTokens ?? 0,
-      output_tokens: result.usage?.completionTokens ?? 0,
-      total_tokens: result.usage?.totalTokens ?? 0
-    }
-  })}\n\n`);
+    usage: formatDashScopeUsage(result)
+  }));
   reply.raw.end();
 }

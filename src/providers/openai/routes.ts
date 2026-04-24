@@ -46,7 +46,7 @@ export async function registerOpenAIRoutes(app: FastifyInstance, context: Server
     if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
     const status = result.error?.status ?? 200;
     context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest });
-    if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatOpenAIError(result.error.status, result.error.code, result.error.message));
+    if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type));
     return reply.send(formatEmbedding(body.model ?? "text-embedding-3-small", result.embedding ?? [0.0123, -0.0456, 0.0789]));
   });
 
@@ -72,7 +72,7 @@ export async function registerOpenAIRoutes(app: FastifyInstance, context: Server
     if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
     const status = result.error?.status ?? 200;
     context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: Boolean(body.stream), request: mockRequest });
-    if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatOpenAIError(result.error.status, result.error.code, result.error.message));
+    if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type));
     if (body.stream) return sendOpenAIStream(reply, body.model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs);
     return reply.send(formatChatCompletion(body.model ?? "mock-model", result));
   }

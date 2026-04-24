@@ -12,18 +12,22 @@ export function formatDashScopeGeneration(result: MockResult): unknown {
         }
       }]
     },
-    usage: {
-      input_tokens: result.usage?.promptTokens ?? 0,
-      output_tokens: result.usage?.completionTokens ?? 0,
-      total_tokens: result.usage?.totalTokens ?? 0
-    }
+    usage: formatDashScopeUsage(result)
   };
 }
 
 export function formatDashScopeError(code: string | undefined, message: string): unknown {
   return {
     request_id: "req_mock_dashscope_error_0001",
-    code: code ?? "MockError",
+    code: code ?? "ServiceUnavailable",
     message
+  };
+}
+
+export function formatDashScopeUsage(result: MockResult): unknown {
+  return {
+    input_tokens: result.usage?.promptTokens ?? 0,
+    output_tokens: result.usage?.completionTokens ?? 0,
+    total_tokens: result.usage?.totalTokens ?? 0
   };
 }

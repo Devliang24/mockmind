@@ -29,7 +29,14 @@ export type MockResult = {
   reasoningContent?: string;
   json?: unknown;
   chunks?: string[];
+  reasoningChunks?: string[];
+  streamError?: {
+    code?: string;
+    message: string;
+  };
   toolCalls?: unknown[];
+  toolName?: string;
+  toolArguments?: Record<string, unknown>;
   embedding?: number[];
   usage?: {
     promptTokens?: number;
@@ -38,6 +45,7 @@ export type MockResult = {
   };
   error?: {
     status: number;
+    type?: string;
     code?: string;
     message: string;
   };

@@ -52,7 +52,7 @@ export async function registerGeminiRoutes(app: FastifyInstance, context: Server
     if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
     const status = result.error?.status ?? 200;
     context.recorder.add({ provider: mockRequest.provider, endpoint, model: operation.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest });
-    if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatGeminiError(result.error.status, result.error.message));
+    if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatGeminiError(result.error.status, result.error.message, result.error.code));
     if (stream) return sendGeminiStream(reply, result, context.config.defaults.streamChunkDelayMs);
     return reply.send(formatGeminiContent(result));
   }

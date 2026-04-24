@@ -48,6 +48,10 @@ MockMind starts all implemented protocols by default. The `providers` section is
 - `POST /dashscope/api/v1/services/aigc/text-generation/generation`
 - OpenAI-compatible SSE streaming
 - Anthropic, Gemini, and DashScope minimal native protocol mocks
+- OpenAI-compatible tool calls and stream usage chunks
+- Anthropic `tool_use` mock responses
+- Gemini `functionCall` mock responses
+- DashScope SSE result events and provider-style errors
 - YAML config loading and validation
 - Scenario matching and global fallback
 - Text, stream, embedding, tool call, and error mock results
@@ -108,6 +112,23 @@ curl http://127.0.0.1:4000/v1/messages \
   -H 'Content-Type: application/json' \
   -d '{"model":"claude-3-5-sonnet-latest","messages":[{"role":"user","content":"hello"}]}'
 ```
+
+## Tool Calling Example
+
+OpenAI-compatible tool call mock:
+
+```bash
+curl http://127.0.0.1:4000/v1/chat/completions \
+  -H 'Authorization: Bearer test-key' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [{"role":"user","content":"weather"}],
+    "tools": [{"type":"function","function":{"name":"get_weather"}}]
+  }'
+```
+
+The default sample config returns a `tool_calls` response for this request.
 
 Gemini generateContent:
 

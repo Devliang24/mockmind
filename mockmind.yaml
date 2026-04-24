@@ -47,6 +47,18 @@ scenarios:
       type: text
       content: Hello from OpenAI-compatible mock.
 
+  - id: openai-tool-weather
+    provider: openai
+    endpoint: /v1/chat/completions
+    match:
+      messagesContain: weather
+      hasTools: true
+    response:
+      type: tool_call
+      toolName: get_weather
+      toolArguments:
+        city: Shanghai
+
   - id: deepseek-reasoning
     provider: deepseek
     endpoint: /v1/chat/completions
@@ -83,3 +95,25 @@ scenarios:
     response:
       type: text
       content: 你好，我是模拟的 DashScope 原生响应。
+
+  - id: anthropic-tool-weather
+    provider: anthropic
+    endpoint: /v1/messages
+    match:
+      messagesContain: weather
+    response:
+      type: tool_call
+      toolName: get_weather
+      toolArguments:
+        city: Shanghai
+
+  - id: gemini-function-weather
+    provider: gemini
+    endpoint: /v1beta/models/gemini-1.5-pro:generateContent
+    match:
+      messagesContain: weather
+    response:
+      type: tool_call
+      toolName: get_weather
+      toolArguments:
+        city: Shanghai
