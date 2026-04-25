@@ -1,8 +1,26 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import { providerGroups, providerRegistry, providerRouteSummaries } from "../providers/registry.js";
 import type { ServerContext } from "../server/context.js";
 
 export async function registerAdminRoutes(app: FastifyInstance, context: ServerContext): Promise<void> {
+  app.get("/__admin/overview", async () => {
+    const requests = context.recorder.list();
+    return {
+      ok: true,
+      name: "mockmind",
+      version: packageVersion(),
+      server: context.config.server,
+      auth: { mode: context.config.auth.mode },
+      providers: context.config.providers,
+      providersCount: providerRegistry.length,
+      modelsCount: context.config.models.length,
+      scenariosCount: context.scenarios.list().length,
+      requestsCount: requests.length,
+      recentRequests: requests.slice(-10)
+    };
+  });
   app.get("/__admin/config", async () => context.config);
   app.get("/__admin/models", async () => ({
     data: context.config.models.map((model) => ({
@@ -30,4 +48,13 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
     return { ok: true };
   });
   app.post("/__admin/reload", async () => ({ ok: false, message: "Reload is not implemented in this MVP." }));
+}
+
+function packageVersion(): string {
+  try {
+    const packageJson = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as { version?: string };
+    return packageJson.version ?? "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
 }
