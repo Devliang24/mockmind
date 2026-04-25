@@ -17,9 +17,7 @@ export const uiHtml = `<!doctype html>
       </header>
       <div class="layout">
         <aside class="sidebar">
-          <button data-view="overview" class="nav active">概览</button>
-          <button data-view="providers" class="nav">供应商</button>
-          <div id="provider-menu" class="provider-menu"></div>
+          <div id="provider-menu" class="provider-menu root-provider-menu"></div>
           <button data-view="requests" class="nav">请求记录</button>
         </aside>
         <main class="content">
@@ -66,9 +64,10 @@ a:hover { text-decoration: underline; }
 .nav, .provider-link { width: 100%; text-align: left; color: var(--text); background: transparent; border: 1px solid transparent; padding: 8px 10px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; font-weight: 500; }
 .nav:hover, .provider-link:hover { background: var(--panel-2); }
 .nav.active, .provider-link.active { color: var(--accent); background: var(--accent-soft); border-color: #b6e3ff; }
-.provider-menu { margin: 8px 0 16px; padding-left: 12px; border-left: 1px solid var(--border); }
-.provider-link { color: var(--muted); font-size: 13px; font-weight: 400; }
+.provider-menu { margin: 0 0 16px; padding-left: 0; border-left: 0; }
+.provider-link { color: var(--muted); font-size: 14px; font-weight: 500; }
 .content { padding: 24px; overflow: auto; }
+.sidebar-title { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin: 4px 0 8px; }
 .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 h1 { margin: 0; font-size: 26px; line-height: 1.25; font-weight: 600; }
 h2 { margin: 20px 0 10px; font-size: 18px; font-weight: 600; }
@@ -103,7 +102,7 @@ button { font: inherit; }
 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .sidebar { border-right: 0; border-bottom: 1px solid var(--border); } .cards, .grid-2 { grid-template-columns: 1fr; } .toolbar { align-items: stretch; flex-direction: column; } input { min-width: 0; width: 100%; } }
 `;
 
-export const uiJs = `const state = { view: 'overview', search: '', selectedProvider: 'openai', selectedProtocol: '', selectedEndpoint: '', data: {} };
+export const uiJs = `const state = { view: 'provider', search: '', selectedProvider: 'openai', selectedProtocol: '', selectedEndpoint: '', data: {} };
 const title = document.getElementById('view-title');
 const panel = document.getElementById('panel');
 const search = document.getElementById('search');
@@ -141,13 +140,13 @@ async function load() {
 
 function renderProviderMenu() {
   const providers = orderedProviders();
-  providerMenu.innerHTML = providers.map((provider) => '<button class="provider-link ' + (provider.provider === state.selectedProvider ? 'active' : '') + '" data-provider="' + esc(provider.provider) + '">' + esc(shortProviderName(provider)) + '</button>').join('');
+  providerMenu.innerHTML = '<div class="sidebar-title">供应商</div>' + providers.map((provider) => '<button class="provider-link ' + (provider.provider === state.selectedProvider && state.view === 'provider' ? 'active' : '') + '" data-provider="' + esc(provider.provider) + '">' + esc(shortProviderName(provider)) + '</button>').join('');
   providerMenu.querySelectorAll('.provider-link').forEach((button) => button.addEventListener('click', () => {
     state.view = 'provider';
     state.selectedProvider = button.dataset.provider;
     state.selectedProtocol = '';
     state.selectedEndpoint = '';
-    setActiveNav('providers');
+    setActiveNav('');
     renderProviderMenu();
     render();
   }));
@@ -174,14 +173,14 @@ function groupedProtocols(providerId) {
 
 function render() {
   title.textContent = viewTitle();
-  search.style.display = state.view === 'overview' ? 'none' : 'block';
+  search.style.display = 'block';
   panel.innerHTML = renderers[state.view]();
   attachDynamicHandlers();
 }
 
 function viewTitle() {
   if (state.view === 'provider') return shortProviderName(currentProvider());
-  return { overview: '概览', providers: '供应商', requests: '请求记录' }[state.view] ?? '概览';
+  return { provider: shortProviderName(currentProvider()), requests: '请求记录' }[state.view] ?? shortProviderName(currentProvider());
 }
 
 const renderers = {
@@ -284,7 +283,7 @@ function prettyJson(value) {
 }
 
 function attachDynamicHandlers() {
-  panel.querySelectorAll('.provider-open').forEach((button) => button.addEventListener('click', () => { state.view = 'provider'; state.selectedProvider = button.dataset.provider; state.selectedProtocol = ''; state.selectedEndpoint = ''; setActiveNav('providers'); renderProviderMenu(); render(); }));
+  panel.querySelectorAll('.provider-open').forEach((button) => button.addEventListener('click', () => { state.view = 'provider'; state.selectedProvider = button.dataset.provider; state.selectedProtocol = ''; state.selectedEndpoint = ''; setActiveNav(''); renderProviderMenu(); render(); }));
   panel.querySelectorAll('.protocol-tab').forEach((button) => button.addEventListener('click', () => { state.selectedProtocol = button.dataset.protocol; state.selectedEndpoint = ''; render(); }));
   panel.querySelectorAll('.endpoint-row').forEach((row) => row.addEventListener('click', () => { state.selectedEndpoint = row.dataset.endpoint; render(); }));
   panel.querySelectorAll('.copy-btn').forEach((button) => button.addEventListener('click', () => copyText(button.nextElementSibling?.textContent || '')));
@@ -305,7 +304,7 @@ function requestsTable(requests) { return '<table><thead><tr><th>ID</th><th>状�
 function esc(value) { return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
 window.copyText = async (text) => navigator.clipboard?.writeText(text);
 function setActiveNav(view) { document.querySelectorAll('.nav').forEach((item) => item.classList.toggle('active', item.dataset.view === view)); }
-document.querySelectorAll('.nav').forEach((button) => button.addEventListener('click', () => { state.view = button.dataset.view === 'providers' ? 'providers' : button.dataset.view; state.search = ''; search.value = ''; setActiveNav(button.dataset.view); render(); }));
+document.querySelectorAll('.nav').forEach((button) => button.addEventListener('click', () => { state.view = button.dataset.view; state.search = ''; search.value = ''; setActiveNav(button.dataset.view); renderProviderMenu(); render(); }));
 search.addEventListener('input', () => { state.search = search.value; render(); });
 load().catch((error) => { panel.innerHTML = '<pre>' + esc(error.stack || error.message) + '</pre>'; });
 `;

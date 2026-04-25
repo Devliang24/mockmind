@@ -19,7 +19,9 @@ describe("web ui", () => {
     expect(html.statusCode).toBe(200);
     expect(html.headers["content-type"]).toContain("text/html");
     expect(html.body).toContain("MockMind Console");
-    expect(html.body).toContain("供应商");
+    expect(html.body).toContain("provider-menu");
+    expect(html.body).not.toContain("data-view=\"overview\"");
+    expect(html.body).not.toContain("data-view=\"providers\"");
 
     const js = await app.inject({ method: "GET", url: "/__ui/app.js" });
     expect(js.statusCode).toBe(200);
