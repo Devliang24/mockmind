@@ -42,7 +42,16 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
     })),
     groups: providerGroups()
   }));
-  app.get("/__admin/routes", async () => providerRegistry.flatMap((registration) => providerRouteSummaries(registration).map((route) => ({ provider: registration.provider, route }))));
+  app.get("/__admin/routes", async () => providerRegistry.flatMap((registration) => registration.routes.map((route) => ({
+    provider: registration.provider,
+    displayName: registration.displayName,
+    groups: registration.groups,
+    method: route.method,
+    path: route.path,
+    protocol: route.protocol,
+    endpoint: route.endpoint,
+    description: route.description ?? protocolLabel(route.protocol, route.path)
+  }))));
   app.post("/__admin/reset", async () => {
     context.recorder.reset();
     return { ok: true };
@@ -57,4 +66,16 @@ function packageVersion(): string {
   } catch {
     return "0.0.0";
   }
+}
+
+function protocolLabel(protocol: string, path: string): string {
+  if (protocol === "openai-compatible") return path.includes("chat/completions") ? "Chat Completions" : "OpenAI Compatible";
+  if (protocol === "openai-embeddings") return "Embeddings";
+  if (protocol === "openai-responses") return "Responses";
+  if (protocol === "anthropic-messages") return "Messages";
+  if (protocol === "gemini-generate-content") return path.includes("streamGenerateContent") ? "streamGenerateContent" : "generateContent";
+  if (protocol === "dashscope-generation") return "Native Text Generation";
+  if (protocol === "minimax-chat") return "ChatCompletion v2";
+  if (protocol === "rerank") return "Rerank";
+  return protocol;
 }

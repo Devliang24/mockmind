@@ -21,10 +21,7 @@ http://127.0.0.1:4000/__ui
 ## 页面
 
 - **概览**：健康状态、版本、服务配置、统计数量和最近请求。
-- **提供商**：Provider 分组、模型、路由摘要和官方文档链接。
-- **路由**：已注册路由，并提供可复制的 cURL 示例。
-- **模型**：模型到 Provider 的归属关系。
-- **场景**：已加载场景、匹配规则、优先级和响应类型。
+- **供应商**：按国外优先、国内随后排序展示 Provider；点击供应商后查看协议菜单、端点、必填项、请求 Body、响应 Body 和官方文档。
 - **请求记录**：已记录请求和原始请求详情。
 
 ## 使用的 Admin API
@@ -38,3 +35,11 @@ http://127.0.0.1:4000/__ui
 - `GET /__admin/requests`
 
 UI 保持静态、无前端框架，不编辑 YAML 配置，也不会调用真实 LLM Provider。
+
+## 展示范围
+
+Web UI 第一版展示 Chat、Responses、Embeddings、Rerank、Anthropic Messages、Gemini generateContent / streamGenerateContent、DashScope Text Generation 和 MiniMax ChatCompletion v2。OpenAI Images、Audio、Moderations、Files、Batch 后端仍可调用，但 UI 暂不展示。
+
+## 供应商排序
+
+国外优先：OpenAI、Anthropic、Gemini。国内随后：DeepSeek、Moonshot / Kimi、智谱 GLM、DashScope / 阿里百炼、MiniMax。
