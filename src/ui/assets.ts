@@ -91,14 +91,15 @@ tr.endpoint-row.active { background: var(--accent-soft); }
 .protocol-tab.active { color: var(--accent); background: var(--accent-soft); border-color: #b6e3ff; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .examples-grid { align-items: start; }
-.code-block { position: relative; margin-bottom: 14px; }
-pre { margin: 0; overflow: auto; background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px; color: var(--text); font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 12px; line-height: 1.45; }
+.code-block { margin-bottom: 14px; }
+.code-surface { position: relative; }
+pre { margin: 0; overflow: auto; background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px 48px 12px 12px; color: var(--text); font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 12px; line-height: 1.45; }
 .detail { margin-top: 16px; }
 button { font: inherit; }
 .linkish { color: var(--accent); background: transparent; border: 0; padding: 0; cursor: pointer; font-weight: 600; }
 .linkish:hover { text-decoration: underline; }
-.copy-btn { position: absolute; right: 8px; top: 2px; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 12px; }
-.copy-btn:hover { background: var(--panel-2); }
+.copy-btn { position: absolute; right: 10px; top: 10px; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; color: var(--muted); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 0; cursor: pointer; box-shadow: 0 1px 2px rgba(31, 35, 40, 0.06); }
+.copy-btn:hover { color: var(--accent); background: var(--panel-2); }
 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .sidebar { border-right: 0; border-bottom: 1px solid var(--border); } .cards, .grid-2 { grid-template-columns: 1fr; } .toolbar { align-items: stretch; flex-direction: column; } input { min-width: 0; width: 100%; } }
 `;
 
@@ -286,9 +287,9 @@ function attachDynamicHandlers() {
   panel.querySelectorAll('.provider-open').forEach((button) => button.addEventListener('click', () => { state.view = 'provider'; state.selectedProvider = button.dataset.provider; state.selectedProtocol = ''; state.selectedEndpoint = ''; setActiveNav(''); renderProviderMenu(); render(); }));
   panel.querySelectorAll('.protocol-tab').forEach((button) => button.addEventListener('click', () => { state.selectedProtocol = button.dataset.protocol; state.selectedEndpoint = ''; render(); }));
   panel.querySelectorAll('.endpoint-row').forEach((row) => row.addEventListener('click', () => { state.selectedEndpoint = row.dataset.endpoint; render(); }));
-  panel.querySelectorAll('.copy-btn').forEach((button) => button.addEventListener('click', () => copyText(button.nextElementSibling?.textContent || '')));
+  panel.querySelectorAll('.copy-btn').forEach((button) => button.addEventListener('click', () => copyText(button.parentElement?.querySelector('pre')?.textContent || '')));
 }
-function codeBlock(title, content) { return '<div class="code-block"><button class="copy-btn">复制</button><h3>' + esc(title) + '</h3><pre>' + esc(content) + '</pre></div>'; }
+function codeBlock(title, content) { return '<div class="code-block"><h3>' + esc(title) + '</h3><div class="code-surface"><button class="copy-btn" title="复制" aria-label="复制"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M0 6.75C0 5.78.78 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .14.11.25.25.25h7.5c.14 0 .25-.11.25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path fill="currentColor" d="M5 1.75C5 .78 5.78 0 6.75 0h7.5C15.22 0 16 .78 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .14.11.25.25.25h7.5c.14 0 .25-.11.25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg></button><pre>' + esc(content) + '</pre></div></div>'; }
 function routeId(route) { return route.method + ' ' + route.path; }
 function currentProvider() { return orderedProviders().find((provider) => provider.provider === state.selectedProvider) ?? orderedProviders()[0]; }
 function shortProviderName(provider) { return provider?.displayName?.replace('OpenAI Compatible', 'OpenAI').replace('Google Gemini', 'Gemini').replace('Alibaba Bailian / DashScope', 'DashScope / 阿里百炼') ?? ''; }
