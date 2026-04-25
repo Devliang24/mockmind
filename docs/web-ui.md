@@ -1,33 +1,33 @@
 # Web UI
 
-MockMind includes a lightweight built-in console for local debugging.
+MockMind 内置一个轻量 Web 控制台，用于本地调试。
 
-## Access
+## 访问方式
 
-Start the server:
+启动服务：
 
 ```bash
 npm run dev -- start --config mockmind.yaml --port 4000
 ```
 
-Open:
+打开：
 
 ```txt
 http://127.0.0.1:4000/__ui
 ```
 
-The root path `/` redirects to `/__ui`.
+根路径 `/` 会重定向到 `/__ui`。
 
-## Pages
+## 页面
 
-- **Overview**: health, version, server settings, counts, and recent requests.
-- **Providers**: provider groups, configured models, route summaries, and official docs links.
-- **Routes**: registered routes with copyable cURL snippets.
-- **Models**: model-to-provider mapping.
-- **Scenarios**: loaded scenario IDs, match rules, priorities, and response types.
-- **Requests**: recorded requests and raw request details.
+- **概览**：健康状态、版本、服务配置、统计数量和最近请求。
+- **提供商**：Provider 分组、模型、路由摘要和官方文档链接。
+- **路由**：已注册路由，并提供可复制的 cURL 示例。
+- **模型**：模型到 Provider 的归属关系。
+- **场景**：已加载场景、匹配规则、优先级和响应类型。
+- **请求记录**：已记录请求和原始请求详情。
 
-## Admin APIs Used
+## 使用的 Admin API
 
 - `GET /health`
 - `GET /__admin/overview`
@@ -37,4 +37,4 @@ The root path `/` redirects to `/__ui`.
 - `GET /__admin/scenarios`
 - `GET /__admin/requests`
 
-The UI is intentionally static and framework-free. It does not edit YAML configuration and does not call real LLM providers.
+UI 保持静态、无前端框架，不编辑 YAML 配置，也不会调用真实 LLM Provider。

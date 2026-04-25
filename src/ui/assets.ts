@@ -11,23 +11,23 @@ export const uiHtml = `<!doctype html>
       <header class="topbar">
         <div>
           <strong>MockMind Console</strong>
-          <span class="muted">Protocol mock dashboard</span>
+          <span class="muted">协议模拟控制台</span>
         </div>
-        <div class="status"><span id="health-dot" class="dot"></span><span id="health-text">loading</span></div>
+        <div class="status"><span id="health-dot" class="dot"></span><span id="health-text">加载中</span></div>
       </header>
       <div class="layout">
         <aside class="sidebar">
-          <button data-view="overview" class="nav active">Overview</button>
-          <button data-view="providers" class="nav">Providers</button>
-          <button data-view="routes" class="nav">Routes</button>
-          <button data-view="models" class="nav">Models</button>
-          <button data-view="scenarios" class="nav">Scenarios</button>
-          <button data-view="requests" class="nav">Requests</button>
+          <button data-view="overview" class="nav active">概览</button>
+          <button data-view="providers" class="nav">提供商</button>
+          <button data-view="routes" class="nav">路由</button>
+          <button data-view="models" class="nav">模型</button>
+          <button data-view="scenarios" class="nav">场景</button>
+          <button data-view="requests" class="nav">请求记录</button>
         </aside>
         <main class="content">
           <section class="toolbar">
-            <h1 id="view-title">Overview</h1>
-            <input id="search" placeholder="Search current view..." />
+            <h1 id="view-title">概览</h1>
+            <input id="search" placeholder="搜索当前页面..." />
           </section>
           <section id="panel" class="panel">Loading...</section>
         </main>
@@ -109,7 +109,7 @@ async function load() {
   ]);
   state.data = { health, overview, providers, routes, models, scenarios, requests };
   document.getElementById('health-dot').classList.toggle('ok', Boolean(health.ok));
-  document.getElementById('health-text').textContent = health.ok ? 'healthy' : 'unhealthy';
+  document.getElementById('health-text').textContent = health.ok ? '健康' : '异常';
   render();
 }
 
@@ -127,48 +127,48 @@ function render() {
   if (copyCurl) copyCurl.addEventListener('click', () => copyText(document.getElementById('curl-examples')?.textContent || ''));
 }
 
-const labels = { overview: 'Overview', providers: 'Providers', routes: 'Routes', models: 'Models', scenarios: 'Scenarios', requests: 'Requests' };
+const labels = { overview: '概览', providers: '提供商', routes: '路由', models: '模型', scenarios: '场景', requests: '请求记录' };
 
 const renderers = {
   overview() {
     const o = state.data.overview;
     return '<div class="cards">' +
-      card('Providers', o.providersCount) + card('Models', o.modelsCount) + card('Scenarios', o.scenariosCount) + card('Requests', o.requestsCount) +
+      card('提供商', o.providersCount) + card('模型', o.modelsCount) + card('场景', o.scenariosCount) + card('请求', o.requestsCount) +
       '</div>' +
-      '<h2>Server</h2>' + table([['Host', o.server.host], ['Port', o.server.port], ['Auth', o.auth.mode], ['Providers', JSON.stringify(o.providers.enabled)]]) +
-      '<h2>Recent Requests</h2>' + requestsTable(o.recentRequests || []);
+      '<h2>服务信息</h2>' + table([['主机', o.server.host], ['端口', o.server.port], ['认证模式', o.auth.mode], ['提供商模式', JSON.stringify(o.providers.enabled)]]) +
+      '<h2>最近请求</h2>' + requestsTable(o.recentRequests || []);
   },
   providers() {
     const providers = filtered(state.data.providers.providers, [p => p.provider, p => p.displayName, p => p.groups.join(','), p => p.routes.join(' ')]);
-    return '<table><thead><tr><th>Provider</th><th>Groups</th><th>Models</th><th>Routes</th><th>Docs</th></tr></thead><tbody>' + providers.map((p) =>
-      '<tr><td><strong>' + esc(p.displayName) + '</strong><br><span class="muted">' + esc(p.provider) + '</span></td><td>' + badges(p.groups) + '</td><td>' + badges(p.configuredModels) + '</td><td>' + p.routes.map(esc).join('<br>') + '</td><td><a href="' + providersDocs[p.provider] + '" target="_blank">official</a></td></tr>'
+    return '<table><thead><tr><th>提供商</th><th>分组</th><th>模型</th><th>路由</th><th>文档</th></tr></thead><tbody>' + providers.map((p) =>
+      '<tr><td><strong>' + esc(p.displayName) + '</strong><br><span class="muted">' + esc(p.provider) + '</span></td><td>' + badges(p.groups) + '</td><td>' + badges(p.configuredModels) + '</td><td>' + p.routes.map(esc).join('<br>') + '</td><td><a href="' + providersDocs[p.provider] + '" target="_blank">官方文档</a></td></tr>'
     ).join('') + '</tbody></table>';
   },
   routes() {
     const routes = filtered(state.data.routes, [r => r.provider, r => r.route]);
-    return '<table><thead><tr><th>Provider</th><th>Route</th><th>cURL</th></tr></thead><tbody>' + routes.map((r) => '<tr><td>' + esc(r.provider) + '</td><td><code>' + esc(r.route) + '</code></td><td><button onclick="copyText(' + JSON.stringify(curlForRoute(r.route)).replaceAll('"', '&quot;') + ')">Copy</button></td></tr>').join('') + '</tbody></table>';
+    return '<table><thead><tr><th>提供商</th><th>路由</th><th>cURL</th></tr></thead><tbody>' + routes.map((r) => '<tr><td>' + esc(r.provider) + '</td><td><code>' + esc(r.route) + '</code></td><td><button onclick="copyText(' + JSON.stringify(curlForRoute(r.route)).replaceAll('"', '&quot;') + ')">复制</button></td></tr>').join('') + '</tbody></table>';
   },
   models() {
     const models = filtered(state.data.models.data, [m => m.id, m => m.provider, m => m.displayName]);
-    return '<table><thead><tr><th>Model</th><th>Provider</th><th>Display Name</th></tr></thead><tbody>' + models.map((m) => '<tr><td><code>' + esc(m.id) + '</code></td><td>' + esc(m.provider) + '</td><td>' + esc(m.displayName) + '</td></tr>').join('') + '</tbody></table>';
+    return '<table><thead><tr><th>模型</th><th>提供商</th><th>显示名称</th></tr></thead><tbody>' + models.map((m) => '<tr><td><code>' + esc(m.id) + '</code></td><td>' + esc(m.provider) + '</td><td>' + esc(m.displayName) + '</td></tr>').join('') + '</tbody></table>';
   },
   scenarios() {
     const scenarios = filtered(state.data.scenarios, [s => s.id, s => s.provider, s => s.endpoint, s => s.response?.type, s => JSON.stringify(s.match || {})]);
-    return '<table><thead><tr><th>ID</th><th>Provider</th><th>Endpoint</th><th>Priority</th><th>Match</th><th>Response</th></tr></thead><tbody>' + scenarios.map((s) => '<tr><td><code>' + esc(s.id) + '</code></td><td>' + esc(s.provider || '-') + '</td><td>' + esc(s.endpoint || '-') + '</td><td>' + esc(s.priority) + '</td><td><pre>' + esc(JSON.stringify(s.match || {}, null, 2)) + '</pre></td><td><span class="badge">' + esc(s.response?.type) + '</span></td></tr>').join('') + '</tbody></table>';
+    return '<table><thead><tr><th>ID</th><th>提供商</th><th>端点</th><th>优先级</th><th>匹配条件</th><th>响应</th></tr></thead><tbody>' + scenarios.map((s) => '<tr><td><code>' + esc(s.id) + '</code></td><td>' + esc(s.provider || '-') + '</td><td>' + esc(s.endpoint || '-') + '</td><td>' + esc(s.priority) + '</td><td><pre>' + esc(JSON.stringify(s.match || {}, null, 2)) + '</pre></td><td><span class="badge">' + esc(s.response?.type) + '</span></td></tr>').join('') + '</tbody></table>';
   },
   requests() {
     const requests = filtered(state.data.requests, [r => r.id, r => r.provider, r => r.endpoint, r => r.model, r => r.matchedScenarioId, r => r.status]);
-    return requestsTable(requests) + '<div class="detail"><h2>Raw Requests</h2><pre>' + esc(JSON.stringify(requests, null, 2)) + '</pre></div>';
+    return requestsTable(requests) + '<div class="detail"><h2>原始请求</h2><pre>' + esc(JSON.stringify(requests, null, 2)) + '</pre></div>';
   },
   curl() {
-    return '<button class="copy" id="copy-curl">Copy all</button><pre id="curl-examples">' + esc(curlExamples()) + '</pre>';
+    return '<button class="copy" id="copy-curl">全部复制</button><pre id="curl-examples">' + esc(curlExamples()) + '</pre>';
   }
 };
 
 function card(label, value) { return '<div class="card"><span class="muted">' + label + '</span><strong>' + value + '</strong></div>'; }
 function table(rows) { return '<table><tbody>' + rows.map(([k, v]) => '<tr><th>' + esc(k) + '</th><td>' + esc(v) + '</td></tr>').join('') + '</tbody></table>'; }
 function badges(values = []) { return values.length ? values.map((v) => '<span class="badge">' + esc(v) + '</span>').join('') : '<span class="muted">-</span>'; }
-function requestsTable(requests) { return '<table><thead><tr><th>ID</th><th>Status</th><th>Provider</th><th>Model</th><th>Endpoint</th><th>Scenario</th><th>Duration</th></tr></thead><tbody>' + requests.slice().reverse().map((r) => '<tr><td>' + esc(r.id) + '</td><td>' + esc(r.status) + '</td><td>' + esc(r.provider) + '</td><td>' + esc(r.model || '-') + '</td><td><code>' + esc(r.endpoint) + '</code></td><td>' + esc(r.matchedScenarioId || '-') + '</td><td>' + esc(r.durationMs) + 'ms</td></tr>').join('') + '</tbody></table>'; }
+function requestsTable(requests) { return '<table><thead><tr><th>ID</th><th>状态</th><th>提供商</th><th>模型</th><th>端点</th><th>命中场景</th><th>耗时</th></tr></thead><tbody>' + requests.slice().reverse().map((r) => '<tr><td>' + esc(r.id) + '</td><td>' + esc(r.status) + '</td><td>' + esc(r.provider) + '</td><td>' + esc(r.model || '-') + '</td><td><code>' + esc(r.endpoint) + '</code></td><td>' + esc(r.matchedScenarioId || '-') + '</td><td>' + esc(r.durationMs) + 'ms</td></tr>').join('') + '</tbody></table>'; }
 function esc(value) { return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
 
 function curlForRoute(route) {

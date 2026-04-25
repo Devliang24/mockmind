@@ -51,7 +51,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
 http://127.0.0.1:4000/__ui
 ```
 
-内置控制台包含 Overview、Providers、Routes、Models、Scenarios和 Requests 页面，可查看 Admin API 数据、搜索请求记录。
+内置控制台包含概览、提供商、路由、模型、场景和请求记录页面，可查看 Admin API 数据、搜索请求记录。
 
 ## Docker
 
