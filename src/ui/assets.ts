@@ -245,8 +245,9 @@ function exampleSections(example) {
 }
 
 function streamExampleFor(route, body, responseText) {
+  if (route.method === 'GET') return undefined;
   return {
-    curl: curl(route.path, { ...body, stream: true }),
+    curl: curl(route.path, { ...body, stream: true }, undefined, route.method),
     responseText
   };
 }
@@ -262,18 +263,24 @@ function exampleFor(route) {
   if (route.protocol === 'dashscope-generation') return { docsUrl, headers: ['Authorization', 'Content-Type'], required: ['model', 'input.messages'], requestBody: { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { result_format: 'message' } }, responseBody: { output: { choices: [{ message: { role: 'assistant', content: '你好，我是模拟的 DashScope 原生响应。' } }] }, usage: { total_tokens: 0 } }, curl: curl(route.path, { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { result_format: 'message' } }), stream: streamExampleFor(route, { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { incremental_output: true } }, ['event: result', 'data: {"output":{"text":"你好"}}', '', 'event: done', 'data: {}'].join(nl)) };
   if (route.protocol === 'minimax-chat') return { docsUrl, headers: ['Authorization', 'Content-Type'], required: ['model', 'messages'], requestBody: { model, messages: [{ role: 'user', content: 'hello' }] }, responseBody: { id: 'minimax_mock_0001', choices: [{ message: { role: 'assistant', content: '你好，我是模拟的 MiniMax 响应。' } }] }, curl: curl(route.path, { model, messages: [{ role: 'user', content: 'hello' }] }), stream: streamExampleFor(route, { model, messages: [{ role: 'user', content: 'hello' }] }, ['data: {"choices":[{"delta":{"content":"你好"}}]}', '', 'data: [DONE]'].join(nl)) };
   if (route.protocol === 'rerank') return { docsUrl, headers: ['Authorization', 'Content-Type'], required: ['model', 'query', 'documents'], requestBody: { model, query: 'hello', documents: ['hello world', 'other'] }, responseBody: { id: 'rerank_mock_0001', object: 'rerank', results: [{ index: 0, relevance_score: 1, document: 'hello world' }] }, curl: curl(route.path, { model, query: 'hello', documents: ['hello world', 'other'] }) };
-  return { ...openAIExample(route, docsUrl, { model, messages: [{ role: 'user', content: 'hello' }] }, { id: 'chatcmpl_mock_0001', object: 'chat.completion', choices: [{ message: { role: 'assistant', content: 'Hello from OpenAI-compatible mock.' }, finish_reason: 'stop' }] }, ['model', 'messages']), stream: streamExampleFor(route, { model, messages: [{ role: 'user', content: 'hello' }] }, ['data: {"choices":[{"delta":{"role":"assistant"}}]}', '', 'data: {"choices":[{"delta":{"content":"Hello"}}]}', '', 'data: [DONE]'].join(nl)) };
+  if (route.method === 'GET') return { docsUrl, headers: [], required: [], requestBody: {}, responseBody: { object: 'list', data: [{ id: 'gpt-4o-mini', object: 'model', owned_by: 'mockmind' }] }, curl: curl(route.path, {}, [], 'GET') };
+  return { ...openAIExample(route, docsUrl, { model, messages: [{ role: 'user', content: 'hello' }] }, { id: 'chatcmpl_mock_0001', object: 'chat.completion', choices: [{ message: { role: 'assistant', content: 'Hello from OpenAI-compatible mock.' }, finish_reason: 'stop' }] }, ['model', 'messages']), stream: streamExampleFor(route, { model, messages: [{ role: 'user', content: 'hello' }] }, ['data: {\"choices\":[{\"delta\":{\"role\":\"assistant\"}}]}', '', 'data: {\"choices\":[{\"delta\":{\"content\":\"Hello\"}}]}', '', 'data: [DONE]'].join(nl)) };
 }
 
 function openAIExample(route, docsUrl, requestBody, responseBody, required) {
-  return { docsUrl, headers: ['Authorization', 'Content-Type'], required, requestBody, responseBody, curl: curl(route.path, requestBody) };
+  return { docsUrl, headers: ['Authorization', 'Content-Type'], required, requestBody, responseBody, curl: curl(route.path, requestBody, undefined, route.method) };
 }
-function curl(path, body, headers = ['Authorization: Bearer test-key', 'Content-Type: application/json']) {
+function curl(path, body, headers = ['Authorization: Bearer test-key', 'Content-Type: application/json'], method = 'POST') {
   const normalizedPath = path.replace(':modelAndMethod', 'gemini-1.5-pro:generateContent');
+  if (method === 'GET') return 'curl http://127.0.0.1:4000' + normalizedPath;
   const slash = String.fromCharCode(92);
   const nl = String.fromCharCode(10);
   const headerLines = headers.map((header) => "  -H '" + header + "' " + slash).join(nl);
-  return 'curl http://127.0.0.1:4000' + normalizedPath + ' ' + slash + nl + headerLines + nl + '  -d ' + JSON.stringify(JSON.stringify(body));
+  return 'curl http://127.0.0.1:4000' + normalizedPath + ' ' + slash + nl + headerLines + nl + "  -d '" + prettyJson(body) + "'";
+}
+
+function prettyJson(value) {
+  return JSON.stringify(value, null, 2);
 }
 
 function attachDynamicHandlers() {
