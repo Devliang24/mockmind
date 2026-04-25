@@ -230,9 +230,8 @@ function endpointTable(protocol) {
 
 function endpointDetail(route) {
   const example = exampleFor(route);
-  const relatedScenarios = (state.data.scenarios ?? []).filter((scenario) => scenario.provider === route.provider && (!scenario.endpoint || scenario.endpoint === route.endpoint || scenario.endpoint === route.path));
   return '<div class="detail"><h2>端点详情</h2>' + table([['供应商', route.displayName], ['协议', route.protocol], ['端点', route.method + ' ' + route.path], ['必填 Header', example.headers.join(', ') || '-'], ['必填字段', example.required.join(', ') || '-'], ['官方文档', '<a href="' + example.docsUrl + '" target="_blank">' + example.docsUrl + '</a>']]) +
-    '<div class="grid-2"><div>' + codeBlock('cURL 请求', example.curl) + codeBlock('请求 Body', JSON.stringify(example.requestBody, null, 2)) + '</div><div>' + codeBlock('响应 Body', JSON.stringify(example.responseBody, null, 2)) + codeBlock('关联场景', JSON.stringify(relatedScenarios.map((scenario) => ({ id: scenario.id, priority: scenario.priority, match: scenario.match, responseType: scenario.response?.type })), null, 2)) + '</div></div></div>';
+    '<div class="grid-2"><div>' + codeBlock('cURL 请求', example.curl) + '</div><div>' + codeBlock('响应 Body', JSON.stringify(example.responseBody, null, 2)) + '</div></div></div>';
 }
 
 function exampleFor(route) {

@@ -25,8 +25,8 @@ describe("web ui", () => {
     expect(js.statusCode).toBe(200);
     expect(js.body).toContain("/__admin/overview");
     expect(js.body).toContain("必填字段");
-    expect(js.body).toContain("请求 Body");
     expect(js.body).toContain("响应 Body");
+    expect(js.body).not.toContain("关联场景");
     expect(js.body).not.toContain("openai-images");
     expect(js.body).not.toContain("openai-audio");
     expect(js.body).not.toContain("openai-moderations");
