@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { providerGroups, providerRegistry } from "../providers/registry.js";
+import { providerGroups, providerRegistry, providerRouteSummaries } from "../providers/registry.js";
 import type { ServerContext } from "../server/context.js";
 
 export async function registerAdminRoutes(app: FastifyInstance, context: ServerContext): Promise<void> {
@@ -20,11 +20,11 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
       groups: registration.groups,
       defaultModels: registration.defaultModels,
       configuredModels: context.config.models.filter((model) => model.provider === registration.provider).map((model) => model.id),
-      routes: registration.routes
+      routes: providerRouteSummaries(registration)
     })),
     groups: providerGroups()
   }));
-  app.get("/__admin/routes", async () => providerRegistry.flatMap((registration) => registration.routes.map((route) => ({ provider: registration.provider, route }))));
+  app.get("/__admin/routes", async () => providerRegistry.flatMap((registration) => providerRouteSummaries(registration).map((route) => ({ provider: registration.provider, route }))));
   app.post("/__admin/reset", async () => {
     context.recorder.reset();
     return { ok: true };

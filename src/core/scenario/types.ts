@@ -4,7 +4,6 @@ export type Provider =
   | "moonshot"
   | "aliyun-bailian"
   | "zhipu"
-  | "volcengine-ark"
   | "anthropic"
   | "gemini"
   | "minimax";
@@ -55,9 +54,13 @@ export type ScenarioMatch = {
   model?: string;
   stream?: boolean;
   messagesContain?: string;
+  lastUserMessageContains?: string;
+  messageRole?: string;
   hasTools?: boolean;
   body?: Record<string, unknown>;
+  bodyPath?: Record<string, unknown>;
   headers?: Record<string, string>;
+  query?: Record<string, string>;
 };
 
 export type Scenario = {

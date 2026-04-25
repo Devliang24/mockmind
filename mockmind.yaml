@@ -15,12 +15,16 @@ auth:
 models:
   - id: gpt-4o-mini
     provider: openai
-  - id: deepseek-chat
-    provider: deepseek
   - id: deepseek-reasoner
     provider: deepseek
+  - id: moonshot-v1-8k
+    provider: moonshot
   - id: qwen-plus
     provider: aliyun-bailian
+  - id: glm-4
+    provider: zhipu
+  - id: abab6.5s-chat
+    provider: minimax
   - id: claude-3-5-sonnet-latest
     provider: anthropic
   - id: gemini-1.5-pro
@@ -69,6 +73,36 @@ scenarios:
       reasoningContent: This is mock reasoning content.
       content: This is the final DeepSeek mock answer.
 
+  - id: moonshot-basic
+    provider: moonshot
+    endpoint: /moonshot/v1/chat/completions
+    match:
+      model: moonshot-v1-8k
+      lastUserMessageContains: hello
+    response:
+      type: text
+      content: Hello from mock Moonshot / Kimi.
+
+  - id: zhipu-basic
+    provider: zhipu
+    endpoint: /api/paas/v4/chat/completions
+    match:
+      model: glm-4
+      lastUserMessageContains: hello
+    response:
+      type: text
+      content: Hello from mock Zhipu GLM.
+
+  - id: minimax-basic
+    provider: minimax
+    endpoint: /v1/text/chatcompletion_v2
+    match:
+      model: abab6.5s-chat
+      lastUserMessageContains: hello
+    response:
+      type: text
+      content: 你好，我是模拟的 MiniMax 响应。
+
   - id: anthropic-basic
     provider: anthropic
     endpoint: /v1/messages
@@ -95,6 +129,21 @@ scenarios:
     response:
       type: text
       content: 你好，我是模拟的 DashScope 原生响应。
+
+  - id: dashscope-result-format-debug
+    provider: aliyun-bailian
+    endpoint: /api/v1/services/aigc/text-generation/generation
+    priority: 10
+    match:
+      model: qwen-plus
+      lastUserMessageContains: debug
+      bodyPath:
+        parameters.result_format: message
+      query:
+        debug: 'true'
+    response:
+      type: text
+      content: Matched DashScope request by nested body path and query.
 
   - id: anthropic-tool-weather
     provider: anthropic

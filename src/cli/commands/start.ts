@@ -1,5 +1,5 @@
 import { loadConfig } from "../../config/loader.js";
-import { providerRegistry } from "../../providers/registry.js";
+import { providerRegistry, providerRouteSummaries } from "../../providers/registry.js";
 import { createMockMindServer } from "../../server/create-server.js";
 
 export async function startCommand(options: { config?: string; host?: string; port?: string | number }): Promise<void> {
@@ -20,7 +20,7 @@ export async function startCommand(options: { config?: string; host?: string; po
   console.log("\nEnabled providers:");
   for (const provider of providerRegistry) {
     console.log(`  ${provider.displayName}:`);
-    for (const route of provider.routes) {
+    for (const route of providerRouteSummaries(provider)) {
       console.log(`    ${route}`);
     }
   }

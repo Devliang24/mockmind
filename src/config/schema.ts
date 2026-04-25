@@ -6,7 +6,6 @@ const providerSchema = z.enum([
   "moonshot",
   "aliyun-bailian",
   "zhipu",
-  "volcengine-ark",
   "anthropic",
   "gemini",
   "minimax"
@@ -97,9 +96,13 @@ export const configSchema = z.object({
       model: z.string().optional(),
       stream: z.boolean().optional(),
       messagesContain: z.string().optional(),
+      lastUserMessageContains: z.string().optional(),
+      messageRole: z.string().optional(),
       hasTools: z.boolean().optional(),
       body: z.record(z.string(), z.unknown()).optional(),
-      headers: z.record(z.string(), z.string()).optional()
+      bodyPath: z.record(z.string(), z.unknown()).optional(),
+      headers: z.record(z.string(), z.string()).optional(),
+      query: z.record(z.string(), z.string()).optional()
     }).optional(),
     response: mockResultSchema
   })).default([])

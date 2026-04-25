@@ -27,8 +27,8 @@ models:
     provider: aliyun-bailian
   - id: glm-4
     provider: zhipu
-  - id: doubao-pro
-    provider: volcengine-ark
+  - id: abab6.5s-chat
+    provider: minimax
   - id: claude-3-5-sonnet-latest
     provider: anthropic
   - id: gemini-1.5-pro
@@ -81,6 +81,36 @@ scenarios:
       type: text
       reasoningContent: This is mock reasoning content.
       content: This is the final DeepSeek mock answer.
+
+  - id: moonshot-basic
+    provider: moonshot
+    endpoint: /moonshot/v1/chat/completions
+    match:
+      model: moonshot-v1-8k
+      lastUserMessageContains: hello
+    response:
+      type: text
+      content: Hello from mock Moonshot / Kimi.
+
+  - id: zhipu-basic
+    provider: zhipu
+    endpoint: /api/paas/v4/chat/completions
+    match:
+      model: glm-4
+      lastUserMessageContains: hello
+    response:
+      type: text
+      content: Hello from mock Zhipu GLM.
+
+  - id: minimax-basic
+    provider: minimax
+    endpoint: /v1/text/chatcompletion_v2
+    match:
+      model: abab6.5s-chat
+      lastUserMessageContains: hello
+    response:
+      type: text
+      content: 你好，我是模拟的 MiniMax 响应。
 
   - id: qwen-compatible
     provider: aliyun-bailian
