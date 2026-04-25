@@ -23,11 +23,6 @@ export const uiHtml = `<!doctype html>
           <button data-view="models" class="nav">Models</button>
           <button data-view="scenarios" class="nav">Scenarios</button>
           <button data-view="requests" class="nav">Requests</button>
-          <button data-view="curl" class="nav">cURL Examples</button>
-          <div class="actions">
-            <button id="reload-btn">Reload Config</button>
-            <button id="reset-btn">Reset Requests</button>
-          </div>
         </aside>
         <main class="content">
           <section class="toolbar">
@@ -132,7 +127,7 @@ function render() {
   if (copyCurl) copyCurl.addEventListener('click', () => copyText(document.getElementById('curl-examples')?.textContent || ''));
 }
 
-const labels = { overview: 'Overview', providers: 'Providers', routes: 'Routes', models: 'Models', scenarios: 'Scenarios', requests: 'Requests', curl: 'cURL Examples' };
+const labels = { overview: 'Overview', providers: 'Providers', routes: 'Routes', models: 'Models', scenarios: 'Scenarios', requests: 'Requests' };
 
 const renderers = {
   overview() {
@@ -209,8 +204,6 @@ document.querySelectorAll('.nav').forEach((button) => button.addEventListener('c
   render();
 }));
 search.addEventListener('input', () => { state.search = search.value; render(); });
-document.getElementById('reset-btn').addEventListener('click', async () => { await api('/__admin/reset', { method: 'POST' }); await load(); });
-document.getElementById('reload-btn').addEventListener('click', async () => { alert(JSON.stringify(await api('/__admin/reload', { method: 'POST' }))); });
 
 load().catch((error) => { panel.innerHTML = '<pre>' + esc(error.stack || error.message) + '</pre>'; });
 `;

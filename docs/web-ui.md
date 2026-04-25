@@ -26,7 +26,6 @@ The root path `/` redirects to `/__ui`.
 - **Models**: model-to-provider mapping.
 - **Scenarios**: loaded scenario IDs, match rules, priorities, and response types.
 - **Requests**: recorded requests and raw request details.
-- **cURL Examples**: common cURL examples for supported protocols.
 
 ## Admin APIs Used
 
@@ -37,7 +36,5 @@ The root path `/` redirects to `/__ui`.
 - `GET /__admin/models`
 - `GET /__admin/scenarios`
 - `GET /__admin/requests`
-- `POST /__admin/reset`
-- `POST /__admin/reload`
 
 The UI is intentionally static and framework-free. It does not edit YAML configuration and does not call real LLM providers.
