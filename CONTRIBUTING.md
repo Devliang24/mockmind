@@ -49,3 +49,20 @@ feat(openai): support streaming chunks
 fix(config): improve validation error output
 docs(readme): add gemini quick start
 ```
+
+## Before Opening a PR
+
+Run the same checks as CI:
+
+```bash
+npm run typecheck
+npm test
+npm run build
+npm pack --dry-run
+```
+
+For protocol or provider changes, update the cURL examples in `README.md` and the provider/protocol tables under `docs/`.
+
+## Compatibility Notes
+
+MockMind should prefer protocol-compatible mock shapes over real network calls. Do not add code that proxies requests to real LLM providers by default.

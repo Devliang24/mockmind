@@ -43,6 +43,19 @@ curl http://127.0.0.1:4000/v1/chat/completions \
 }
 ```
 
+## Docker
+
+```bash
+docker build -t mockmind:local .
+docker run --rm -p 4000:4000 -v "$PWD/mockmind.yaml:/app/mockmind.yaml:ro" mockmind:local
+```
+
+或者使用 Compose：
+
+```bash
+docker compose up --build
+```
+
 ## 命令行
 
 ```bash
@@ -917,6 +930,7 @@ curl -X POST http://127.0.0.1:4000/__admin/reset
 - `docs/providers.md`
 - `docs/protocols.md`
 - `docs/adding-provider.md`
+- `docs/npm-publishing.md`
 
 ## 许可证
 
