@@ -78,7 +78,7 @@ describe("protocol capabilities", () => {
 
   it("returns Anthropic tool_use", async () => {
     const { app } = await createMockMindServer(config);
-    const response = await app.inject({ method: "POST", url: "/v1/messages", payload: { model: "claude-3-5-sonnet-latest", messages: [{ role: "user", content: "weather" }] } });
+    const response = await app.inject({ method: "POST", url: "/v1/messages", headers: { "anthropic-version": "2023-06-01" }, payload: { model: "claude-3-5-sonnet-latest", max_tokens: 128, messages: [{ role: "user", content: "weather" }] } });
     expect(response.json().stop_reason).toBe("tool_use");
     expect(response.json().content[0].type).toBe("tool_use");
     await app.close();

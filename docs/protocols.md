@@ -6,19 +6,27 @@ Protocols live under `src/protocols` and are reusable across providers.
 
 - `openai-compatible`
 - `openai-embeddings`
+- `openai-responses`
+- `openai-images`
+- `openai-audio`
+- `openai-moderations`
+- `openai-files`
+- `openai-batch`
 - `anthropic-messages`
 - `gemini-generate-content`
 - `dashscope-generation`
 - `minimax-chat`
+- `rerank`
 
 ## Protocol Handler Flow
 
-1. Parse provider HTTP request.
-2. Build unified `MockRequest`.
-3. Match scenario.
-4. Render `MockResult`.
-5. Format provider-specific response.
-6. Record request in recorder.
+1. Validate required body fields and protocol headers.
+2. Parse provider HTTP request.
+3. Build unified `MockRequest`.
+4. Match scenario.
+5. Render `MockResult`.
+6. Format provider-specific response.
+7. Record request in recorder.
 
 ## Adding a Protocol
 

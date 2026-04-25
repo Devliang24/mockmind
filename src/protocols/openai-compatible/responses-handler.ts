@@ -4,21 +4,21 @@ import { renderResult } from "../../core/renderer/render.js";
 import type { MockRequest, Provider } from "../../core/scenario/types.js";
 import type { ServerContext } from "../../server/context.js";
 import { requestHeaders, requestQuery } from "../../shared/http.js";
-import { delay } from "../../shared/time.js";
-import { formatChatCompletion, formatOpenAIError } from "./adapter.js";
-import { isArray, isString, requireFields } from "../validation.js";
-import { sendOpenAIStream } from "./stream.js";
+import { delay, unixSeconds } from "../../shared/time.js";
+import { formatOpenAIError, formatUsage, normalizeOpenAIToolCalls } from "./adapter.js";
+import { sendOpenAIResponsesStream } from "./responses-stream.js";
+import { isString, requireFields } from "../validation.js";
 
-export type OpenAICompatibleChatBody = {
+export type OpenAIResponsesBody = {
   model?: string;
-  messages?: unknown[];
+  input?: unknown;
   stream?: boolean;
   tools?: unknown[];
 };
 
-export async function handleOpenAICompatibleChat(
+export async function handleOpenAIResponses(
   context: ServerContext,
-  request: FastifyRequest<{ Body: OpenAICompatibleChatBody }>,
+  request: FastifyRequest<{ Body: OpenAIResponsesBody }>,
   reply: FastifyReply,
   provider: Provider,
   endpoint: string
@@ -26,9 +26,10 @@ export async function handleOpenAICompatibleChat(
   if (!checkAuth(context.config, request, reply)) return;
   const validationError = requireFields(request.body, [
     { path: "model", validate: isString },
-    { path: "messages", validate: isArray }
+    { path: "input" }
   ]);
   if (validationError) return reply.code(validationError.status).send(formatOpenAIError(validationError.status, validationError.code, validationError.message, validationError.type));
+
   const started = Date.now();
   const body = request.body;
   const mockRequest: MockRequest = {
@@ -36,7 +37,8 @@ export async function handleOpenAICompatibleChat(
     endpoint,
     method: request.method,
     model: body.model,
-    messages: body.messages,
+    messages: Array.isArray(body.input) ? body.input : undefined,
+    prompt: typeof body.input === "string" ? body.input : undefined,
     stream: Boolean(body.stream),
     tools: body.tools,
     rawBody: body,
@@ -44,26 +46,28 @@ export async function handleOpenAICompatibleChat(
     query: requestQuery(request)
   };
   const found = context.scenarios.find(mockRequest);
-  const result = renderResult(found.result ?? { type: "text", content: defaultContent(provider) }, mockRequest);
+  const result = renderResult(found.result ?? { type: "text", content: "This is a mock OpenAI Responses API response." }, mockRequest);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
   context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: Boolean(body.stream), request: mockRequest });
   if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type));
-  if (body.stream) return sendOpenAIStream(reply, body.model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs);
-  return reply.send(formatChatCompletion(body.model ?? "mock-model", result));
+  if (body.stream) return sendOpenAIResponsesStream(reply, body.model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs);
+  return reply.send(formatResponse(body.model ?? "mock-model", result));
 }
 
-function defaultContent(provider: Provider): string {
-  switch (provider) {
-    case "deepseek":
-      return "This is a mock DeepSeek response.";
-    case "moonshot":
-      return "This is a mock Moonshot / Kimi response.";
-    case "zhipu":
-      return "This is a mock Zhipu GLM response.";
-    case "aliyun-bailian":
-      return "This is a mock Qwen response.";
-    default:
-      return "This is a default mock response from mockmind.";
-  }
+export function formatResponse(model: string, result: ReturnType<typeof renderResult>): unknown {
+  const output = result.type === "tool_call"
+    ? normalizeOpenAIToolCalls(result).map((toolCall) => ({ type: "function_call", ...toolCall as Record<string, unknown> }))
+    : [{ id: "msg_mock_0001", type: "message", role: "assistant", content: [{ type: "output_text", text: result.content ?? "" }] }];
+
+  return {
+    id: "resp_mock_0001",
+    object: "response",
+    created_at: unixSeconds(),
+    status: "completed",
+    model,
+    output,
+    output_text: result.type === "tool_call" ? "" : result.content ?? "",
+    usage: formatUsage(result)
+  };
 }

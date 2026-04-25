@@ -7,6 +7,7 @@ import { delay } from "../../shared/time.js";
 import { formatDashScopeError, formatDashScopeGeneration } from "./adapter.js";
 import { sendDashScopeStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
+import { isArray, isString, requireFields } from "../validation.js";
 
 type DashScopeBody = {
   model?: string;
@@ -23,6 +24,11 @@ type DashScopeBody = {
 export async function handleDashScopeGeneration(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
   const { context, endpoint } = handlerContext;
   if (!checkAuth(context.config, request, reply)) return;
+  const validationError = requireFields(request.body, [
+    { path: "model", validate: isString },
+    { path: "input.messages", validate: isArray }
+  ]);
+  if (validationError) return reply.code(validationError.status).send(formatDashScopeError(validationError.code, validationError.message));
   const started = Date.now();
   const body = request.body as DashScopeBody;
   const stream = Boolean(body.stream ?? body.parameters?.incremental_output);

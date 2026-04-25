@@ -7,6 +7,7 @@ import { delay } from "../../shared/time.js";
 import { formatGeminiContent, formatGeminiError } from "./adapter.js";
 import { sendGeminiStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
+import { isArray, requireFields } from "../validation.js";
 
 type GeminiBody = {
   contents?: unknown[];
@@ -15,6 +16,8 @@ type GeminiBody = {
 export async function handleGeminiGenerateContent(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
   const { context, endpoint } = handlerContext;
   if (!checkAuth(context.config, request, reply)) return;
+  const validationError = requireFields(request.body, [{ path: "contents", validate: isArray }]);
+  if (validationError) return reply.code(validationError.status).send(formatGeminiError(validationError.status, validationError.message, validationError.code));
   const started = Date.now();
   const body = request.body as GeminiBody;
   const model = modelFromEndpoint(endpoint);

@@ -7,6 +7,7 @@ import { delay } from "../../shared/time.js";
 import { formatMiniMaxChatCompletion, formatMiniMaxError } from "./adapter.js";
 import { sendMiniMaxStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
+import { isArray, isString, requireFields } from "../validation.js";
 
 type MiniMaxBody = {
   model?: string;
@@ -18,6 +19,11 @@ type MiniMaxBody = {
 export async function handleMiniMaxChat(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
   const { context, provider, endpoint } = handlerContext;
   if (!checkAuth(context.config, request, reply)) return;
+  const validationError = requireFields(request.body, [
+    { path: "model", validate: isString },
+    { path: "messages", validate: isArray }
+  ]);
+  if (validationError) return reply.code(validationError.status).send(formatMiniMaxError(validationError.code, validationError.message));
   const started = Date.now();
   const body = request.body as MiniMaxBody;
   const mockRequest: MockRequest = {

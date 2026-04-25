@@ -6,6 +6,7 @@ import { requestHeaders, requestQuery } from "../../shared/http.js";
 import { delay } from "../../shared/time.js";
 import { formatEmbedding, formatOpenAIError } from "./adapter.js";
 import type { ProtocolHandlerContext } from "../types.js";
+import { isString, requireFields } from "../validation.js";
 
 type EmbeddingBody = {
   model?: string;
@@ -19,6 +20,11 @@ export async function handleOpenAIEmbeddings(
 ): Promise<unknown> {
   const { context, provider, endpoint } = handlerContext;
   if (!checkAuth(context.config, request, reply)) return;
+  const validationError = requireFields(request.body, [
+    { path: "model", validate: isString },
+    { path: "input" }
+  ]);
+  if (validationError) return reply.code(validationError.status).send(formatOpenAIError(validationError.status, validationError.code, validationError.message, validationError.type));
   const started = Date.now();
   const body = request.body as EmbeddingBody;
   const mockRequest: MockRequest = {
