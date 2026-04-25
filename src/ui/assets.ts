@@ -91,6 +91,7 @@ tr.endpoint-row.active { background: var(--accent-soft); }
 .protocol-tab:hover { background: var(--panel-2); }
 .protocol-tab.active { color: var(--accent); background: var(--accent-soft); border-color: #b6e3ff; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.examples-grid { align-items: start; }
 .code-block { position: relative; margin-bottom: 14px; }
 pre { margin: 0; overflow: auto; background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px; color: var(--text); font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; font-size: 12px; line-height: 1.45; }
 .detail { margin-top: 16px; }
@@ -206,7 +207,7 @@ const renderers = {
     const protocol = protocols.find((item) => item.key === state.selectedProtocol) ?? protocols[0];
     if (!state.selectedEndpoint && protocol?.routes[0]) state.selectedEndpoint = routeId(protocol.routes[0]);
     const selectedRoute = protocol?.routes.find((route) => routeId(route) === state.selectedEndpoint) ?? protocol?.routes[0];
-    return providerHeader(provider, protocols) + protocolTabs(protocols) + endpointTable(protocol) + (selectedRoute ? endpointDetail(selectedRoute) : '<p>该供应商暂无可展示端点。</p>');
+    return providerHeader(provider, protocols) + protocolTabs(protocols) + (selectedRoute ? endpointDetail(selectedRoute, protocol) : '<p>该供应商暂无可展示端点。</p>');
   },
   requests() {
     const requests = filtered(state.data.requests, [r => r.id, r => r.provider, r => r.endpoint, r => r.model, r => r.matchedScenarioId, r => r.status]);
@@ -223,22 +224,24 @@ function protocolTabs(protocols) {
   return '<h2>协议菜单</h2><div class="protocol-tabs">' + protocols.map((protocol) => '<button class="protocol-tab ' + (protocol.key === state.selectedProtocol ? 'active' : '') + '" data-protocol="' + esc(protocol.key) + '">' + esc(protocol.label) + '</button>').join('') + '</div>';
 }
 
-function endpointTable(protocol) {
-  if (!protocol) return '';
-  return '<h2>端点列表</h2><table><thead><tr><th>方法</th><th>端点</th><th>说明</th></tr></thead><tbody>' + protocol.routes.map((route) => '<tr class="endpoint-row ' + (routeId(route) === state.selectedEndpoint ? 'active' : '') + '" data-endpoint="' + esc(routeId(route)) + '"><td><span class="badge">' + esc(route.method) + '</span></td><td><code>' + esc(route.path) + '</code></td><td>' + esc(route.description || protocol.label) + '</td></tr>').join('') + '</tbody></table>';
+function endpointDetail(route, protocol) {
+  const example = exampleFor(route);
+  return '<h2>端点列表</h2>' + endpointSummaryTable(protocol, route, example) + '<div class="detail">' + exampleSections(example) + '</div>';
 }
 
-function endpointDetail(route) {
-  const example = exampleFor(route);
-  return '<div class="detail"><h2>端点详情</h2>' + table([['供应商', route.displayName], ['协议', route.protocol], ['端点', route.method + ' ' + route.path], ['必填 Header', example.headers.join(', ') || '-'], ['必填字段', example.required.join(', ') || '-'], ['官方文档', '<a href="' + example.docsUrl + '" target="_blank">' + example.docsUrl + '</a>']]) +
-    exampleSections(example) + '</div>';
+function endpointSummaryTable(protocol, selectedRoute, selectedExample) {
+  if (!protocol) return '';
+  return '<table><thead><tr><th>方法</th><th>端点</th><th>说明</th><th>必填 Header</th><th>必填字段</th><th>官方文档</th></tr></thead><tbody>' + protocol.routes.map((route) => {
+    const example = routeId(route) === routeId(selectedRoute) ? selectedExample : exampleFor(route);
+    return '<tr class="endpoint-row ' + (routeId(route) === state.selectedEndpoint ? 'active' : '') + '" data-endpoint="' + esc(routeId(route)) + '"><td><span class="badge">' + esc(route.method) + '</span></td><td><code>' + esc(route.path) + '</code></td><td>' + esc(route.description || protocol.label) + '</td><td>' + esc(example.headers.join(', ') || '-') + '</td><td>' + esc(example.required.join(', ') || '-') + '</td><td><a href="' + esc(example.docsUrl) + '" target="_blank">官方文档</a></td></tr>';
+  }).join('') + '</tbody></table>';
 }
 
 function exampleSections(example) {
   const stream = example.stream;
-  let html = '<h2>非流式示例</h2><div class="grid-2"><div>' + codeBlock('非流式 cURL', example.curl) + '</div><div>' + codeBlock('非流式响应 Body', JSON.stringify(example.responseBody, null, 2)) + '</div></div>';
-  if (stream) html += '<h2>流式示例</h2><div class="grid-2"><div>' + codeBlock('流式 cURL', stream.curl) + '</div><div>' + codeBlock('流式响应示例', stream.responseText) + '</div></div>';
-  return html;
+  const nonStreamColumn = '<div><h2>非流式示例</h2>' + codeBlock('非流式 cURL', example.curl) + codeBlock('非流式响应 Body', JSON.stringify(example.responseBody, null, 2)) + '</div>';
+  const streamColumn = '<div><h2>流式示例</h2>' + (stream ? codeBlock('流式 cURL', stream.curl) + codeBlock('流式响应示例', stream.responseText) : '<p class="muted">该端点暂无流式示例。</p>') + '</div>';
+  return '<div class="grid-2 examples-grid">' + nonStreamColumn + streamColumn + '</div>';
 }
 
 function streamExampleFor(route, body, responseText) {
