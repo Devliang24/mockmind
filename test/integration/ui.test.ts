@@ -15,10 +15,12 @@ const config: MockMindConfig = {
 describe("web ui", () => {
   it("serves UI shell and assets", async () => {
     const { app } = await createMockMindServer(config);
-    const html = await app.inject({ method: "GET", url: "/__ui" });
+    const html = await app.inject({ method: "GET", url: "/console" });
     expect(html.statusCode).toBe(200);
     expect(html.headers["content-type"]).toContain("text/html");
     expect(html.body).toContain("MockMind Console");
+    expect(html.body).toContain("/console/style.css");
+    expect(html.body).toContain("/console/app.js");
     expect(html.body).toContain("sidebar-brand");
     expect(html.body).toContain("<strong>MockMind</strong>");
     expect(html.body).not.toContain("协议模拟控制台");
@@ -28,7 +30,7 @@ describe("web ui", () => {
     expect(html.body).not.toContain("data-view=\"overview\"");
     expect(html.body).not.toContain("data-view=\"providers\"");
 
-    const js = await app.inject({ method: "GET", url: "/__ui/app.js" });
+    const js = await app.inject({ method: "GET", url: "/console/app.js" });
     expect(js.statusCode).toBe(200);
     expect(js.body).toContain("/__admin/overview");
     expect(js.body).toContain("必填字段");
@@ -57,7 +59,7 @@ describe("web ui", () => {
     expect(js.body).not.toContain("openai-files");
     expect(js.body).not.toContain("openai-batch");
 
-    const css = await app.inject({ method: "GET", url: "/__ui/style.css" });
+    const css = await app.inject({ method: "GET", url: "/console/style.css" });
     expect(css.statusCode).toBe(200);
     expect(css.body).toContain(".sidebar-brand");
     expect(css.body).toContain(".inline-copy-btn");
@@ -67,6 +69,23 @@ describe("web ui", () => {
     expect(css.body).toContain(".layout { display: grid; grid-template-columns: 248px minmax(0, 1fr); height: 100vh;");
     expect(css.body).toContain(".sidebar { height: 100vh; overflow-y: auto;");
     expect(css.body).toContain(".content { min-width: 0; min-height: 0; padding: 0; overflow: auto;");
+    await app.close();
+  });
+
+  it("redirects legacy UI paths to console", async () => {
+    const { app } = await createMockMindServer(config);
+    const root = await app.inject({ method: "GET", url: "/" });
+    const legacy = await app.inject({ method: "GET", url: "/__ui" });
+    const legacyJs = await app.inject({ method: "GET", url: "/__ui/app.js" });
+    const legacyCss = await app.inject({ method: "GET", url: "/__ui/style.css" });
+    expect(root.statusCode).toBe(302);
+    expect(root.headers.location).toBe("/console");
+    expect(legacy.statusCode).toBe(302);
+    expect(legacy.headers.location).toBe("/console");
+    expect(legacyJs.statusCode).toBe(302);
+    expect(legacyJs.headers.location).toBe("/console/app.js");
+    expect(legacyCss.statusCode).toBe(302);
+    expect(legacyCss.headers.location).toBe("/console/style.css");
     await app.close();
   });
 

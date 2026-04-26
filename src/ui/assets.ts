@@ -4,7 +4,7 @@ export const uiHtml = `<!doctype html>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MockMind Console</title>
-    <link rel="stylesheet" href="/__ui/style.css" />
+    <link rel="stylesheet" href="/console/style.css" />
   </head>
   <body>
     <div id="app">
@@ -21,7 +21,7 @@ export const uiHtml = `<!doctype html>
         </main>
       </div>
     </div>
-    <script src="/__ui/app.js"></script>
+    <script src="/console/app.js"></script>
   </body>
 </html>`;
 

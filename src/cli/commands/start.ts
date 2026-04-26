@@ -13,6 +13,7 @@ export async function startCommand(options: { config?: string; host?: string; po
   const base = `http://${config.server.host}:${config.server.port}`;
   console.log("MockMind running\n");
   console.log(`Local:   ${base}`);
+  console.log(`Console: ${base}/console`);
   console.log(`Health:  ${base}/health`);
   console.log(`Admin:   ${base}/__admin/requests`);
   console.log("\nOpenAI-compatible baseURL:");
