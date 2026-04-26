@@ -72,20 +72,17 @@ describe("web ui", () => {
     await app.close();
   });
 
-  it("redirects legacy UI paths to console", async () => {
+  it("serves console from root without supporting legacy UI paths", async () => {
     const { app } = await createMockMindServer(config);
     const root = await app.inject({ method: "GET", url: "/" });
-    const legacy = await app.inject({ method: "GET", url: "/__ui" });
-    const legacyJs = await app.inject({ method: "GET", url: "/__ui/app.js" });
-    const legacyCss = await app.inject({ method: "GET", url: "/__ui/style.css" });
+    const oldUi = await app.inject({ method: "GET", url: "/__ui" });
+    const oldJs = await app.inject({ method: "GET", url: "/__ui/app.js" });
+    const oldCss = await app.inject({ method: "GET", url: "/__ui/style.css" });
     expect(root.statusCode).toBe(302);
     expect(root.headers.location).toBe("/console");
-    expect(legacy.statusCode).toBe(302);
-    expect(legacy.headers.location).toBe("/console");
-    expect(legacyJs.statusCode).toBe(302);
-    expect(legacyJs.headers.location).toBe("/console/app.js");
-    expect(legacyCss.statusCode).toBe(302);
-    expect(legacyCss.headers.location).toBe("/console/style.css");
+    expect(oldUi.statusCode).toBe(404);
+    expect(oldJs.statusCode).toBe(404);
+    expect(oldCss.statusCode).toBe(404);
     await app.close();
   });
 

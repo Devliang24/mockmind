@@ -6,7 +6,4 @@ export async function registerUiRoutes(app: FastifyInstance): Promise<void> {
   app.get("/console", async (_request, reply) => reply.type("text/html; charset=utf-8").send(uiHtml));
   app.get("/console/style.css", async (_request, reply) => reply.type("text/css; charset=utf-8").send(uiCss));
   app.get("/console/app.js", async (_request, reply) => reply.type("application/javascript; charset=utf-8").send(uiJs));
-  app.get("/__ui", async (_request, reply) => reply.redirect("/console"));
-  app.get("/__ui/style.css", async (_request, reply) => reply.redirect("/console/style.css"));
-  app.get("/__ui/app.js", async (_request, reply) => reply.redirect("/console/app.js"));
 }
