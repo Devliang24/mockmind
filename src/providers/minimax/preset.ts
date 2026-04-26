@@ -5,6 +5,7 @@ export const minimaxPreset: ProviderPreset = {
   displayName: "MiniMax",
   groups: ["chinese", "openai-compatible", "native"],
   defaultModels: ["abab6.5s-chat"],
+  latestModels: ["MiniMax-M2.7", "MiniMax-M2.7-highspeed", "MiniMax-M2.5", "MiniMax-M2.5-highspeed"],
   modelPatterns: [/^abab/i, /^minimax-/i],
   routes: [
     { method: "POST", path: "/v1/chat/completions", protocol: "openai-compatible", endpoint: "/v1/chat/completions", description: "via model abab* or minimax-*" },

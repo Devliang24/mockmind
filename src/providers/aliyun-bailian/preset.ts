@@ -5,7 +5,8 @@ export const aliyunBailianPreset: ProviderPreset = {
   displayName: "Alibaba Bailian / DashScope",
   groups: ["chinese", "openai-compatible", "native"],
   defaultModels: ["qwen-plus"],
-  modelPatterns: [/^qwen-/],
+  latestModels: ["qwen3.6-max-preview", "qwen3.6-plus", "qwen3.6-flash", "qwen-plus-latest"],
+  modelPatterns: [/^qwen/, /^text-embedding-/],
   routes: [
     { method: "POST", path: "/v1/chat/completions", protocol: "openai-compatible", endpoint: "/v1/chat/completions", description: "via model qwen-*" },
     { method: "POST", path: "/compatible-mode/v1/chat/completions", protocol: "openai-compatible", endpoint: "/compatible-mode/v1/chat/completions" },

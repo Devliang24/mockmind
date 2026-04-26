@@ -66,6 +66,21 @@ docker run --rm -p 4000:4000 -v "$PWD/mockmind.yaml:/app/mockmind.yaml:ro" mockm
 docker compose up --build
 ```
 
+容器默认监听 `0.0.0.0:4000`，并固定读取容器内的 `/app/mockmind.yaml`。启动后可访问：
+
+```txt
+http://127.0.0.1:4000/health
+http://127.0.0.1:4000/__ui
+http://127.0.0.1:4000/__admin/requests
+http://127.0.0.1:4000/v1
+```
+
+说明：
+
+- Docker 镜像使用 `package-lock.json` 对应的依赖版本构建。
+- 运行阶段使用非 root 的 `node` 用户。
+- `docker-compose.yml` 会把当前目录下的 `mockmind.yaml` 只读挂载到容器内。
+
 ## 命令行
 
 ```bash

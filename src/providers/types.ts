@@ -17,6 +17,7 @@ export type ProviderPreset = {
   displayName: string;
   groups: ProviderGroup[];
   defaultModels: string[];
+  latestModels?: string[];
   modelPatterns?: RegExp[];
   routes: ProviderRoute[];
 };

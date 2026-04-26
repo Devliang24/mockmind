@@ -37,6 +37,7 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
       displayName: registration.displayName,
       groups: registration.groups,
       defaultModels: registration.defaultModels,
+      latestModels: registration.latestModels ?? registration.defaultModels,
       configuredModels: context.config.models.filter((model) => model.provider === registration.provider).map((model) => model.id),
       routes: providerRouteSummaries(registration)
     })),
@@ -69,7 +70,10 @@ function packageVersion(): string {
 }
 
 function protocolLabel(protocol: string, path: string): string {
-  if (protocol === "openai-compatible") return path.includes("chat/completions") ? "Chat Completions" : "OpenAI Compatible";
+  if (protocol === "openai-compatible") {
+    if (path.includes("/models")) return "Models";
+    return path.includes("chat/completions") ? "Chat Completions" : "OpenAI Compatible";
+  }
   if (protocol === "openai-embeddings") return "Embeddings";
   if (protocol === "openai-responses") return "Responses";
   if (protocol === "anthropic-messages") return "Messages";

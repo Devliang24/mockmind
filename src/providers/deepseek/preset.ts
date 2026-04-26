@@ -5,6 +5,7 @@ export const deepseekPreset: ProviderPreset = {
   displayName: "DeepSeek",
   groups: ["chinese", "openai-compatible"],
   defaultModels: ["deepseek-chat", "deepseek-reasoner"],
+  latestModels: ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-chat", "deepseek-reasoner"],
   modelPatterns: [/^deepseek-/],
   routes: [
     { method: "POST", path: "/v1/chat/completions", protocol: "openai-compatible", endpoint: "/v1/chat/completions", description: "via model deepseek-*" },

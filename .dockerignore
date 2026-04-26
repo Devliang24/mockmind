@@ -1,7 +1,12 @@
 .git
+.github
 node_modules
 dist
 coverage
 .DS_Store
 .env
 *.log
+.playwright-mcp
+mockmind-ui-*.png
+test
+examples
