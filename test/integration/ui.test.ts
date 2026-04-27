@@ -38,6 +38,8 @@ describe("web ui", () => {
     expect(js.body).toContain("非流式示例");
     expect(js.body).toContain("流式示例");
     expect(js.body).toContain("Base URL");
+    expect(js.body).toContain("currentBaseUrl()");
+    expect(js.body).toContain("return 'curl ' + baseUrl + normalizedPath");
     expect(js.body).toContain("inline-copy-btn");
     expect(js.body).toContain("markCopied");
     expect(js.body).toContain("dataset.copied");

@@ -345,8 +345,12 @@ function protocolModelSection(provider, protocol) {
 }
 
 function protocolBaseUrl() {
-  const value = location.origin || 'http://127.0.0.1:4000';
+  const value = currentBaseUrl();
   return '<div class="inline-copy"><code>' + esc(value) + '</code><button class="inline-copy-btn" type="button" title="复制 Base URL" aria-label="复制 Base URL" data-copy="' + esc(value) + '"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M0 6.75C0 5.78.78 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .14.11.25.25.25h7.5c.14 0 .25-.11.25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path fill="currentColor" d="M5 1.75C5 .78 5.78 0 6.75 0h7.5C15.22 0 16 .78 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .14.11.25.25.25h7.5c.14 0 .25-.11.25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg></button></div>';
+}
+
+function currentBaseUrl() {
+  return location.origin || 'http://127.0.0.1:4000';
 }
 
 function endpointDetail(route, protocol) {
@@ -431,11 +435,12 @@ function openAIExample(route, docsUrl, requestBody, responseBody, required) {
 }
 function curl(path, body, headers = ['Authorization: Bearer test-key', 'Content-Type: application/json'], method = 'POST') {
   const normalizedPath = path.replace(':modelAndMethod', 'gemini-1.5-pro:generateContent');
-  if (method === 'GET') return 'curl http://127.0.0.1:4000' + normalizedPath;
+  const baseUrl = currentBaseUrl();
+  if (method === 'GET') return 'curl ' + baseUrl + normalizedPath;
   const slash = String.fromCharCode(92);
   const nl = String.fromCharCode(10);
   const headerLines = headers.map((header) => "  -H '" + header + "' " + slash).join(nl);
-  return 'curl http://127.0.0.1:4000' + normalizedPath + ' ' + slash + nl + headerLines + nl + "  -d '" + prettyJson(body) + "'";
+  return 'curl ' + baseUrl + normalizedPath + ' ' + slash + nl + headerLines + nl + "  -d '" + prettyJson(body) + "'";
 }
 
 function prettyJson(value) {
