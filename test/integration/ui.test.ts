@@ -49,6 +49,8 @@ describe("web ui", () => {
     expect(js.body).toContain("协议模型");
     expect(js.body).toContain("当前协议");
     expect(js.body).toContain("当前示例模型");
+    expect(js.body).toContain("menuProviderName(provider)");
+    expect(js.body).toContain("name.split(' / ').pop()");
     expect(js.body).toContain("gpt-5.5");
     expect(js.body).toContain("claude-opus-4-7");
     expect(js.body).toContain("claude-sonnet-4-6");

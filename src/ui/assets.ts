@@ -194,7 +194,7 @@ async function load() {
 
 function renderProviderMenu() {
   const providers = orderedProviders();
-  providerMenu.innerHTML = '<div class="sidebar-title">供应商</div>' + providers.map((provider) => '<button class="provider-link ' + (provider.provider === state.selectedProvider && state.view === 'provider' ? 'active' : '') + '" data-provider="' + esc(provider.provider) + '">' + esc(shortProviderName(provider)) + '</button>').join('');
+  providerMenu.innerHTML = '<div class="sidebar-title">供应商</div>' + providers.map((provider) => '<button class="provider-link ' + (provider.provider === state.selectedProvider && state.view === 'provider' ? 'active' : '') + '" data-provider="' + esc(provider.provider) + '">' + esc(menuProviderName(provider)) + '</button>').join('');
   providerMenu.querySelectorAll('.provider-link').forEach((button) => button.addEventListener('click', () => {
     state.view = 'provider';
     state.selectedProvider = button.dataset.provider;
@@ -472,6 +472,7 @@ function codeBlock(title, content) { return '<div class="code-block"><h3>' + esc
 function routeId(route) { return route.method + ' ' + route.path; }
 function currentProvider() { return orderedProviders().find((provider) => provider.provider === state.selectedProvider) ?? orderedProviders()[0]; }
 function shortProviderName(provider) { return provider?.displayName?.replace('OpenAI Compatible', 'OpenAI').replace('Google Gemini', 'Gemini').replace('Alibaba Bailian / DashScope', 'DashScope / 阿里百炼') ?? ''; }
+function menuProviderName(provider) { const name = shortProviderName(provider); return name.includes(' / ') ? name.split(' / ').pop() : name; }
 function protocolMenuKey(route) { if (route.protocol === 'openai-compatible' && route.path.includes('/models')) return 'openai-models'; if (route.protocol === 'gemini-generate-content') return route.path.includes('streamGenerateContent') ? 'gemini-stream' : 'gemini-generate'; if (route.protocol === 'openai-compatible' && route.path.includes('compatible-mode')) return 'dashscope-openai-chat'; return route.protocol; }
 function protocolLabel(route) { const key = protocolMenuKey(route); return ({ 'openai-compatible': 'Chat Completions', 'openai-models': 'Models', 'openai-responses': 'Responses', 'openai-embeddings': 'Embeddings', 'anthropic-messages': 'Messages', 'gemini-generate': 'generateContent', 'gemini-stream': 'streamGenerateContent', 'dashscope-generation': 'Native Text Generation', 'dashscope-openai-chat': 'OpenAI Compatible Chat', 'minimax-chat': 'ChatCompletion v2', rerank: 'Rerank' })[key] ?? route.protocol; }
 function protocolSortIndex(key) { const index = protocolOrder.indexOf(key); return index === -1 ? protocolOrder.length : index; }
