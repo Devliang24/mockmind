@@ -70,6 +70,11 @@ input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(9, 105, 21
 table { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--panel); }
 th, td { border-bottom: 1px solid var(--border); padding: 9px 10px; text-align: left; vertical-align: top; }
 th { color: var(--muted); font-weight: 600; background: var(--panel-2); }
+td { min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
+.provider-meta { table-layout: fixed; margin-bottom: 16px; }
+.provider-meta th { width: 220px; }
+.provider-meta td { width: calc(100% - 220px); }
+.provider-meta .inline-copy code { max-width: 100%; overflow-wrap: anywhere; }
 tr.endpoint-row { cursor: pointer; }
 tr.endpoint-row:hover { background: var(--panel-2); }
 tr.endpoint-row.active { background: var(--accent-soft); }
@@ -332,7 +337,7 @@ const renderers = {
 };
 
 function providerHeader(provider, selectedRoute) {
-  return '<h2>' + esc(provider.displayName) + '</h2>' + table([['Provider', provider.provider], ['分组', provider.groups.join(', ')], ['Base URL', protocolBaseUrl()], ['官方文档', '<a href="' + providersDocs[provider.provider] + '" target="_blank">' + providersDocs[provider.provider] + '</a>']]);
+  return '<h2>' + esc(provider.displayName) + '</h2>' + table([['Provider', provider.provider], ['分组', provider.groups.join(', ')], ['Base URL', protocolBaseUrl()], ['官方文档', '<a href="' + providersDocs[provider.provider] + '" target="_blank">' + providersDocs[provider.provider] + '</a>']], 'provider-meta');
 }
 
 function protocolTabs(protocols) {
@@ -479,7 +484,7 @@ function defaultModel(provider, protocol, protocolKey = protocol) {
 function embeddingModel(provider) { if (provider === 'aliyun-bailian') return 'text-embedding-v3'; if (provider === 'zhipu') return 'embedding-3'; return 'text-embedding-3-small'; }
 function filtered(items, fields) { const query = state.search.trim().toLowerCase(); return query ? items.filter((item) => fields.some((field) => String(field(item) ?? '').toLowerCase().includes(query))) : items; }
 function card(label, value) { return '<div class="card"><span class="muted">' + esc(label) + '</span><strong>' + esc(value) + '</strong></div>'; }
-function table(rows) { return '<table><tbody>' + rows.map(([k, v]) => '<tr><th>' + esc(k) + '</th><td>' + (typeof v === 'string' && v.startsWith('<') ? v : esc(v)) + '</td></tr>').join('') + '</tbody></table>'; }
+function table(rows, className = '') { return '<table' + (className ? ' class="' + esc(className) + '"' : '') + '><tbody>' + rows.map(([k, v]) => '<tr><th>' + esc(k) + '</th><td>' + (typeof v === 'string' && v.startsWith('<') ? v : esc(v)) + '</td></tr>').join('') + '</tbody></table>'; }
 function badges(values = []) { return values.length ? values.map((v) => '<span class="badge">' + esc(v) + '</span>').join('') : '<span class="muted">-</span>'; }
 function requestsTable(requests) { return '<table><thead><tr><th>ID</th><th>状态</th><th>提供商</th><th>模型</th><th>端点</th><th>命中场景</th><th>耗时</th></tr></thead><tbody>' + requests.slice().reverse().map((r) => '<tr><td>' + esc(r.id) + '</td><td>' + esc(r.status) + '</td><td>' + esc(r.provider) + '</td><td>' + esc(r.model || '-') + '</td><td><code>' + esc(r.endpoint) + '</code></td><td>' + esc(r.matchedScenarioId || '-') + '</td><td>' + esc(r.durationMs) + 'ms</td></tr>').join('') + '</tbody></table>'; }
 function esc(value) { return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }

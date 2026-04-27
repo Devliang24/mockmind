@@ -70,6 +70,9 @@ describe("web ui", () => {
     expect(css.body).toContain(".inline-copy-btn");
     expect(css.body).toContain("已复制");
     expect(css.body).toContain(".provider-menu");
+    expect(css.body).toContain(".provider-meta { table-layout: fixed;");
+    expect(css.body).toContain(".provider-meta th { width: 220px;");
+    expect(css.body).toContain("overflow-wrap: anywhere");
     expect(css.body).toContain("body { margin: 0; overflow: hidden;");
     expect(css.body).toContain(".layout { display: grid; grid-template-columns: 248px minmax(0, 1fr); height: 100vh;");
     expect(css.body).toContain(".sidebar { height: 100vh; overflow-y: auto;");
