@@ -73,7 +73,7 @@ persistence:
 docker build -t mockmind:local .
 docker run --rm -p 4000:4000 \
   -v "$PWD/mockmind.yaml:/app/mockmind.yaml:ro" \
-  -v "$PWD/.mockmind:/app/.mockmind" \
+  -v mockmind-data:/app/.mockmind \
   mockmind:local
 ```
 
@@ -95,8 +95,9 @@ http://127.0.0.1:4000/v1
 说明：
 
 - Docker 镜像使用 `package-lock.json` 对应的依赖版本构建。
+- Docker 构建阶段会安装 `python3`、`make`、`g++` 以支持 `better-sqlite3` 原生依赖，并将裁剪后的生产依赖复制到运行镜像。
 - 运行阶段使用非 root 的 `node` 用户。
-- `docker-compose.yml` 会把当前目录下的 `mockmind.yaml` 只读挂载到容器内，并把 `.mockmind` 目录挂载为 SQLite 数据目录。
+- `docker-compose.yml` 会把当前目录下的 `mockmind.yaml` 只读挂载到容器内，并用 `mockmind-data` volume 持久化 SQLite 数据。
 
 ## 命令行
 
