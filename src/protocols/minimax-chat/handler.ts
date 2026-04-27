@@ -42,8 +42,17 @@ export async function handleMiniMaxChat(handlerContext: ProtocolHandlerContext, 
   const result = renderResult(found.result ?? { type: "text", content: "你好，我是模拟的 MiniMax 响应。" }, mockRequest);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
-  context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: Boolean(body.stream), request: mockRequest });
-  if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatMiniMaxError(result.error.code, result.error.message));
-  if (body.stream) return sendMiniMaxStream(reply, body.model ?? "abab6.5s-chat", result, context.config.defaults.streamChunkDelayMs);
-  return reply.send(formatMiniMaxChatCompletion(body.model ?? "abab6.5s-chat", result));
+  if (result.type === "error" && result.error) {
+    const responseBody = formatMiniMaxError(result.error.code, result.error.message);
+    context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: Boolean(body.stream), request: mockRequest, responseBody });
+    return reply.code(result.error.status).send(responseBody);
+  }
+  if (body.stream) {
+    const responseBody = { stream: true, format: "text/event-stream", content: result.chunks ?? result.content ?? "" };
+    context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
+    return sendMiniMaxStream(reply, body.model ?? "abab6.5s-chat", result, context.config.defaults.streamChunkDelayMs);
+  }
+  const responseBody = formatMiniMaxChatCompletion(body.model ?? "abab6.5s-chat", result);
+  context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
+  return reply.send(responseBody);
 }

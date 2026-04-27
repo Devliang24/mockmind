@@ -37,10 +37,19 @@ export async function handleGeminiGenerateContent(handlerContext: ProtocolHandle
   const result = renderResult(found.result ?? { type: "text", content: "Hello from mock Gemini." }, mockRequest);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
-  context.recorder.add({ provider: mockRequest.provider, endpoint, model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest });
-  if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatGeminiError(result.error.status, result.error.message, result.error.code));
-  if (stream) return sendGeminiStream(reply, result, context.config.defaults.streamChunkDelayMs);
-  return reply.send(formatGeminiContent(result));
+  if (result.type === "error" && result.error) {
+    const responseBody = formatGeminiError(result.error.status, result.error.message, result.error.code);
+    context.recorder.add({ provider: mockRequest.provider, endpoint, model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest, responseBody });
+    return reply.code(result.error.status).send(responseBody);
+  }
+  if (stream) {
+    const responseBody = { stream: true, format: "application/json", content: result.chunks ?? result.content ?? "" };
+    context.recorder.add({ provider: mockRequest.provider, endpoint, model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest, responseBody });
+    return sendGeminiStream(reply, result, context.config.defaults.streamChunkDelayMs);
+  }
+  const responseBody = formatGeminiContent(result);
+  context.recorder.add({ provider: mockRequest.provider, endpoint, model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest, responseBody });
+  return reply.send(responseBody);
 }
 
 function modelFromEndpoint(endpoint: string): string | undefined {

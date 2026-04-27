@@ -43,6 +43,8 @@ describe("OpenAI-compatible routes", () => {
     const response = await app.inject({ method: "GET", url: "/__admin/requests" });
 
     expect(response.json()).toHaveLength(1);
+    expect(response.json()[0].request.rawBody.model).toBe("gpt-4o-mini");
+    expect(response.json()[0].responseBody.choices[0].message.content).toBe("Hello from test.");
     await app.close();
   });
 });

@@ -9,9 +9,10 @@ export type ServerContext = {
 };
 
 export function createServerContext(config: MockMindConfig): ServerContext {
+  const persistence = config.persistence;
   return {
     config,
     scenarios: new ScenarioStore(config),
-    recorder: new RequestRecorder()
+    recorder: new RequestRecorder(persistence?.enabled && persistence.driver === "sqlite" ? { sqlitePath: persistence.sqlite.path } : {})
   };
 }

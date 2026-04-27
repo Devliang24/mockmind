@@ -9,6 +9,9 @@ import { createServerContext } from "./context.js";
 export async function createMockMindServer(config: MockMindConfig) {
   const app = Fastify({ logger: false });
   const context = createServerContext(config);
+  app.addHook("onClose", async () => {
+    context.recorder.close();
+  });
 
   await app.register(cors, { origin: true });
 

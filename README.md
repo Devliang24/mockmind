@@ -53,11 +53,28 @@ http://127.0.0.1:4000/console
 
 内置控制台左侧直接展示供应商菜单，并提供请求记录页面。供应商按国外优先、国内随后排序，可查看每家 Provider 的协议、端点、必填项、非流式/流式 cURL 示例、响应 Body 和官方文档。
 
+## 持久化
+
+默认配置使用 SQLite 持久化请求记录，服务重启后 `__admin/requests` 和 Web UI 的请求记录仍可查看。
+
+```yaml
+persistence:
+  enabled: true
+  driver: sqlite
+  sqlite:
+    path: .mockmind/mockmind.sqlite
+```
+
+请求记录会保存摘要、请求体、响应体和完整日志。调用 `POST /__admin/reset` 会同步清空内存和 SQLite 中的请求记录。
+
 ## Docker
 
 ```bash
 docker build -t mockmind:local .
-docker run --rm -p 4000:4000 -v "$PWD/mockmind.yaml:/app/mockmind.yaml:ro" mockmind:local
+docker run --rm -p 4000:4000 \
+  -v "$PWD/mockmind.yaml:/app/mockmind.yaml:ro" \
+  -v "$PWD/.mockmind:/app/.mockmind" \
+  mockmind:local
 ```
 
 或者使用 Compose：
@@ -79,7 +96,7 @@ http://127.0.0.1:4000/v1
 
 - Docker 镜像使用 `package-lock.json` 对应的依赖版本构建。
 - 运行阶段使用非 root 的 `node` 用户。
-- `docker-compose.yml` 会把当前目录下的 `mockmind.yaml` 只读挂载到容器内。
+- `docker-compose.yml` 会把当前目录下的 `mockmind.yaml` 只读挂载到容器内，并把 `.mockmind` 目录挂载为 SQLite 数据目录。
 
 ## 命令行
 

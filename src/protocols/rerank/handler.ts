@@ -41,10 +41,14 @@ export async function handleRerank(handlerContext: ProtocolHandlerContext, reque
   const result = renderResult(found.result ?? { type: "json", json: formatRerankResponse(provider, body) }, mockRequest);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
-  context.recorder.add({ provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest });
-  if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatRerankError(provider, result.error.code ?? "mock_error", result.error.message));
-  if (result.type === "json" && result.json) return reply.send(result.json);
-  return reply.send(formatRerankResponse(provider, body));
+  if (result.type === "error" && result.error) {
+    const responseBody = formatRerankError(provider, result.error.code ?? "mock_error", result.error.message);
+    context.recorder.add({ provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
+    return reply.code(result.error.status).send(responseBody);
+  }
+  const responseBody = result.type === "json" && result.json ? result.json : formatRerankResponse(provider, body);
+  context.recorder.add({ provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
+  return reply.send(responseBody);
 }
 
 function formatRerankResponse(provider: string, body: RerankBody): unknown {

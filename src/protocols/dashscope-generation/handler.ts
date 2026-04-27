@@ -47,8 +47,17 @@ export async function handleDashScopeGeneration(handlerContext: ProtocolHandlerC
   const result = renderResult(found.result ?? { type: "text", content: "你好，我是模拟的 DashScope 原生响应。" }, mockRequest);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
-  context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest });
-  if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatDashScopeError(result.error.code, result.error.message));
-  if (stream) return sendDashScopeStream(reply, result, context.config.defaults.streamChunkDelayMs);
-  return reply.send(formatDashScopeGeneration(result));
+  if (result.type === "error" && result.error) {
+    const responseBody = formatDashScopeError(result.error.code, result.error.message);
+    context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest, responseBody });
+    return reply.code(result.error.status).send(responseBody);
+  }
+  if (stream) {
+    const responseBody = { stream: true, format: "text/event-stream", content: result.chunks ?? result.content ?? "" };
+    context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest, responseBody });
+    return sendDashScopeStream(reply, result, context.config.defaults.streamChunkDelayMs);
+  }
+  const responseBody = formatDashScopeGeneration(result);
+  context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest, responseBody });
+  return reply.send(responseBody);
 }

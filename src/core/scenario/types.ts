@@ -95,6 +95,13 @@ export type MockMindConfig = {
     latencyMs: number;
     streamChunkDelayMs: number;
   };
+  persistence?: {
+    enabled: boolean;
+    driver: "memory" | "sqlite";
+    sqlite: {
+      path: string;
+    };
+  };
   fallback: {
     enabled: boolean;
     response: MockResult;

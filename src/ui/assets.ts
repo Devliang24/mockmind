@@ -516,9 +516,28 @@ function requestDrawer(request) {
   if (!request) return '';
   return '<div class="drawer-backdrop" aria-hidden="true"></div><aside class="request-drawer" role="dialog" aria-modal="true" aria-label="请求详情"><div class="drawer-head"><div><h2>请求详情 ' + esc(request.id) + '</h2><p>' + esc(request.provider) + ' · ' + esc(request.endpoint) + ' · ' + esc(request.status) + '</p></div><button class="drawer-close" type="button" title="关闭" aria-label="关闭">×</button></div><div class="drawer-body">' +
     '<div class="drawer-section"><h3>摘要</h3>' + table([['ID', request.id], ['状态', request.status], ['提供商', request.provider], ['模型', request.model || '-'], ['端点', request.endpoint], ['命中场景', request.matchedScenarioId || '-'], ['流式', request.stream ? '是' : '否'], ['耗时', request.durationMs + 'ms']]) + '</div>' +
-    '<div class="drawer-section"><h3>请求内容</h3><pre>' + esc(JSON.stringify(request.request, null, 2)) + '</pre></div>' +
-    '<div class="drawer-section"><h3>完整日志</h3><pre>' + esc(JSON.stringify(request, null, 2)) + '</pre></div>' +
+    '<div class="drawer-section">' + codeBlock('完整 cURL', requestCurl(request)) + '</div>' +
+    '<div class="drawer-section">' + codeBlock('请求体', prettyJson(request.request?.rawBody ?? {})) + '</div>' +
+    '<div class="drawer-section">' + codeBlock('响应体', prettyJson(request.responseBody ?? { note: 'Response body was not recorded for this request.' })) + '</div>' +
+    '<div class="drawer-section">' + codeBlock('完整日志', prettyJson(request)) + '</div>' +
     '</div></aside>';
+}
+function requestCurl(request) {
+  const method = request.request?.method || 'POST';
+  const url = currentBaseUrl() + (request.endpoint || '');
+  const headers = replayHeaders(request.request?.headers || {});
+  const body = request.request?.rawBody;
+  const slash = String.fromCharCode(92);
+  const nl = String.fromCharCode(10);
+  const methodPart = method === 'GET' ? '' : ' -X ' + method;
+  const lines = ['curl' + methodPart + ' ' + url];
+  headers.forEach(([name, value]) => lines.push("  -H '" + name + ': ' + String(value).replace(/'/g, "'\\\\''") + "'"));
+  if (method !== 'GET' && body !== undefined) lines.push("  -d '" + prettyJson(body).replace(/'/g, "'\\\\''") + "'");
+  return lines.map((line, index) => index < lines.length - 1 ? line + ' ' + slash : line).join(nl);
+}
+function replayHeaders(headers) {
+  const wanted = ['authorization', 'x-api-key', 'anthropic-version', 'content-type'];
+  return wanted.map((name) => [name, headers[name]]).filter(([, value]) => value);
 }
 function esc(value) { return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
 window.copyText = async (text) => {

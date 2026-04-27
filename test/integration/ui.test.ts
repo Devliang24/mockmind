@@ -47,6 +47,11 @@ describe("web ui", () => {
     expect(js.body).toContain("request-drawer");
     expect(js.body).toContain("请求详情");
     expect(js.body).toContain("完整日志");
+    expect(js.body).toContain("完整 cURL");
+    expect(js.body).toContain("请求体");
+    expect(js.body).toContain("响应体");
+    expect(js.body).toContain("requestCurl(request)");
+    expect(js.body).toContain("responseBody");
     expect(js.body).toContain("request-id");
     expect(js.body).toContain("model-chip");
     expect(js.body).toContain("model-copy-btn");

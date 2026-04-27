@@ -112,9 +112,14 @@ async function sendRendered(
   const found = context.scenarios.find(mockRequest);
   const result = renderResult(found.result ?? { type: "text", content: `Mock ${label} response.` }, mockRequest);
   const status = result.error?.status ?? 200;
-  context.recorder.add({ provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: 0, stream: false, request: mockRequest });
-  if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type));
-  return reply.send(format(body, result.content ?? ""));
+  if (result.type === "error" && result.error) {
+    const responseBody = formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type);
+    context.recorder.add({ provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: 0, stream: false, request: mockRequest, responseBody });
+    return reply.code(result.error.status).send(responseBody);
+  }
+  const responseBody = format(body, result.content ?? "");
+  context.recorder.add({ provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: 0, stream: false, request: mockRequest, responseBody });
+  return reply.send(responseBody);
 }
 
 function fileObject(id: string): Record<string, unknown> {

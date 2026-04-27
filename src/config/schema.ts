@@ -83,6 +83,13 @@ export const configSchema = z.object({
     latencyMs: z.number().int().nonnegative().default(0),
     streamChunkDelayMs: z.number().int().nonnegative().default(30)
   }).prefault({}),
+  persistence: z.object({
+    enabled: z.boolean().default(true),
+    driver: z.enum(["memory", "sqlite"]).default("sqlite"),
+    sqlite: z.object({
+      path: z.string().default(".mockmind/mockmind.sqlite")
+    }).prefault({})
+  }).prefault({}),
   fallback: z.object({
     enabled: z.boolean().default(true),
     response: mockResultSchema.default({ type: "text", content: "This is a default mock response from mockmind." })

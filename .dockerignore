@@ -6,6 +6,10 @@ coverage
 .DS_Store
 .env
 *.log
+.mockmind
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 .playwright-mcp
 mockmind-ui-*.png
 test

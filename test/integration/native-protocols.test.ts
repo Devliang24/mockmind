@@ -22,6 +22,8 @@ describe("native protocol routes", () => {
     const response = await app.inject({ method: "POST", url: "/v1/messages", headers: { "anthropic-version": "2023-06-01" }, payload: { model: "claude-sonnet-4-6", max_tokens: 128, messages: [{ role: "user", content: "hello" }] } });
     expect(response.statusCode).toBe(200);
     expect(response.json().type).toBe("message");
+    const requests = await app.inject({ method: "GET", url: "/__admin/requests" });
+    expect(requests.json()[0].responseBody.type).toBe("message");
     await app.close();
   });
 

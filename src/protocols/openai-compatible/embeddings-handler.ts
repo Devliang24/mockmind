@@ -40,7 +40,12 @@ export async function handleOpenAIEmbeddings(
   const result = renderResult(found.result ?? { type: "embedding", embedding: [0.0123, -0.0456, 0.0789] }, mockRequest);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
-  context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest });
-  if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type));
-  return reply.send(formatEmbedding(body.model ?? "text-embedding-3-small", result.embedding ?? [0.0123, -0.0456, 0.0789]));
+  if (result.type === "error" && result.error) {
+    const responseBody = formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type);
+    context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
+    return reply.code(result.error.status).send(responseBody);
+  }
+  const responseBody = formatEmbedding(body.model ?? "text-embedding-3-small", result.embedding ?? [0.0123, -0.0456, 0.0789]);
+  context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
+  return reply.send(responseBody);
 }

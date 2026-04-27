@@ -38,6 +38,12 @@ defaults:
   latencyMs: 30
   streamChunkDelayMs: 25
 
+persistence:
+  enabled: true
+  driver: sqlite
+  sqlite:
+    path: .mockmind/mockmind.sqlite
+
 fallback:
   enabled: true
   response:

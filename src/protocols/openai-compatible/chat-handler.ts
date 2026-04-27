@@ -47,10 +47,19 @@ export async function handleOpenAICompatibleChat(
   const result = renderResult(found.result ?? { type: "text", content: defaultContent(provider) }, mockRequest);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
-  context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: Boolean(body.stream), request: mockRequest });
-  if (result.type === "error" && result.error) return reply.code(result.error.status).send(formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type));
-  if (body.stream) return sendOpenAIStream(reply, body.model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs);
-  return reply.send(formatChatCompletion(body.model ?? "mock-model", result));
+  if (result.type === "error" && result.error) {
+    const responseBody = formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type);
+    context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: Boolean(body.stream), request: mockRequest, responseBody });
+    return reply.code(result.error.status).send(responseBody);
+  }
+  if (body.stream) {
+    const responseBody = { stream: true, format: "text/event-stream", content: result.chunks ?? result.content ?? "" };
+    context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
+    return sendOpenAIStream(reply, body.model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs);
+  }
+  const responseBody = formatChatCompletion(body.model ?? "mock-model", result);
+  context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
+  return reply.send(responseBody);
 }
 
 function defaultContent(provider: Provider): string {
