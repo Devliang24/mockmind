@@ -121,10 +121,23 @@ button { font: inherit; }
 .inline-copy { display: inline-flex; align-items: center; gap: 8px; }
 .inline-copy-btn { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; color: var(--muted); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 0; cursor: pointer; }
 .inline-copy-btn:hover { color: var(--accent); background: var(--panel-2); }
+.request-id { color: var(--accent); background: transparent; border: 0; padding: 0; cursor: pointer; font-weight: 600; }
+.request-id:hover { text-decoration: underline; }
+.drawer-backdrop { position: fixed; inset: 0; background: rgba(31, 35, 40, 0.24); z-index: 10; }
+.request-drawer { position: fixed; top: 0; right: 0; z-index: 11; display: flex; flex-direction: column; width: min(720px, calc(100vw - 248px)); height: 100vh; background: var(--panel); border-left: 1px solid var(--border); box-shadow: -8px 0 24px rgba(31, 35, 40, 0.12); }
+.drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--panel); }
+.drawer-head h2 { margin: 0; font-size: 18px; }
+.drawer-head p { margin: 6px 0 0; color: var(--muted); }
+.drawer-close { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; color: var(--muted); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; }
+.drawer-close:hover { color: var(--accent); background: var(--panel-2); }
+.drawer-body { min-height: 0; overflow: auto; padding: 16px 20px 20px; }
+.drawer-section { margin-bottom: 18px; }
+.drawer-section pre { max-height: none; height: auto; }
+.requests-empty { color: var(--muted); padding: 20px 0; }
 @media (max-width: 900px) { body { overflow: auto; } .layout { grid-template-columns: 1fr; height: auto; } .sidebar { height: auto; overflow: visible; border-right: 0; border-bottom: 1px solid var(--border); } .content { overflow: visible; } .cards, .grid-2 { grid-template-columns: 1fr; } .model-chip { flex-basis: 100%; max-width: none; } input { min-width: 0; width: 100%; } .code-block { height: auto; } }
 `;
 
-export const uiJs = `const state = { view: 'provider', search: '', selectedProvider: 'openai', selectedProtocol: '', selectedEndpoint: '', selectedModels: {}, data: {} };
+export const uiJs = `const state = { view: 'provider', search: '', selectedProvider: 'openai', selectedProtocol: '', selectedEndpoint: '', selectedRequestId: '', selectedModels: {}, data: {} };
 const panel = document.getElementById('panel');
 const providerMenu = document.getElementById('provider-menu');
 
@@ -332,7 +345,8 @@ const renderers = {
   },
   requests() {
     const requests = filtered(state.data.requests, [r => r.id, r => r.provider, r => r.endpoint, r => r.model, r => r.matchedScenarioId, r => r.status]);
-    return requestsTable(requests) + '<div class="detail"><h2>原始请求</h2><pre>' + esc(JSON.stringify(requests, null, 2)) + '</pre></div>';
+    const selected = selectedRequest(requests);
+    return requestsTable(requests) + requestDrawer(selected);
   }
 };
 
@@ -463,6 +477,8 @@ function attachDynamicHandlers() {
   panel.querySelectorAll('.provider-open').forEach((button) => button.addEventListener('click', () => { state.view = 'provider'; state.selectedProvider = button.dataset.provider; state.selectedProtocol = ''; state.selectedEndpoint = ''; setActiveNav(''); renderProviderMenu(); render(); }));
   panel.querySelectorAll('.protocol-tab').forEach((button) => button.addEventListener('click', () => { state.selectedProtocol = button.dataset.protocol; state.selectedEndpoint = ''; render(); }));
   panel.querySelectorAll('.endpoint-row').forEach((row) => row.addEventListener('click', () => { state.selectedEndpoint = row.dataset.endpoint; render(); }));
+  panel.querySelectorAll('.request-id').forEach((button) => button.addEventListener('click', () => { state.selectedRequestId = button.dataset.requestId || ''; render(); }));
+  panel.querySelectorAll('.drawer-close, .drawer-backdrop').forEach((button) => button.addEventListener('click', () => { state.selectedRequestId = ''; render(); }));
   panel.querySelectorAll('.model-chip').forEach((button) => button.addEventListener('click', () => { state.selectedModels[modelStateKey(button.dataset.provider, button.dataset.protocol)] = button.dataset.model; render(); }));
   panel.querySelectorAll('.model-copy-btn').forEach((button) => button.addEventListener('click', async (event) => { event.stopPropagation(); if (await copyText(button.dataset.copy || '')) markCopied(button); }));
   panel.querySelectorAll('.inline-copy-btn').forEach((button) => button.addEventListener('click', async () => { if (await copyText(button.dataset.copy || '')) markCopied(button); }));
@@ -487,7 +503,23 @@ function filtered(items, fields) { const query = state.search.trim().toLowerCase
 function card(label, value) { return '<div class="card"><span class="muted">' + esc(label) + '</span><strong>' + esc(value) + '</strong></div>'; }
 function table(rows, className = '') { return '<table' + (className ? ' class="' + esc(className) + '"' : '') + '><tbody>' + rows.map(([k, v]) => '<tr><th>' + esc(k) + '</th><td>' + (typeof v === 'string' && v.startsWith('<') ? v : esc(v)) + '</td></tr>').join('') + '</tbody></table>'; }
 function badges(values = []) { return values.length ? values.map((v) => '<span class="badge">' + esc(v) + '</span>').join('') : '<span class="muted">-</span>'; }
-function requestsTable(requests) { return '<table><thead><tr><th>ID</th><th>状态</th><th>提供商</th><th>模型</th><th>端点</th><th>命中场景</th><th>耗时</th></tr></thead><tbody>' + requests.slice().reverse().map((r) => '<tr><td>' + esc(r.id) + '</td><td>' + esc(r.status) + '</td><td>' + esc(r.provider) + '</td><td>' + esc(r.model || '-') + '</td><td><code>' + esc(r.endpoint) + '</code></td><td>' + esc(r.matchedScenarioId || '-') + '</td><td>' + esc(r.durationMs) + 'ms</td></tr>').join('') + '</tbody></table>'; }
+function requestsTable(requests) {
+  if (!requests.length) return '<div class="requests-empty">暂无请求记录。</div>';
+  return '<table><thead><tr><th>ID</th><th>状态</th><th>提供商</th><th>模型</th><th>端点</th><th>命中场景</th><th>耗时</th></tr></thead><tbody>' + requests.slice().reverse().map((r) => '<tr><td><button class="request-id" data-request-id="' + esc(r.id) + '">' + esc(r.id) + '</button></td><td>' + esc(r.status) + '</td><td>' + esc(r.provider) + '</td><td>' + esc(r.model || '-') + '</td><td><code>' + esc(r.endpoint) + '</code></td><td>' + esc(r.matchedScenarioId || '-') + '</td><td>' + esc(r.durationMs) + 'ms</td></tr>').join('') + '</tbody></table>';
+}
+function selectedRequest(requests) {
+  const source = requests.length ? requests : state.data.requests || [];
+  if (!state.selectedRequestId) return undefined;
+  return source.find((request) => request.id === state.selectedRequestId);
+}
+function requestDrawer(request) {
+  if (!request) return '';
+  return '<div class="drawer-backdrop" aria-hidden="true"></div><aside class="request-drawer" role="dialog" aria-modal="true" aria-label="请求详情"><div class="drawer-head"><div><h2>请求详情 ' + esc(request.id) + '</h2><p>' + esc(request.provider) + ' · ' + esc(request.endpoint) + ' · ' + esc(request.status) + '</p></div><button class="drawer-close" type="button" title="关闭" aria-label="关闭">×</button></div><div class="drawer-body">' +
+    '<div class="drawer-section"><h3>摘要</h3>' + table([['ID', request.id], ['状态', request.status], ['提供商', request.provider], ['模型', request.model || '-'], ['端点', request.endpoint], ['命中场景', request.matchedScenarioId || '-'], ['流式', request.stream ? '是' : '否'], ['耗时', request.durationMs + 'ms']]) + '</div>' +
+    '<div class="drawer-section"><h3>请求内容</h3><pre>' + esc(JSON.stringify(request.request, null, 2)) + '</pre></div>' +
+    '<div class="drawer-section"><h3>完整日志</h3><pre>' + esc(JSON.stringify(request, null, 2)) + '</pre></div>' +
+    '</div></aside>';
+}
 function esc(value) { return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
 window.copyText = async (text) => {
   try {

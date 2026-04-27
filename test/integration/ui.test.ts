@@ -43,6 +43,11 @@ describe("web ui", () => {
     expect(js.body).toContain("inline-copy-btn");
     expect(js.body).toContain("markCopied");
     expect(js.body).toContain("dataset.copied");
+    expect(js.body).toContain("selectedRequestId");
+    expect(js.body).toContain("request-drawer");
+    expect(js.body).toContain("请求详情");
+    expect(js.body).toContain("完整日志");
+    expect(js.body).toContain("request-id");
     expect(js.body).toContain("model-chip");
     expect(js.body).toContain("model-copy-btn");
     expect(js.body).toContain("data-protocol");
@@ -72,6 +77,8 @@ describe("web ui", () => {
     expect(css.body).toContain(".inline-copy-btn");
     expect(css.body).toContain("已复制");
     expect(css.body).toContain(".provider-menu");
+    expect(css.body).toContain(".request-drawer");
+    expect(css.body).toContain(".drawer-backdrop");
     expect(css.body).toContain(".provider-meta { table-layout: fixed;");
     expect(css.body).toContain(".provider-meta th { width: 220px;");
     expect(css.body).toContain("overflow-wrap: anywhere");
