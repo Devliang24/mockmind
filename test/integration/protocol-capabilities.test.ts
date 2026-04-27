@@ -8,8 +8,8 @@ const config: MockMindConfig = {
   auth: { mode: "permissive", apiKeys: ["test-key"] },
   models: [
     { id: "gpt-4o-mini", provider: "openai" },
-    { id: "claude-3-5-sonnet-latest", provider: "anthropic" },
-    { id: "gemini-1.5-pro", provider: "gemini" },
+    { id: "claude-sonnet-4-6", provider: "anthropic" },
+    { id: "gemini-3-flash-preview", provider: "gemini" },
     { id: "qwen-plus", provider: "aliyun-bailian" }
   ],
   defaults: { latencyMs: 0, streamChunkDelayMs: 0 },
@@ -42,7 +42,7 @@ const config: MockMindConfig = {
     {
       id: "gemini-tool",
       provider: "gemini",
-      endpoint: "/v1beta/models/gemini-1.5-pro:generateContent",
+      endpoint: "/v1beta/models/gemini-3-flash-preview:generateContent",
       priority: 0,
       match: { messagesContain: "weather" },
       response: { type: "tool_call", toolName: "get_weather", toolArguments: { city: "Shanghai" } }
@@ -78,7 +78,7 @@ describe("protocol capabilities", () => {
 
   it("returns Anthropic tool_use", async () => {
     const { app } = await createMockMindServer(config);
-    const response = await app.inject({ method: "POST", url: "/v1/messages", headers: { "anthropic-version": "2023-06-01" }, payload: { model: "claude-3-5-sonnet-latest", max_tokens: 128, messages: [{ role: "user", content: "weather" }] } });
+    const response = await app.inject({ method: "POST", url: "/v1/messages", headers: { "anthropic-version": "2023-06-01" }, payload: { model: "claude-sonnet-4-6", max_tokens: 128, messages: [{ role: "user", content: "weather" }] } });
     expect(response.json().stop_reason).toBe("tool_use");
     expect(response.json().content[0].type).toBe("tool_use");
     await app.close();
@@ -86,7 +86,7 @@ describe("protocol capabilities", () => {
 
   it("returns Gemini functionCall", async () => {
     const { app } = await createMockMindServer(config);
-    const response = await app.inject({ method: "POST", url: "/v1beta/models/gemini-1.5-pro:generateContent", payload: { contents: [{ role: "user", parts: [{ text: "weather" }] }] } });
+    const response = await app.inject({ method: "POST", url: "/v1beta/models/gemini-3-flash-preview:generateContent", payload: { contents: [{ role: "user", parts: [{ text: "weather" }] }] } });
     expect(response.json().candidates[0].content.parts[0].functionCall.name).toBe("get_weather");
     await app.close();
   });

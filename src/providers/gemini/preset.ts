@@ -4,8 +4,8 @@ export const geminiPreset: ProviderPreset = {
   provider: "gemini",
   displayName: "Google Gemini",
   groups: ["international", "native"],
-  defaultModels: ["gemini-1.5-pro"],
-  latestModels: ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-flash-preview-09-2025"],
+  defaultModels: ["gemini-3-flash-preview"],
+  latestModels: ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-3.1-flash-lite-preview", "gemini-2.5-pro"],
   modelPatterns: [/^gemini-/],
   routes: [
     { method: "POST", path: "/v1beta/models/:modelAndMethod", protocol: "gemini-generate-content", endpoint: "/v1beta/models/:modelAndMethod", description: "supports :generateContent and :streamGenerateContent" },

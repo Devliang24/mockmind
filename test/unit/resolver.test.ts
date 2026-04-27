@@ -4,10 +4,10 @@ import { providerRouteSummaries, providerRegistry } from "../../src/providers/re
 
 describe("OpenAI-compatible resolver", () => {
   it("resolves providers from registry model patterns", () => {
-    expect(resolveOpenAICompatibleProvider("deepseek-chat")).toBe("deepseek");
-    expect(resolveOpenAICompatibleProvider("moonshot-v1-8k")).toBe("moonshot");
-    expect(resolveOpenAICompatibleProvider("glm-4")).toBe("zhipu");
-    expect(resolveOpenAICompatibleProvider("qwen-plus")).toBe("aliyun-bailian");
+    expect(resolveOpenAICompatibleProvider("deepseek-v4-pro")).toBe("deepseek");
+    expect(resolveOpenAICompatibleProvider("kimi-k2.6")).toBe("moonshot");
+    expect(resolveOpenAICompatibleProvider("glm-5.1")).toBe("zhipu");
+    expect(resolveOpenAICompatibleProvider("qwen3-max")).toBe("aliyun-bailian");
   });
 
   it("falls back to openai", () => {

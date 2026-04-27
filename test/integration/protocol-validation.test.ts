@@ -23,7 +23,7 @@ describe("protocol validation", () => {
 
   it("validates Anthropic version header", async () => {
     const { app } = await createMockMindServer(config);
-    const response = await app.inject({ method: "POST", url: "/v1/messages", payload: { model: "claude-3-5-sonnet-latest", max_tokens: 32, messages: [] } });
+    const response = await app.inject({ method: "POST", url: "/v1/messages", payload: { model: "claude-sonnet-4-6", max_tokens: 32, messages: [] } });
     expect(response.statusCode).toBe(400);
     expect(response.json().error.type).toBe("missing_required_header");
     await app.close();

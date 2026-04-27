@@ -4,7 +4,7 @@ export const zhipuPreset: ProviderPreset = {
   provider: "zhipu",
   displayName: "Zhipu GLM",
   groups: ["chinese", "openai-compatible"],
-  defaultModels: ["glm-4"],
+  defaultModels: ["glm-5.1"],
   latestModels: ["glm-5.1", "glm-5", "glm-4.7", "glm-4.6"],
   modelPatterns: [/^glm-/],
   routes: [

@@ -4,8 +4,8 @@ export const openaiPreset: ProviderPreset = {
   provider: "openai",
   displayName: "OpenAI Compatible",
   groups: ["international", "openai-compatible"],
-  defaultModels: ["gpt-4o-mini"],
-  latestModels: ["gpt-5.2", "gpt-5.2-pro", "gpt-5.1", "gpt-5-mini"],
+  defaultModels: ["gpt-5.5"],
+  latestModels: ["gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano"],
   modelPatterns: [/^gpt-/, /^o\d/, /^text-embedding-/],
   routes: [
     { method: "GET", path: "/v1/models", protocol: "openai-compatible", endpoint: "/v1/models" },

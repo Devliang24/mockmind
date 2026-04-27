@@ -4,8 +4,8 @@ import type { MockMindConfig } from "../../src/core/scenario/types.js";
 
 describe("config defaults", () => {
   it("builds default models from provider registry", () => {
-    expect(defaultModels().map((model) => model.id)).toContain("gpt-4o-mini");
-    expect(defaultModels().map((model) => model.id)).toContain("gemini-1.5-pro");
+    expect(defaultModels().map((model) => model.id)).toContain("gpt-5.5");
+    expect(defaultModels().map((model) => model.id)).toContain("gemini-3-flash-preview");
   });
 
   it("merges missing registry models", () => {

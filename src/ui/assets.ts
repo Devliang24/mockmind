@@ -137,24 +137,29 @@ const providersDocs = {
   minimax: 'https://platform.minimax.io/docs/api-reference/text-post'
 };
 const modelCapabilities = {
-  'gpt-5.2': ['思考', '工具'],
-  'gpt-5.2-pro': ['深度思考', '工具'],
-  'gpt-5.1': ['思考'],
-  'gpt-5-mini': ['快速'],
-  'claude-sonnet-4-5': ['思考', '工具'],
-  'claude-sonnet-4-5-thinking': ['深度思考', '工具'],
-  'claude-opus-4-1': ['深度思考', '工具'],
-  'claude-opus-4-1-thinking': ['深度思考', '工具'],
-  'claude-haiku-4-5': ['快速'],
+  'gpt-5.5': ['深度思考', '工具'],
+  'gpt-5.4': ['思考', '工具'],
+  'gpt-5.4-mini': ['快速', '工具'],
+  'gpt-5.4-nano': ['低成本'],
+  'claude-opus-4-7': ['自适应思考', '工具'],
+  'claude-sonnet-4-6': ['扩展思考', '工具'],
+  'claude-haiku-4-5-20251001': ['扩展思考', '快速'],
+  'gemini-3.1-pro-preview': ['思考', '工具'],
+  'gemini-3-flash-preview': ['思考', '快速'],
+  'gemini-3.1-flash-lite-preview': ['快速'],
   'gemini-2.5-pro': ['思考', '工具'],
   'gemini-2.5-flash': ['思考', '快速'],
   'gemini-2.5-flash-lite': ['快速'],
-  'gemini-2.5-flash-preview-09-2025': ['思考'],
+  'deepseek-v4-pro': ['思考'],
+  'deepseek-v4-flash': ['快速'],
   'deepseek-reasoner': ['思考'],
-  'kimi-k2-thinking-turbo': ['思考'],
+  'kimi-k2.6': ['思考', '工具'],
+  'kimi-k2.5': ['工具'],
+  'kimi-k2-thinking': ['思考'],
   'glm-5.1': ['思考'],
-  'qwen3.6-max-preview': ['思考'],
-  'qwen3.6-flash': ['快速'],
+  'qwen3-max': ['思考'],
+  'qwen3.5-plus': ['思考'],
+  'qwen3.5-flash': ['快速'],
   'MiniMax-M2.7': ['思考'],
   'MiniMax-M2.7-highspeed': ['快速'],
   'text-embedding-3-small': ['向量'],
@@ -164,11 +169,6 @@ const modelCapabilities = {
   'rerank-mock': ['重排']
 };
 const modelCodeMap = {
-  'claude-sonnet-4-5': 'claude-sonnet-4-5-20250929',
-  'claude-sonnet-4-5-thinking': 'claude-sonnet-4-5-20250929-thinking',
-  'claude-haiku-4-5': 'claude-haiku-4-5-20251001',
-  'claude-opus-4-1': 'claude-opus-4-1-20250805',
-  'claude-opus-4-1-thinking': 'claude-opus-4-1-20250805-thinking'
 };
 const modelCodeReverseMap = Object.fromEntries(Object.entries(modelCodeMap).map(([key, value]) => [value, key]));
 
@@ -208,7 +208,7 @@ function orderedProviders() {
 
 function providerModels(provider) {
   const models = provider?.latestModels?.length ? provider.latestModels : provider?.configuredModels ?? [];
-  return provider?.provider === 'anthropic' ? models.slice(0, 5) : models.slice(0, 4);
+  return models.slice(0, 4);
 }
 
 function modelStateKey(provider, protocolKey) {
@@ -434,7 +434,7 @@ function openAIExample(route, docsUrl, requestBody, responseBody, required) {
   return { docsUrl, headers: ['Authorization', 'Content-Type'], required, requestBody, responseBody, curl: curl(route.path, requestBody, undefined, route.method) };
 }
 function curl(path, body, headers = ['Authorization: Bearer test-key', 'Content-Type: application/json'], method = 'POST') {
-  const normalizedPath = path.replace(':modelAndMethod', 'gemini-1.5-pro:generateContent');
+  const normalizedPath = path.replace(':modelAndMethod', 'gemini-3-flash-preview:generateContent');
   const baseUrl = currentBaseUrl();
   if (method === 'GET') return 'curl ' + baseUrl + normalizedPath;
   const slash = String.fromCharCode(92);
@@ -474,7 +474,7 @@ function defaultModel(provider, protocol, protocolKey = protocol) {
   if (provider === 'zhipu' && protocol === 'rerank') return 'rerank-mock';
   if (provider === 'aliyun-bailian' && protocol === 'rerank') return 'gte-rerank-v2';
   const selectedProvider = orderedProviders().find((item) => item.provider === provider);
-  return modelCode(selectedModelFor(selectedProvider, protocolKey) ?? ({ anthropic: 'claude-3-5-sonnet-latest', gemini: 'gemini-1.5-pro', deepseek: 'deepseek-chat', moonshot: 'moonshot-v1-8k', zhipu: 'glm-4', 'aliyun-bailian': 'qwen-plus', minimax: 'abab6.5s-chat', openai: 'gpt-4o-mini' }[provider] ?? 'gpt-4o-mini'));
+  return modelCode(selectedModelFor(selectedProvider, protocolKey) ?? ({ anthropic: 'claude-sonnet-4-6', gemini: 'gemini-3-flash-preview', deepseek: 'deepseek-v4-flash', moonshot: 'kimi-k2.6', zhipu: 'glm-5.1', 'aliyun-bailian': 'qwen3-max', minimax: 'MiniMax-M2.7', openai: 'gpt-5.5' }[provider] ?? 'gpt-5.5'));
 }
 function embeddingModel(provider) { if (provider === 'aliyun-bailian') return 'text-embedding-v3'; if (provider === 'zhipu') return 'embedding-3'; return 'text-embedding-3-small'; }
 function filtered(items, fields) { const query = state.search.trim().toLowerCase(); return query ? items.filter((item) => fields.some((field) => String(field(item) ?? '').toLowerCase().includes(query))) : items; }

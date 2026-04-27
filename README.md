@@ -18,7 +18,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "gpt-4o-mini",
+    "model": "gpt-5.5",
     "messages": [{"role":"user","content":"hello"}]
   }'
 ```
@@ -29,7 +29,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
 {
   "id": "chatcmpl_mock_0001",
   "object": "chat.completion",
-  "model": "gpt-4o-mini",
+  "model": "gpt-5.5",
   "choices": [
     {
       "index": 0,
@@ -186,7 +186,7 @@ curl http://127.0.0.1:4000/v1/responses \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "gpt-4o-mini",
+    "model": "gpt-5.5",
     "input": "hello"
   }'
 ```
@@ -251,7 +251,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "gpt-4o-mini",
+    "model": "gpt-5.5",
     "messages": [{"role":"user","content":"hello"}]
   }'
 ```
@@ -263,7 +263,7 @@ curl -N http://127.0.0.1:4000/v1/chat/completions \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "gpt-4o-mini",
+    "model": "gpt-5.5",
     "stream": true,
     "messages": [{"role":"user","content":"hello"}]
   }'
@@ -292,7 +292,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "gpt-4o-mini",
+    "model": "gpt-5.5",
     "messages": [{"role":"user","content":"weather"}],
     "tools": [
       {
@@ -316,7 +316,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
 {
   "id": "chatcmpl_mock_tool_0001",
   "object": "chat.completion",
-  "model": "gpt-4o-mini",
+  "model": "gpt-5.5",
   "choices": [
     {
       "index": 0,
@@ -347,7 +347,7 @@ curl -N http://127.0.0.1:4000/v1/chat/completions \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "gpt-4o-mini",
+    "model": "gpt-5.5",
     "stream": true,
     "messages": [{"role":"user","content":"weather"}],
     "tools": [{"type":"function","function":{"name":"get_weather"}}]
@@ -365,7 +365,7 @@ curl -i http://127.0.0.1:4000/v1/chat/completions \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "gpt-4o-mini",
+    "model": "gpt-5.5",
     "messages": [{"role":"user","content":"trigger-rate-limit"}]
   }'
 ```
@@ -407,7 +407,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "deepseek-reasoner",
+    "model": "deepseek-v4-pro",
     "messages": [{"role":"user","content":"explain"}]
   }'
 ```
@@ -435,7 +435,7 @@ curl http://127.0.0.1:4000/deepseek/v1/chat/completions \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "deepseek-reasoner",
+    "model": "deepseek-v4-pro",
     "messages": [{"role":"user","content":"explain"}]
   }'
 ```
@@ -450,7 +450,7 @@ curl http://127.0.0.1:4000/moonshot/v1/chat/completions \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "moonshot-v1-8k",
+    "model": "kimi-k2.6",
     "messages": [{"role":"user","content":"hello"}]
   }'
 ```
@@ -459,7 +459,7 @@ curl http://127.0.0.1:4000/moonshot/v1/chat/completions \
 
 ```json
 {
-  "model": "moonshot-v1-8k",
+  "model": "kimi-k2.6",
   "choices": [{"message":{"content":"Hello from mock Moonshot / Kimi."}}]
 }
 ```
@@ -473,7 +473,7 @@ curl http://127.0.0.1:4000/api/paas/v4/chat/completions \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "glm-4",
+    "model": "glm-5.1",
     "messages": [{"role":"user","content":"hello"}]
   }'
 ```
@@ -482,7 +482,7 @@ curl http://127.0.0.1:4000/api/paas/v4/chat/completions \
 
 ```json
 {
-  "model": "glm-4",
+  "model": "glm-5.1",
   "choices": [{"message":{"content":"Hello from mock Zhipu GLM."}}]
 }
 ```
@@ -500,7 +500,7 @@ curl http://127.0.0.1:4000/v1/messages \
   -H 'anthropic-version: 2023-06-01' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "claude-3-5-sonnet-latest",
+    "model": "claude-sonnet-4-6",
     "max_tokens": 128,
     "messages": [{"role":"user","content":"hello"}]
   }'
@@ -513,7 +513,7 @@ curl http://127.0.0.1:4000/v1/messages \
   "id": "msg_mock_0001",
   "type": "message",
   "role": "assistant",
-  "model": "claude-3-5-sonnet-latest",
+  "model": "claude-sonnet-4-6",
   "content": [{"type":"text","text":"Hello from mock Anthropic."}],
   "stop_reason": "end_turn"
 }
@@ -527,7 +527,7 @@ curl http://127.0.0.1:4000/v1/messages \
   -H 'anthropic-version: 2023-06-01' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "claude-3-5-sonnet-latest",
+    "model": "claude-sonnet-4-6",
     "max_tokens": 128,
     "messages": [{"role":"user","content":"weather"}],
     "tools": [{"name":"get_weather","input_schema":{"type":"object"}}]
@@ -559,7 +559,7 @@ curl -N http://127.0.0.1:4000/v1/messages \
   -H 'anthropic-version: 2023-06-01' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "claude-3-5-sonnet-latest",
+    "model": "claude-sonnet-4-6",
     "stream": true,
     "messages": [{"role":"user","content":"hello"}]
   }'
@@ -575,7 +575,7 @@ curl -N http://127.0.0.1:4000/v1/messages \
 ### generateContent 示例
 
 ```bash
-curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:generateContent \
+curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:generateContent \
   -H 'Content-Type: application/json' \
   -d '{
     "contents": [
@@ -607,7 +607,7 @@ curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:generateContent \
 ### functionCall 示例
 
 ```bash
-curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:generateContent \
+curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:generateContent \
   -H 'Content-Type: application/json' \
   -d '{
     "contents": [
@@ -652,7 +652,7 @@ curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:generateContent \
 ### streamGenerateContent 示例
 
 ```bash
-curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:streamGenerateContent \
+curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:streamGenerateContent \
   -H 'Content-Type: application/json' \
   -d '{
     "contents": [{"role":"user","parts":[{"text":"hello"}]}]
@@ -851,7 +851,7 @@ scenarios:
     provider: deepseek
     endpoint: /v1/chat/completions
     match:
-      model: deepseek-reasoner
+      model: deepseek-v4-pro
       stream: true
     response:
       type: stream

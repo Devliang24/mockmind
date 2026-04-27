@@ -15,23 +15,23 @@ auth:
     - test-key
 
 models:
-  - id: gpt-4o-mini
+  - id: gpt-5.5
     provider: openai
-  - id: deepseek-chat
+  - id: deepseek-v4-flash
     provider: deepseek
-  - id: deepseek-reasoner
+  - id: deepseek-v4-pro
     provider: deepseek
-  - id: moonshot-v1-8k
+  - id: kimi-k2.6
     provider: moonshot
-  - id: qwen-plus
+  - id: qwen3-max
     provider: aliyun-bailian
-  - id: glm-4
+  - id: glm-5.1
     provider: zhipu
   - id: abab6.5s-chat
     provider: minimax
-  - id: claude-3-5-sonnet-latest
+  - id: claude-sonnet-4-6
     provider: anthropic
-  - id: gemini-1.5-pro
+  - id: gemini-3-flash-preview
     provider: gemini
 
 defaults:
@@ -49,7 +49,7 @@ scenarios:
     provider: openai
     endpoint: /v1/chat/completions
     match:
-      model: gpt-4o-mini
+      model: gpt-5.5
       messagesContain: hello
     response:
       type: text
@@ -63,7 +63,7 @@ scenarios:
     provider: openai
     endpoint: /v1/chat/completions
     match:
-      model: gpt-4o-mini
+      model: gpt-5.5
       stream: true
     response:
       type: stream
@@ -76,7 +76,7 @@ scenarios:
     provider: deepseek
     endpoint: /v1/chat/completions
     match:
-      model: deepseek-reasoner
+      model: deepseek-v4-pro
     response:
       type: text
       reasoningContent: This is mock reasoning content.
@@ -86,7 +86,7 @@ scenarios:
     provider: moonshot
     endpoint: /moonshot/v1/chat/completions
     match:
-      model: moonshot-v1-8k
+      model: kimi-k2.6
       lastUserMessageContains: hello
     response:
       type: text
@@ -96,7 +96,7 @@ scenarios:
     provider: zhipu
     endpoint: /api/paas/v4/chat/completions
     match:
-      model: glm-4
+      model: glm-5.1
       lastUserMessageContains: hello
     response:
       type: text
@@ -116,7 +116,7 @@ scenarios:
     provider: aliyun-bailian
     endpoint: /compatible-mode/v1/chat/completions
     match:
-      model: qwen-plus
+      model: qwen3-max
     response:
       type: text
       content: 你好，我是模拟的通义千问响应。
@@ -125,16 +125,16 @@ scenarios:
     provider: anthropic
     endpoint: /v1/messages
     match:
-      model: claude-3-5-sonnet-latest
+      model: claude-sonnet-4-6
     response:
       type: text
       content: Hello from mock Anthropic.
 
   - id: gemini-basic
     provider: gemini
-    endpoint: /v1beta/models/gemini-1.5-pro:generateContent
+    endpoint: /v1beta/models/gemini-3-flash-preview:generateContent
     match:
-      model: gemini-1.5-pro
+      model: gemini-3-flash-preview
     response:
       type: text
       content: Hello from mock Gemini.
@@ -143,7 +143,7 @@ scenarios:
     provider: aliyun-bailian
     endpoint: /api/v1/services/aigc/text-generation/generation
     match:
-      model: qwen-plus
+      model: qwen3-max
     response:
       type: text
       content: 你好，我是模拟的 DashScope 原生响应。
