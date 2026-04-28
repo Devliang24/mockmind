@@ -47,7 +47,7 @@ a:hover { text-decoration: underline; }
 .muted { color: var(--muted); margin-left: 8px; font-size: 13px; }
 .layout { display: grid; grid-template-columns: 248px minmax(0, 1fr); height: 100vh; min-height: 0; }
 .sidebar { height: 100vh; overflow-y: auto; padding: 16px; border-right: 1px solid var(--border); background: var(--sidebar); }
-.sidebar-brand { padding: 4px 10px 16px; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+.sidebar-brand { display: flex; align-items: center; min-height: 40px; padding: 0 10px 16px; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
 .sidebar-brand strong { display: block; font-size: 18px; line-height: 1.25; font-weight: 600; color: var(--text); }
 .sidebar-brand span { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
 .nav, .provider-link { width: 100%; text-align: left; color: var(--text); background: transparent; border: 1px solid transparent; padding: 8px 10px; border-radius: 6px; cursor: pointer; margin-bottom: 4px; font-weight: 500; }
@@ -60,6 +60,8 @@ a:hover { text-decoration: underline; }
 h1 { margin: 0; font-size: 26px; line-height: 1.25; font-weight: 600; }
 h2 { margin: 20px 0 10px; font-size: 18px; font-weight: 600; }
 .panel > h2:first-child { margin-top: 0; }
+.page-header { display: flex; align-items: center; min-height: 40px; margin: 0 0 16px; }
+.page-header h1 { margin: 0; }
 h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--text); }
 input { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; min-width: 320px; outline: none; }
 input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.12); }
@@ -321,14 +323,14 @@ function viewTitle() {
 const renderers = {
   overview() {
     const o = state.data.overview;
-    return '<div class="cards">' +
+    return pageHeader('总览') + '<div class="cards">' +
       card('提供商', o.providersCount) + card('模型', o.modelsCount) + card('场景', o.scenariosCount) + card('请求', o.requestsCount) +
       '</div><h2>服务信息</h2>' + table([['主机', o.server.host], ['端口', o.server.port], ['认证模式', o.auth.mode], ['提供商模式', JSON.stringify(o.providers.enabled)]]) +
       '<h2>最近请求</h2>' + requestsTable(o.recentRequests || []);
   },
   providers() {
     const providers = filtered(orderedProviders(), [p => p.provider, p => p.displayName, p => p.groups.join(','), p => p.routes.join(' '), p => providerModels(p).join(',')]);
-    return '<table><thead><tr><th>排序</th><th>供应商</th><th>区域</th><th>模型</th><th>协议数</th><th>文档</th></tr></thead><tbody>' + providers.map((p, index) => {
+    return pageHeader('提供商') + '<table><thead><tr><th>排序</th><th>供应商</th><th>区域</th><th>模型</th><th>协议数</th><th>文档</th></tr></thead><tbody>' + providers.map((p, index) => {
       const protocols = groupedProtocols(p.provider);
       return '<tr><td>' + (index + 1) + '</td><td><button class="linkish provider-open" data-provider="' + esc(p.provider) + '">' + esc(p.displayName) + '</button><br><span class="muted">' + esc(p.provider) + '</span></td><td>' + badges(p.groups) + '</td><td>' + badges(providerModels(p)) + '</td><td>' + protocols.length + '</td><td><a href="' + providersDocs[p.provider] + '" target="_blank">官方文档</a></td></tr>';
     }).join('') + '</tbody></table>';
@@ -341,17 +343,21 @@ const renderers = {
     const protocol = protocols.find((item) => item.key === state.selectedProtocol) ?? protocols[0];
     if (!state.selectedEndpoint && protocol?.routes[0]) state.selectedEndpoint = routeId(protocol.routes[0]);
     const selectedRoute = protocol?.routes.find((route) => routeId(route) === state.selectedEndpoint) ?? protocol?.routes[0];
-    return providerHeader(provider, selectedRoute) + protocolTabs(protocols) + protocolModelSection(provider, protocol) + (selectedRoute ? endpointDetail(selectedRoute, protocol) : '<p>该供应商暂无可展示端点。</p>');
+    return pageHeader(provider.displayName) + providerHeader(provider) + protocolTabs(protocols) + protocolModelSection(provider, protocol) + (selectedRoute ? endpointDetail(selectedRoute, protocol) : '<p>该供应商暂无可展示端点。</p>');
   },
   requests() {
     const requests = filtered(state.data.requests, [r => r.id, r => r.provider, r => r.endpoint, r => r.model, r => r.matchedScenarioId, r => r.status]);
     const selected = selectedRequest(requests);
-    return requestsTable(requests) + requestDrawer(selected);
+    return pageHeader('请求记录') + requestsTable(requests) + requestDrawer(selected);
   }
 };
 
-function providerHeader(provider, selectedRoute) {
-  return '<h2>' + esc(provider.displayName) + '</h2>' + table([['Provider', provider.provider], ['分组', provider.groups.join(', ')], ['Base URL', protocolBaseUrl()], ['官方文档', '<a href="' + providersDocs[provider.provider] + '" target="_blank">' + providersDocs[provider.provider] + '</a>']], 'provider-meta');
+function pageHeader(title) {
+  return '<div class="page-header"><h1>' + esc(title) + '</h1></div>';
+}
+
+function providerHeader(provider) {
+  return table([['Provider', provider.provider], ['分组', provider.groups.join(', ')], ['Base URL', protocolBaseUrl()], ['官方文档', '<a href="' + providersDocs[provider.provider] + '" target="_blank">' + providersDocs[provider.provider] + '</a>']], 'provider-meta');
 }
 
 function protocolTabs(protocols) {
