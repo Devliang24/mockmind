@@ -67,6 +67,12 @@ describe("web ui", () => {
     expect(js.body).toContain("claude-sonnet-4-5-20250929");
     expect(js.body).toContain("gemini-3-pro-preview");
     expect(js.body).toContain("qwen3.6-plus");
+    expect(js.body).toContain("qwen3-rerank");
+    expect(js.body).toContain("gte-rerank-v2");
+    expect(js.body).toContain("qwen3-vl-rerank");
+    expect(js.body).toContain("rerankRequestBody(route, model)");
+    expect(js.body).toContain("input.query");
+    expect(js.body).toContain("return_documents");
     expect(js.body).toContain("stream_options");
     expect(js.body).toContain("reasoning_content");
     expect(js.body).toContain("thinking_delta");

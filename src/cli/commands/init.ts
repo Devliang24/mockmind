@@ -25,6 +25,8 @@ models:
     provider: moonshot
   - id: qwen3.6-plus
     provider: aliyun-bailian
+  - id: qwen3-rerank
+    provider: aliyun-bailian
   - id: glm-5.1
     provider: zhipu
   - id: MiniMax-M2.7
@@ -153,6 +155,30 @@ scenarios:
     response:
       type: text
       content: 你好，我是模拟的 DashScope 原生响应。
+
+  - id: bailian-rerank-basic
+    provider: aliyun-bailian
+    endpoint: /compatible-api/v1/reranks
+    match:
+      model: qwen3-rerank
+      bodyPath:
+        query: hello
+    response:
+      type: json
+      json:
+        request_id: req_mock_rerank_0001
+        output:
+          results:
+            - index: 0
+              relevance_score: 1
+              document:
+                text: hello world
+            - index: 1
+              relevance_score: 0.12
+              document:
+                text: other
+        usage:
+          total_tokens: 2
 
   - id: openai-rate-limit
     provider: openai

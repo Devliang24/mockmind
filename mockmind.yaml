@@ -21,6 +21,8 @@ models:
     provider: moonshot
   - id: qwen3.6-plus
     provider: aliyun-bailian
+  - id: qwen3-rerank
+    provider: aliyun-bailian
   - id: glm-5.1
     provider: zhipu
   - id: MiniMax-M2.7
@@ -150,6 +152,30 @@ scenarios:
     response:
       type: text
       content: Matched DashScope request by nested body path and query.
+
+  - id: bailian-rerank-basic
+    provider: aliyun-bailian
+    endpoint: /compatible-api/v1/reranks
+    match:
+      model: qwen3-rerank
+      bodyPath:
+        query: hello
+    response:
+      type: json
+      json:
+        request_id: req_mock_rerank_0001
+        output:
+          results:
+            - index: 0
+              relevance_score: 1
+              document:
+                text: hello world
+            - index: 1
+              relevance_score: 0.12
+              document:
+                text: other
+        usage:
+          total_tokens: 2
 
   - id: anthropic-tool-weather
     provider: anthropic

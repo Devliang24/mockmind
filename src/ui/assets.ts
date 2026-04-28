@@ -189,7 +189,9 @@ const modelCapabilities = {
   'text-embedding-3-small': ['向量'],
   'text-embedding-v3': ['向量'],
   'embedding-3': ['向量'],
+  'qwen3-rerank': ['重排'],
   'gte-rerank-v2': ['重排'],
+  'qwen3-vl-rerank': ['多模态重排'],
   'rerank-mock': ['重排']
 };
 const modelCodeMap = {
@@ -240,7 +242,7 @@ function modelStateKey(provider, protocolKey) {
 }
 
 function rerankModels(providerId) {
-  if (providerId === 'aliyun-bailian') return ['gte-rerank-v2'];
+  if (providerId === 'aliyun-bailian') return ['qwen3-rerank', 'gte-rerank-v2', 'qwen3-vl-rerank'];
   if (providerId === 'zhipu') return ['rerank-mock'];
   return [];
 }
@@ -428,7 +430,10 @@ function exampleFor(route) {
   }
   if (route.protocol === 'dashscope-generation') return { docsUrl, headers: ['Authorization', 'Content-Type'], required: ['model', 'input.messages'], requestBody: { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { result_format: 'message' } }, responseBody: dashScopeGenerationResponse(route, model), curl: curl(route.path, { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { result_format: 'message' } }), stream: streamExampleFor(route, { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { incremental_output: true } }, dashScopeGenerationStream(route, model, nl)) };
   if (route.protocol === 'minimax-chat') return { docsUrl, headers: ['Authorization', 'Content-Type'], required: ['model', 'messages'], requestBody: { model, messages: [{ role: 'user', content: 'hello' }] }, responseBody: miniMaxChatResponse(model, route), curl: curl(route.path, { model, messages: [{ role: 'user', content: 'hello' }] }), stream: streamExampleFor(route, { model, messages: [{ role: 'user', content: 'hello' }] }, miniMaxChatStream(model, route, nl)) };
-  if (route.protocol === 'rerank') return { docsUrl, headers: ['Authorization', 'Content-Type'], required: ['model', 'query', 'documents'], requestBody: { model, query: 'hello', documents: ['hello world', 'other'] }, responseBody: rerankResponse(route), curl: curl(route.path, { model, query: 'hello', documents: ['hello world', 'other'] }) };
+  if (route.protocol === 'rerank') {
+    const body = rerankRequestBody(route, model);
+    return { docsUrl, headers: ['Authorization', 'Content-Type'], required: rerankRequiredFields(route), requestBody: body, responseBody: rerankResponse(route, body), curl: curl(route.path, body) };
+  }
   if (route.method === 'GET') return { docsUrl, headers: [], required: [], requestBody: {}, responseBody: modelsResponse(route.provider), curl: curl(route.path, {}, [], 'GET') };
   return { ...openAIExample(route, docsUrl, { model, messages: [{ role: 'user', content: 'hello' }] }, openAIChatResponse(model, route), ['model', 'messages']), stream: streamExampleFor(route, { model, messages: [{ role: 'user', content: 'hello' }], stream_options: { include_usage: true } }, openAIChatStream(model, route, nl)) };
 }
@@ -458,7 +463,18 @@ function dashScopeGenerationResponse(route, model) { const message = { role: 'as
 function dashScopeGenerationStream(route, model, nl) { const events = []; if (isThinkingModel(model)) events.push(sseEvent('result', { request_id: 'req_mock_' + endpointKey(route), output: { choices: [{ finish_reason: null, message: { role: 'assistant', reasoning_content: thinkingText(model, route), content: '' } }] } }, nl)); events.push(sseEvent('result', { request_id: 'req_mock_' + endpointKey(route), output: { choices: [{ finish_reason: null, message: { role: 'assistant', content: '你好，' } }] } }, nl), sseEvent('result', { request_id: 'req_mock_' + endpointKey(route), output: { choices: [{ finish_reason: null, message: { role: 'assistant', content: '我是 ' + endpointText(route) + ' 的模拟响应。' } }] } }, nl), sseEvent('result', { request_id: 'req_mock_' + endpointKey(route), output: { choices: [{ finish_reason: 'stop', message: { role: 'assistant', content: '' } }] }, usage: tokenUsage() }, nl)); return events.join(nl + nl); }
 function miniMaxChatResponse(model, route) { const message = { role: 'assistant', name: 'MiniMax AI', audio_content: '', reasoning_content: isThinkingModel(model) ? thinkingText(model, route) : '', content: '你好，我是 ' + endpointText(route) + ' 的模拟响应。' }; return { id: 'minimax-mock-' + endpointKey(route), object: 'chat.completion', choices: [{ index: 0, message, finish_reason: 'stop' }], created: createdAt(), model, usage: miniMaxUsage(), input_sensitive: false, output_sensitive: false, input_sensitive_type: 0, output_sensitive_type: 0, output_sensitive_int: 0, base_resp: { status_code: 0, status_msg: '' } }; }
 function miniMaxChatStream(model, route, nl) { const events = []; if (isThinkingModel(model)) events.push(sseData({ id: 'minimax-mock-' + endpointKey(route), object: 'chat.completion.chunk', created: createdAt(), model, choices: [{ index: 0, delta: { reasoning_content: thinkingText(model, route) }, finish_reason: null }] })); events.push(sseData({ id: 'minimax-mock-' + endpointKey(route), object: 'chat.completion.chunk', created: createdAt(), model, choices: [{ index: 0, delta: { content: '你好，' }, finish_reason: null }] }), sseData({ id: 'minimax-mock-' + endpointKey(route), object: 'chat.completion.chunk', created: createdAt(), model, choices: [{ index: 0, delta: { content: '我是 ' + endpointText(route) + ' 的模拟响应。' }, finish_reason: null }] }), sseData({ id: 'minimax-mock-' + endpointKey(route), object: 'chat.completion.chunk', created: createdAt(), model, choices: [{ index: 0, delta: {}, finish_reason: 'stop' }], usage: miniMaxUsage(), input_sensitive: false, output_sensitive: false, input_sensitive_type: 0, output_sensitive_type: 0, output_sensitive_int: 0, base_resp: { status_code: 0, status_msg: '' } }), 'data: [DONE]'); return events.join(nl + nl); }
-function rerankResponse(route) { return { id: 'rerank_mock_' + endpointKey(route), object: 'rerank', results: [{ index: 0, relevance_score: 1, document: 'hello world', endpoint: route.path }, { index: 1, relevance_score: 0.12, document: 'other', endpoint: route.path }], usage: { total_tokens: 2 } }; }
+function rerankRequestBody(route, model) {
+  if (route.provider === 'aliyun-bailian' && route.path.includes('/api/v1/services/rerank/')) return { model, input: rerankNativeInput(model), parameters: { top_n: 2, return_documents: true } };
+  return { model, query: 'hello', documents: ['hello world', 'other'], top_n: 2, return_documents: true };
+}
+function rerankNativeInput(model) {
+  if (model === 'qwen3-vl-rerank') return { query: { text: '找一张蓝天图片' }, documents: [{ text: '蓝天白云的照片' }, { text: '城市夜景' }] };
+  return { query: 'hello', documents: ['hello world', 'other'] };
+}
+function rerankRequiredFields(route) {
+  return route.provider === 'aliyun-bailian' && route.path.includes('/api/v1/services/rerank/') ? ['model', 'input.query', 'input.documents'] : ['model', 'query', 'documents'];
+}
+function rerankResponse(route, body = {}) { const output = { results: [{ index: 0, relevance_score: 1, document: { text: 'hello world' } }, { index: 1, relevance_score: 0.12, document: { text: 'other' } }] }; if (route.provider === 'aliyun-bailian') return { request_id: 'req_mock_' + endpointKey(route), output, usage: { total_tokens: 2 } }; return { id: 'rerank_mock_' + endpointKey(route), object: 'rerank', model: body.model, results: output.results, usage: { total_tokens: 2 } }; }
 function modelsResponse(providerId) { const provider = orderedProviders().find((item) => item.provider === providerId); return { object: 'list', data: providerModels(provider).map((id) => ({ id, object: 'model', owned_by: 'mockmind' })) }; }
 
 function openAIExample(route, docsUrl, requestBody, responseBody, required) {
@@ -506,7 +522,7 @@ function protocolLabel(route) { const key = protocolMenuKey(route); return ({ 'o
 function protocolSortIndex(key) { const index = protocolOrder.indexOf(key); return index === -1 ? protocolOrder.length : index; }
 function defaultModel(provider, protocol, protocolKey = protocol) {
   if (provider === 'zhipu' && protocol === 'rerank') return 'rerank-mock';
-  if (provider === 'aliyun-bailian' && protocol === 'rerank') return 'gte-rerank-v2';
+  if (provider === 'aliyun-bailian' && protocol === 'rerank') return 'qwen3-rerank';
   const selectedProvider = orderedProviders().find((item) => item.provider === provider);
   return modelCode(selectedModelFor(selectedProvider, protocolKey) ?? ({ anthropic: 'claude-sonnet-4-5-20250929', gemini: 'gemini-3-flash-preview', deepseek: 'deepseek-v4-flash', moonshot: 'kimi-k2.6', zhipu: 'glm-5.1', 'aliyun-bailian': 'qwen3.6-plus', minimax: 'MiniMax-M2.7', openai: 'gpt-5.5' }[provider] ?? 'gpt-5.5'));
 }

@@ -1,0 +1,25 @@
+image: deploy.deepexi.com/applife/ci/node:20-alpine
+
+stages:
+  - verify
+
+variables:
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - .npm/
+
+verify:
+  stage: verify
+  before_script:
+    - apk add --no-cache python3 make g++
+    - npm ci
+  script:
+    - npm run typecheck
+    - npm test
+    - npm run build
+    - npm run dev -- validate --config mockmind.yaml

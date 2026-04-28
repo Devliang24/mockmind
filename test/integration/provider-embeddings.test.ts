@@ -27,12 +27,27 @@ describe("provider embedding endpoints", () => {
 
   it.each([
     "/api/paas/v4/rerank",
+    "/compatible-api/v1/reranks",
     "/api/v1/services/rerank/text-rerank/text-rerank"
   ])("serves rerank %s", async (url) => {
     const { app } = await createMockMindServer(config);
-    const response = await app.inject({ method: "POST", url, payload: { model: "rerank-mock", query: "hello", documents: ["hello world", "other"] } });
+    const response = await app.inject({ method: "POST", url, payload: { model: "qwen3-rerank", query: "hello", documents: ["hello world", "other"], top_n: 2, return_documents: true } });
     expect(response.statusCode).toBe(200);
     expect(response.body).toContain("relevance_score");
+    await app.close();
+  });
+
+  it("serves DashScope native rerank request body", async () => {
+    const { app } = await createMockMindServer(config);
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/v1/services/rerank/text-rerank/text-rerank",
+      payload: { model: "gte-rerank-v2", input: { query: "hello", documents: ["hello world", "other"] }, parameters: { top_n: 1, return_documents: true } }
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().request_id).toBe("req_mock_rerank_0001");
+    expect(response.json().output.results).toHaveLength(1);
+    expect(response.json().output.results[0].document).toEqual({ text: "hello world" });
     await app.close();
   });
 });
