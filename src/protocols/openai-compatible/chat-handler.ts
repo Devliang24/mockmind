@@ -9,6 +9,7 @@ import { formatChatCompletion, formatOpenAIError } from "./adapter.js";
 import { isArray, isString, requireFields } from "../validation.js";
 import { sendOpenAIStream } from "./stream.js";
 import { withEstimatedUsage } from "../usage.js";
+import { resolveOpenAICompatibleProvider } from "./resolver.js";
 
 export type OpenAICompatibleChatBody = {
   model?: string;
@@ -35,8 +36,9 @@ export async function handleOpenAICompatibleChat(
   if (validationError) return reply.code(validationError.status).send(formatOpenAIError(validationError.status, validationError.code, validationError.message, validationError.type));
   const started = Date.now();
   const body = request.body;
+  const effectiveProvider = provider === "openai" ? resolveOpenAICompatibleProvider(body.model, endpoint) : provider;
   const mockRequest: MockRequest = {
-    provider,
+    provider: effectiveProvider,
     endpoint,
     method: request.method,
     model: body.model,
@@ -48,7 +50,7 @@ export async function handleOpenAICompatibleChat(
     query: requestQuery(request)
   };
   const found = context.scenarios.find(mockRequest);
-  const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: defaultContent(provider) }, mockRequest), body.messages);
+  const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: defaultContent(effectiveProvider) }, mockRequest), body.messages);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {

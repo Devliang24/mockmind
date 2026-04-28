@@ -29,7 +29,7 @@ models:
     provider: zhipu
   - id: MiniMax-M2.7
     provider: minimax
-  - id: claude-sonnet-4-6
+  - id: claude-sonnet-4-5-20250929
     provider: anthropic
   - id: gemini-3-flash-preview
     provider: gemini
@@ -80,7 +80,7 @@ scenarios:
 
   - id: deepseek-reasoning
     provider: deepseek
-    endpoint: /v1/chat/completions
+    endpoint: /chat/completions
     match:
       model: deepseek-v4-pro
     response:
@@ -90,7 +90,7 @@ scenarios:
 
   - id: moonshot-basic
     provider: moonshot
-    endpoint: /moonshot/v1/chat/completions
+    endpoint: /v1/chat/completions
     match:
       model: kimi-k2.6
       lastUserMessageContains: hello
@@ -131,7 +131,7 @@ scenarios:
     provider: anthropic
     endpoint: /v1/messages
     match:
-      model: claude-sonnet-4-6
+      model: claude-sonnet-4-5-20250929
     response:
       type: text
       content: Hello from mock Anthropic.

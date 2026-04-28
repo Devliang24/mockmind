@@ -351,9 +351,9 @@ auth:
 models:
   - id: gpt-4o-mini
     provider: openai
-  - id: deepseek-chat
+  - id: deepseek-v4-flash
     provider: deepseek
-  - id: deepseek-reasoner
+  - id: deepseek-v4-pro
     provider: deepseek
   - id: kimi-k2.6
     provider: moonshot
@@ -395,9 +395,9 @@ scenarios:
 
   - id: deepseek-reasoning-demo
     provider: deepseek
-    endpoint: /v1/chat/completions
+    endpoint: /chat/completions
     match:
-      model: deepseek-reasoner
+      model: deepseek-v4-pro
       messagesContain: explain
     response:
       type: text
@@ -935,9 +935,9 @@ scenarios:
 流式请求日志：
 
 ```txt
-[12:00:05] POST /v1/chat/completions 200 stream 183ms
+[12:00:05] POST /chat/completions 200 stream 183ms
   provider: deepseek
-  model: deepseek-chat
+  model: deepseek-v4-flash
   scenario: deepseek-stream-demo
   chunks: 8
 ```
@@ -1146,7 +1146,7 @@ afterAll(async () => {
 #### 请求
 
 ```http
-POST /v1/chat/completions
+POST /chat/completions
 Authorization: Bearer test-key
 Content-Type: application/json
 ```
@@ -1304,19 +1304,19 @@ Content-Type: application/json
 
 ### 23.4 DeepSeek Chat Completion
 
-DeepSeek 主要按 OpenAI-compatible 协议接入，但需要支持 `reasoning_content` 场景。
+DeepSeek 按官网公开的 OpenAI-compatible 路径接入，并支持 `reasoning_content` 场景。
 
 #### 请求
 
 ```http
-POST /v1/chat/completions
+POST /chat/completions
 Authorization: Bearer test-key
 Content-Type: application/json
 ```
 
 ```json
 {
-  "model": "deepseek-reasoner",
+  "model": "deepseek-v4-pro",
   "messages": [
     { "role": "user", "content": "Explain why the sky is blue." }
   ]
@@ -1330,7 +1330,7 @@ Content-Type: application/json
   "id": "chatcmpl_mock_deepseek_0001",
   "object": "chat.completion",
   "created": 1710000000,
-  "model": "deepseek-reasoner",
+  "model": "deepseek-v4-pro",
   "choices": [
     {
       "index": 0,
@@ -1353,17 +1353,17 @@ Content-Type: application/json
 #### 流式响应
 
 ```txt
-data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-reasoner","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
+data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-v4-pro","choices":[{"index":0,"delta":{"role":"assistant"},"finish_reason":null}]}
 
-data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-reasoner","choices":[{"index":0,"delta":{"reasoning_content":"We need explain "},"finish_reason":null}]}
+data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-v4-pro","choices":[{"index":0,"delta":{"reasoning_content":"We need explain "},"finish_reason":null}]}
 
-data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-reasoner","choices":[{"index":0,"delta":{"reasoning_content":"Rayleigh scattering."},"finish_reason":null}]}
+data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-v4-pro","choices":[{"index":0,"delta":{"reasoning_content":"Rayleigh scattering."},"finish_reason":null}]}
 
-data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-reasoner","choices":[{"index":0,"delta":{"content":"The sky looks blue because "},"finish_reason":null}]}
+data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-v4-pro","choices":[{"index":0,"delta":{"content":"The sky looks blue because "},"finish_reason":null}]}
 
-data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-reasoner","choices":[{"index":0,"delta":{"content":"air scatters blue light."},"finish_reason":null}]}
+data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-v4-pro","choices":[{"index":0,"delta":{"content":"air scatters blue light."},"finish_reason":null}]}
 
-data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-reasoner","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+data: {"id":"chatcmpl_mock_deepseek_0001","object":"chat.completion.chunk","created":1710000000,"model":"deepseek-v4-pro","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
 
 data: [DONE]
 ```
@@ -1706,7 +1706,7 @@ Content-Type: application/json
 
 ```json
 {
-  "model": "claude-sonnet-4-6",
+  "model": "claude-sonnet-4-5-20250929",
   "max_tokens": 128,
   "messages": [
     { "role": "user", "content": "hello" }
@@ -1721,7 +1721,7 @@ Content-Type: application/json
   "id": "msg_mock_0001",
   "type": "message",
   "role": "assistant",
-  "model": "claude-sonnet-4-6",
+  "model": "claude-sonnet-4-5-20250929",
   "content": [
     {
       "type": "text",
@@ -1741,7 +1741,7 @@ Content-Type: application/json
 
 ```txt
 event: message_start
-data: {"type":"message_start","message":{"id":"msg_mock_0001","type":"message","role":"assistant","model":"claude-sonnet-4-6","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":8,"output_tokens":0}}}
+data: {"type":"message_start","message":{"id":"msg_mock_0001","type":"message","role":"assistant","model":"claude-sonnet-4-5-20250929","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":8,"output_tokens":0}}}
 
 event: content_block_start
 data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
@@ -1868,9 +1868,9 @@ scenarios:
 
   - id: deepseek-reasoning-stream
     provider: deepseek
-    endpoint: /v1/chat/completions
+    endpoint: /chat/completions
     match:
-      model: deepseek-reasoner
+      model: deepseek-v4-pro
       stream: true
     response:
       type: stream
@@ -2501,23 +2501,18 @@ Enabled providers:
     models:  GET  /v1/models
 
   DeepSeek:
-    baseURL: http://127.0.0.1:4000/deepseek/v1
-    alias:   http://127.0.0.1:4000/v1 with model deepseek-*
+    baseURL: http://127.0.0.1:4000
+    chat:    POST /chat/completions
 
   Moonshot / Kimi:
-    baseURL: http://127.0.0.1:4000/moonshot/v1
+    baseURL: http://127.0.0.1:4000/v1
+    chat:    POST /v1/chat/completions
 
   阿里云百炼 OpenAI-compatible:
     baseURL: http://127.0.0.1:4000/compatible-mode/v1
 
   阿里云 DashScope Native:
     endpoint: POST /api/v1/services/aigc/text-generation/generation
-
-  百度千帆:
-    endpoint: POST /rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions
-
-  腾讯混元:
-    endpoint: POST /hunyuan/v1/chat/completions
 
   智谱 GLM:
     endpoint: POST /api/paas/v4/chat/completions
@@ -2549,14 +2544,7 @@ mockmind start --providers all
 - Admin API。
 - Request recorder。
 
-如果用户希望只启用部分 Provider，可以指定：
-
-```bash
-mockmind start --providers openai,deepseek,zhipu
-mockmind start --providers chinese
-mockmind start --providers international
-mockmind start --providers openai-compatible
-```
+当前不实现按需启用 Provider，所有已实现协议默认启动；`providers.enabled` 只作为配置元数据和 Admin 展示字段保留。
 
 ### 25.3 Provider Group
 
@@ -2570,7 +2558,7 @@ openai-compatible
   启用 OpenAI-compatible 通用路由和相关国产厂商兼容 preset。
 
 chinese
-  启用国产厂商：DeepSeek、Kimi、百炼、千帆、混元、智谱、MiniMax、讯飞星火等。
+  展示国产厂商：DeepSeek、Kimi、百炼、智谱、MiniMax。
 
 international
   启用 OpenAI、Anthropic、Gemini。
@@ -2592,73 +2580,44 @@ http://127.0.0.1:4000
 示例：
 
 ```txt
-/v1/chat/completions                                      # OpenAI-compatible 通用入口
-/deepseek/v1/chat/completions                            # DeepSeek namespaced 入口
-/moonshot/v1/chat/completions                            # Kimi namespaced 入口
+/v1/chat/completions                                      # OpenAI / Moonshot / MiniMax 官方兼容路径
+/chat/completions                                         # DeepSeek 官方兼容路径
 /compatible-mode/v1/chat/completions                     # 阿里百炼 OpenAI-compatible
 /api/v1/services/aigc/text-generation/generation         # DashScope 原生
-/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions    # 百度千帆原生
-/hunyuan/v1/chat/completions                             # 腾讯混元 mock 入口
 /api/paas/v4/chat/completions                            # 智谱 GLM
 /v1/text/chatcompletion_v2                               # MiniMax
 /v1/messages                                             # Anthropic
 /v1beta/models/:model:generateContent                    # Gemini
 ```
 
-### 25.5 Namespaced Provider BaseURL
+### 25.5 官方路径约束
 
-除厂商原始路径外，还提供统一 namespace baseURL，方便本地调试时避免路径冲突。
+只模拟厂商官网公开的路径，不再提供本地 namespace 前缀别名。
 
-```txt
-/openai/v1
-/deepseek/v1
-/moonshot/v1
-/zhipu/v1
-/aliyun-bailian/compatible-mode/v1
-/anthropic/v1
-/gemini/v1beta
-```
-
-这样用户可以选择两种接入方式：
-
-#### 方式一：模拟厂商真实路径
-
-适合验证真实协议路径。
+模拟厂商真实路径示例：
 
 ```txt
 http://127.0.0.1:4000/api/paas/v4/chat/completions
 ```
 
-#### 方式二：使用 namespaced 路径
-
-适合本地同时调试多个 Provider。
-
-```txt
-http://127.0.0.1:4000/zhipu/api/paas/v4/chat/completions
-```
-
 ### 25.6 OpenAI-compatible 智能分流
 
-`/v1/chat/completions` 是通用 OpenAI-compatible 入口。
+`/v1/chat/completions` 只用于官网同样使用该路径的 OpenAI-compatible Provider。
 
-它可以根据 `model` 自动识别 Provider preset：
+它可以根据 `model` 自动识别以下 Provider preset：
 
 ```txt
 gpt-*                 -> openai
-deepseek-*            -> deepseek
 moonshot-*            -> moonshot
 kimi-*                -> moonshot
-qwen-*                -> aliyun-bailian
-glm-*                 -> zhipu
 abab*                 -> minimax
-yi-*                  -> 01-ai
 ```
 
 示例：
 
 ```json
 {
-  "model": "deepseek-chat",
+  "model": "kimi-k2.6",
   "messages": [
     { "role": "user", "content": "hello" }
   ]
@@ -2668,7 +2627,7 @@ yi-*                  -> 01-ai
 请求 `/v1/chat/completions` 时，内部识别为：
 
 ```txt
-provider: deepseek
+provider: moonshot
 protocol: openai-compatible
 ```
 
@@ -2739,11 +2698,10 @@ providers:
   presets:
     deepseek:
       enabled: true
-      basePath: /deepseek/v1
-      compatiblePath: /v1
+      compatiblePath: /chat/completions
       models:
-        - deepseek-chat
-        - deepseek-reasoner
+        - deepseek-v4-flash
+        - deepseek-v4-pro
     aliyun-bailian:
       enabled: true
       compatiblePath: /compatible-mode/v1
@@ -2960,11 +2918,11 @@ mockmind start
 然后立即可用：
 
 ```bash
-curl http://127.0.0.1:4000/v1/chat/completions \
+curl http://127.0.0.1:4000/chat/completions \
   -H 'Authorization: Bearer test-key' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "deepseek-chat",
+    "model": "deepseek-v4-flash",
     "messages": [{"role":"user","content":"hello"}]
   }'
 ```
@@ -2975,7 +2933,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
 {
   "id": "chatcmpl_mock_0001",
   "object": "chat.completion",
-  "model": "deepseek-chat",
+  "model": "deepseek-v4-flash",
   "choices": [
     {
       "index": 0,
@@ -3033,20 +2991,18 @@ POST /v1/embeddings
 
 #### 国产 OpenAI-compatible Presets
 
-第一阶段通过 OpenAI-compatible 入口支持：
+第一阶段按官网公开路径支持：
 
-- DeepSeek
-- Moonshot / Kimi
-- 阿里云百炼 OpenAI-compatible
-- 智谱 GLM OpenAI-compatible
+- DeepSeek：`POST /chat/completions`
+- Moonshot / Kimi：`POST /v1/chat/completions`
+- 阿里云百炼 OpenAI-compatible：`POST /compatible-mode/v1/chat/completions`
+- 智谱 GLM：`POST /api/paas/v4/chat/completions`
 
-必须支持模型名自动分流：
+`/v1/chat/completions` 只对官网同样使用该路径的 Provider 做模型分流：
 
 ```txt
-deepseek-* -> deepseek
 moonshot-* / kimi-* -> moonshot
-glm-* -> zhipu
-qwen-* -> aliyun-bailian
+abab* / MiniMax-* -> minimax
 ```
 
 #### Anthropic 原生协议
@@ -3055,7 +3011,6 @@ qwen-* -> aliyun-bailian
 
 ```txt
 POST /v1/messages
-POST /anthropic/v1/messages
 ```
 
 必须支持：
@@ -3080,8 +3035,6 @@ POST /anthropic/v1/messages
 ```txt
 POST /v1beta/models/:model:generateContent
 POST /v1beta/models/:model:streamGenerateContent
-POST /gemini/v1beta/models/:model:generateContent
-POST /gemini/v1beta/models/:model:streamGenerateContent
 ```
 
 必须支持：
@@ -3106,7 +3059,6 @@ POST /gemini/v1beta/models/:model:streamGenerateContent
 
 ```txt
 POST /api/v1/services/aigc/text-generation/generation
-POST /dashscope/api/v1/services/aigc/text-generation/generation
 ```
 
 必须支持：
@@ -3143,20 +3095,18 @@ POST /__admin/reload
 GET  /v1/models
 POST /v1/chat/completions
 POST /v1/embeddings
+POST /chat/completions
+POST /compatible-mode/v1/chat/completions
 
 # Anthropic native
 POST /v1/messages
-POST /anthropic/v1/messages
 
 # Gemini native
 POST /v1beta/models/:model:generateContent
 POST /v1beta/models/:model:streamGenerateContent
-POST /gemini/v1beta/models/:model:generateContent
-POST /gemini/v1beta/models/:model:streamGenerateContent
 
 # DashScope native
 POST /api/v1/services/aigc/text-generation/generation
-POST /dashscope/api/v1/services/aigc/text-generation/generation
 
 # Aliyun Bailian OpenAI-compatible
 POST /compatible-mode/v1/chat/completions
@@ -3228,7 +3178,7 @@ auth:
 models:
   - id: gpt-4o-mini
     provider: openai
-  - id: deepseek-chat
+  - id: deepseek-v4-flash
     provider: deepseek
   - id: kimi-k2.6
     provider: moonshot
@@ -3236,7 +3186,7 @@ models:
     provider: aliyun-bailian
   - id: glm-5.1
     provider: zhipu
-  - id: claude-sonnet-4-6
+  - id: claude-sonnet-4-5-20250929
     provider: anthropic
   - id: gemini-3-flash-preview
     provider: gemini
@@ -3263,9 +3213,9 @@ scenarios:
 
   - id: deepseek-reasoning
     provider: deepseek
-    endpoint: /v1/chat/completions
+    endpoint: /chat/completions
     match:
-      model: deepseek-reasoner
+      model: deepseek-v4-pro
     response:
       type: text
       reasoningContent: "This is mock reasoning content."
@@ -3275,7 +3225,7 @@ scenarios:
     provider: anthropic
     endpoint: /v1/messages
     match:
-      model: claude-sonnet-4-6
+      model: claude-sonnet-4-5-20250929
     response:
       type: text
       content: "Hello from mock Anthropic."

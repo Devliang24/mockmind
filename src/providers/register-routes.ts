@@ -5,7 +5,7 @@ import type { ProviderRegistration, ProviderRoute } from "./types.js";
 
 export async function registerProviderRoutes(app: FastifyInstance, context: ServerContext, provider: ProviderRegistration): Promise<void> {
   for (const route of provider.routes) {
-    if (route.description?.startsWith("via model")) continue;
+    if (route.register === false) continue;
     const handler = getProtocolHandler(route.protocol);
     if (!handler) continue;
     app.route({

@@ -161,21 +161,18 @@ const modelCapabilities = {
   'gpt-5.4': ['思考', '工具'],
   'gpt-5.4-mini': ['快速', '工具'],
   'gpt-5.4-nano': ['低成本'],
-  'claude-opus-4-7': ['自适应思考', '工具'],
-  'claude-sonnet-4-6': ['扩展思考', '工具'],
+  'claude-opus-4-1-20250805': ['自适应思考', '工具'],
+  'claude-sonnet-4-5-20250929': ['扩展思考', '工具'],
   'claude-haiku-4-5-20251001': ['扩展思考', '快速'],
-  'gemini-3.1-pro-preview': ['思考', '工具'],
+  'gemini-3-pro-preview': ['思考', '工具'],
   'gemini-3-flash-preview': ['思考', '快速'],
-  'gemini-3.1-flash-lite-preview': ['快速'],
-  'gemini-2.5-pro': ['思考', '工具'],
   'gemini-2.5-flash': ['思考', '快速'],
   'gemini-2.5-flash-lite': ['快速'],
   'deepseek-v4-pro': ['思考'],
   'deepseek-v4-flash': ['快速'],
-  'deepseek-reasoner': ['思考'],
   'kimi-k2.6': ['思考', '工具'],
   'kimi-k2.5': ['工具'],
-  'kimi-k2-0905-preview': ['工具'],
+  'kimi-k2-thinking': ['思考'],
   'kimi-k2-thinking-turbo': ['思考'],
   'glm-5.1': ['思考'],
   'glm-5': ['思考'],
@@ -304,7 +301,7 @@ function selectedModelSummary(provider, protocol) {
 }
 
 function visibleRoutes(providerId) {
-  return (state.data.routes ?? []).filter((route) => route.provider === providerId && !hiddenOpenAIProtocols.has(route.protocol) && !route.description?.startsWith('via model'));
+  return (state.data.routes ?? []).filter((route) => route.provider === providerId && !hiddenOpenAIProtocols.has(route.protocol));
 }
 
 function groupedProtocols(providerId) {
@@ -511,7 +508,7 @@ function defaultModel(provider, protocol, protocolKey = protocol) {
   if (provider === 'zhipu' && protocol === 'rerank') return 'rerank-mock';
   if (provider === 'aliyun-bailian' && protocol === 'rerank') return 'gte-rerank-v2';
   const selectedProvider = orderedProviders().find((item) => item.provider === provider);
-  return modelCode(selectedModelFor(selectedProvider, protocolKey) ?? ({ anthropic: 'claude-sonnet-4-6', gemini: 'gemini-3-flash-preview', deepseek: 'deepseek-v4-flash', moonshot: 'kimi-k2.6', zhipu: 'glm-5.1', 'aliyun-bailian': 'qwen3.6-plus', minimax: 'MiniMax-M2.7', openai: 'gpt-5.5' }[provider] ?? 'gpt-5.5'));
+  return modelCode(selectedModelFor(selectedProvider, protocolKey) ?? ({ anthropic: 'claude-sonnet-4-5-20250929', gemini: 'gemini-3-flash-preview', deepseek: 'deepseek-v4-flash', moonshot: 'kimi-k2.6', zhipu: 'glm-5.1', 'aliyun-bailian': 'qwen3.6-plus', minimax: 'MiniMax-M2.7', openai: 'gpt-5.5' }[provider] ?? 'gpt-5.5'));
 }
 function embeddingModel(provider) { if (provider === 'aliyun-bailian') return 'text-embedding-v3'; if (provider === 'zhipu') return 'embedding-3'; return 'text-embedding-3-small'; }
 function filtered(items, fields) { const query = state.search.trim().toLowerCase(); return query ? items.filter((item) => fields.some((field) => String(field(item) ?? '').toLowerCase().includes(query))) : items; }

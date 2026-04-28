@@ -62,9 +62,9 @@ describe("web ui", () => {
     expect(js.body).toContain("menuProviderName(provider)");
     expect(js.body).toContain("name.split(' / ').pop()");
     expect(js.body).toContain("gpt-5.5");
-    expect(js.body).toContain("claude-opus-4-7");
-    expect(js.body).toContain("claude-sonnet-4-6");
-    expect(js.body).toContain("gemini-3.1-pro-preview");
+    expect(js.body).toContain("claude-opus-4-1-20250805");
+    expect(js.body).toContain("claude-sonnet-4-5-20250929");
+    expect(js.body).toContain("gemini-3-pro-preview");
     expect(js.body).toContain("qwen3.6-plus");
     expect(js.body).toContain("stream_options");
     expect(js.body).toContain("reasoning_content");
@@ -143,10 +143,10 @@ describe("web ui", () => {
     const aliyun = response.json().providers.find((provider: { provider: string }) => provider.provider === "aliyun-bailian");
     expect(openai.latestModels).toEqual(["gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano"]);
     expect(openai.latestModels).toHaveLength(4);
-    expect(anthropic.latestModels).toEqual(["claude-opus-4-7", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"]);
-    expect(gemini.latestModels).toEqual(["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-3.1-flash-lite-preview", "gemini-2.5-pro"]);
-    expect(deepseek.latestModels).toEqual(["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-chat", "deepseek-reasoner"]);
-    expect(moonshot.latestModels).toEqual(["kimi-k2.6", "kimi-k2.5", "kimi-k2-0905-preview", "kimi-k2-thinking-turbo"]);
+    expect(anthropic.latestModels).toEqual(["claude-opus-4-1-20250805", "claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"]);
+    expect(gemini.latestModels).toEqual(["gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.5-flash-lite"]);
+    expect(deepseek.latestModels).toEqual(["deepseek-v4-pro", "deepseek-v4-flash"]);
+    expect(moonshot.latestModels).toEqual(["kimi-k2.6", "kimi-k2.5", "kimi-k2-thinking", "kimi-k2-thinking-turbo"]);
     expect(aliyun.latestModels).toEqual(["qwen3.6-max-preview", "qwen3.6-plus", "qwen3.6-flash", "qwen3.5-plus"]);
     await app.close();
   });

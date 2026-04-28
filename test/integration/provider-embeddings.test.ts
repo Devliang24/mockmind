@@ -14,8 +14,6 @@ const config: MockMindConfig = {
 
 describe("provider embedding endpoints", () => {
   it.each([
-    "/deepseek/v1/embeddings",
-    "/moonshot/v1/embeddings",
     "/api/paas/v4/embeddings",
     "/compatible-mode/v1/embeddings"
   ])("serves %s", async (url) => {

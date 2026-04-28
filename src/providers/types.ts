@@ -10,6 +10,7 @@ export type ProviderRoute = {
   protocol: string;
   endpoint: string;
   description?: string;
+  register?: boolean;
 };
 
 export type ProviderPreset = {

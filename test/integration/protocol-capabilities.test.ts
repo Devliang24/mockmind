@@ -8,7 +8,7 @@ const config: MockMindConfig = {
   auth: { mode: "permissive", apiKeys: ["test-key"] },
   models: [
     { id: "gpt-4o-mini", provider: "openai" },
-    { id: "claude-sonnet-4-6", provider: "anthropic" },
+    { id: "claude-sonnet-4-5-20250929", provider: "anthropic" },
     { id: "gemini-3-flash-preview", provider: "gemini" },
     { id: "qwen3.6-plus", provider: "aliyun-bailian" }
   ],
@@ -79,7 +79,7 @@ describe("protocol capabilities", () => {
 
   it("returns Anthropic tool_use", async () => {
     const { app } = await createMockMindServer(config);
-    const response = await app.inject({ method: "POST", url: "/v1/messages", headers: { "anthropic-version": "2023-06-01" }, payload: { model: "claude-sonnet-4-6", max_tokens: 128, messages: [{ role: "user", content: "weather" }] } });
+    const response = await app.inject({ method: "POST", url: "/v1/messages", headers: { "anthropic-version": "2023-06-01" }, payload: { model: "claude-sonnet-4-5-20250929", max_tokens: 128, messages: [{ role: "user", content: "weather" }] } });
     expect(response.json().stop_reason).toBe("tool_use");
     expect(response.json().content[0].type).toBe("tool_use");
     await app.close();

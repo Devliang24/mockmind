@@ -14,9 +14,15 @@ describe("OpenAI-compatible resolver", () => {
     expect(resolveOpenAICompatibleProvider("unknown-model")).toBe("openai");
   });
 
+  it("only resolves providers that officially expose the endpoint", () => {
+    expect(resolveOpenAICompatibleProvider("kimi-k2.6", "/v1/chat/completions")).toBe("moonshot");
+    expect(resolveOpenAICompatibleProvider("deepseek-v4-pro", "/v1/chat/completions")).toBe("openai");
+    expect(resolveOpenAICompatibleProvider("deepseek-v4-pro", "/chat/completions")).toBe("deepseek");
+  });
+
   it("summarizes structured provider routes", () => {
     const deepseek = providerRegistry.find((provider) => provider.provider === "deepseek");
     expect(deepseek).toBeDefined();
-    expect(providerRouteSummaries(deepseek!).join("\n")).toContain("/deepseek/v1/chat/completions");
+    expect(providerRouteSummaries(deepseek!).join("\n")).toContain("/chat/completions");
   });
 });
