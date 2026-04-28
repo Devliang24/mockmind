@@ -7,7 +7,7 @@ describe("OpenAI-compatible resolver", () => {
     expect(resolveOpenAICompatibleProvider("deepseek-v4-pro")).toBe("deepseek");
     expect(resolveOpenAICompatibleProvider("kimi-k2.6")).toBe("moonshot");
     expect(resolveOpenAICompatibleProvider("glm-5.1")).toBe("zhipu");
-    expect(resolveOpenAICompatibleProvider("qwen3-max")).toBe("aliyun-bailian");
+    expect(resolveOpenAICompatibleProvider("qwen3.6-plus")).toBe("aliyun-bailian");
   });
 
   it("falls back to openai", () => {

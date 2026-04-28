@@ -8,6 +8,7 @@ import { formatMiniMaxChatCompletion, formatMiniMaxError } from "./adapter.js";
 import { sendMiniMaxStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
 import { isArray, isString, requireFields } from "../validation.js";
+import { withEstimatedUsage } from "../usage.js";
 
 type MiniMaxBody = {
   model?: string;
@@ -39,7 +40,7 @@ export async function handleMiniMaxChat(handlerContext: ProtocolHandlerContext, 
     query: requestQuery(request)
   };
   const found = context.scenarios.find(mockRequest);
-  const result = renderResult(found.result ?? { type: "text", content: "你好，我是模拟的 MiniMax 响应。" }, mockRequest);
+  const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: "你好，我是模拟的 MiniMax 响应。" }, mockRequest), body.messages);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
@@ -50,9 +51,9 @@ export async function handleMiniMaxChat(handlerContext: ProtocolHandlerContext, 
   if (body.stream) {
     const responseBody = { stream: true, format: "text/event-stream", content: result.chunks ?? result.content ?? "" };
     context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
-    return sendMiniMaxStream(reply, body.model ?? "abab6.5s-chat", result, context.config.defaults.streamChunkDelayMs);
+    return sendMiniMaxStream(reply, body.model ?? "MiniMax-M2.7", result, context.config.defaults.streamChunkDelayMs);
   }
-  const responseBody = formatMiniMaxChatCompletion(body.model ?? "abab6.5s-chat", result);
+  const responseBody = formatMiniMaxChatCompletion(body.model ?? "MiniMax-M2.7", result);
   context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
   return reply.send(responseBody);
 }

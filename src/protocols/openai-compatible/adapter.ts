@@ -31,12 +31,12 @@ export function formatChatCompletion(model: string, result: MockResult): unknown
   };
 }
 
-export function formatEmbedding(model: string, embedding: number[]): unknown {
+export function formatEmbedding(model: string, embedding: number[], promptTokens = 1): unknown {
   return {
     object: "list",
     data: [{ object: "embedding", index: 0, embedding }],
     model,
-    usage: { prompt_tokens: 1, total_tokens: 1 }
+    usage: { prompt_tokens: promptTokens, total_tokens: promptTokens }
   };
 }
 
@@ -68,6 +68,20 @@ export function formatUsage(result: MockResult): unknown {
   return {
     prompt_tokens: result.usage?.promptTokens ?? 0,
     completion_tokens: result.usage?.completionTokens ?? 0,
+    total_tokens: result.usage?.totalTokens ?? 0
+  };
+}
+
+export function formatResponsesUsage(result: MockResult): unknown {
+  return {
+    input_tokens: result.usage?.promptTokens ?? 0,
+    input_tokens_details: {
+      cached_tokens: 0
+    },
+    output_tokens: result.usage?.completionTokens ?? 0,
+    output_tokens_details: {
+      reasoning_tokens: result.reasoningContent || result.reasoningChunks?.length ? result.usage?.completionTokens ?? 0 : 0
+    },
     total_tokens: result.usage?.totalTokens ?? 0
   };
 }

@@ -5,7 +5,7 @@ export const zhipuPreset: ProviderPreset = {
   displayName: "Zhipu GLM",
   groups: ["chinese", "openai-compatible"],
   defaultModels: ["glm-5.1"],
-  latestModels: ["glm-5.1", "glm-5", "glm-4.7", "glm-4.6"],
+  latestModels: ["glm-5.1", "glm-5", "glm-5-turbo", "glm-4.7"],
   modelPatterns: [/^glm-/],
   routes: [
     { method: "POST", path: "/v1/chat/completions", protocol: "openai-compatible", endpoint: "/v1/chat/completions", description: "via model glm-*" },

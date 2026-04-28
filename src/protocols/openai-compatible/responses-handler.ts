@@ -5,9 +5,10 @@ import type { MockRequest, Provider } from "../../core/scenario/types.js";
 import type { ServerContext } from "../../server/context.js";
 import { requestHeaders, requestQuery } from "../../shared/http.js";
 import { delay, unixSeconds } from "../../shared/time.js";
-import { formatOpenAIError, formatUsage, normalizeOpenAIToolCalls } from "./adapter.js";
+import { formatOpenAIError, formatResponsesUsage, normalizeOpenAIToolCalls } from "./adapter.js";
 import { sendOpenAIResponsesStream } from "./responses-stream.js";
 import { isString, requireFields } from "../validation.js";
+import { withEstimatedUsage } from "../usage.js";
 
 export type OpenAIResponsesBody = {
   model?: string;
@@ -46,7 +47,7 @@ export async function handleOpenAIResponses(
     query: requestQuery(request)
   };
   const found = context.scenarios.find(mockRequest);
-  const result = renderResult(found.result ?? { type: "text", content: "This is a mock OpenAI Responses API response." }, mockRequest);
+  const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: "This is a mock OpenAI Responses API response." }, mockRequest), body.input);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
@@ -77,6 +78,6 @@ export function formatResponse(model: string, result: ReturnType<typeof renderRe
     model,
     output,
     output_text: result.type === "tool_call" ? "" : result.content ?? "",
-    usage: formatUsage(result)
+    usage: formatResponsesUsage(result)
   };
 }

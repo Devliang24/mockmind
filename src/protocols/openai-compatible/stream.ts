@@ -14,7 +14,7 @@ function chunk(model: string, delta: Record<string, unknown>, finishReason: stri
   })}\n\n`;
 }
 
-export async function sendOpenAIStream(reply: FastifyReply, model: string, result: MockResult, chunkDelayMs: number): Promise<void> {
+export async function sendOpenAIStream(reply: FastifyReply, model: string, result: MockResult, chunkDelayMs: number, includeUsage = false): Promise<void> {
   reply.raw.writeHead(200, {
     "content-type": "text/event-stream; charset=utf-8",
     "cache-control": "no-cache",
@@ -35,7 +35,7 @@ export async function sendOpenAIStream(reply: FastifyReply, model: string, resul
       if (chunkDelayMs > 0) await delay(chunkDelayMs);
     }
     reply.raw.write(chunk(model, {}, "tool_calls"));
-    reply.raw.write(chunk(model, {}, null, { usage: formatUsage(result) }));
+    if (includeUsage) reply.raw.write(usageChunk(model, result));
     reply.raw.write("data: [DONE]\n\n");
     reply.raw.end();
     return;
@@ -54,7 +54,18 @@ export async function sendOpenAIStream(reply: FastifyReply, model: string, resul
   }
 
   reply.raw.write(chunk(model, {}, "stop"));
-  reply.raw.write(chunk(model, {}, null, { usage: formatUsage(result) }));
+  if (includeUsage) reply.raw.write(usageChunk(model, result));
   reply.raw.write("data: [DONE]\n\n");
   reply.raw.end();
+}
+
+function usageChunk(model: string, result: MockResult): string {
+  return `data: ${JSON.stringify({
+    id: "chatcmpl_mock_0001",
+    object: "chat.completion.chunk",
+    created: unixSeconds(),
+    model,
+    choices: [],
+    usage: formatUsage(result)
+  })}\n\n`;
 }

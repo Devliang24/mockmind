@@ -1,6 +1,7 @@
 import type { FastifyReply } from "fastify";
 import type { MockResult } from "../../core/scenario/types.js";
 import { delay } from "../../shared/time.js";
+import { formatResponsesUsage } from "./adapter.js";
 
 function event(type: string, data: Record<string, unknown>): string {
   return `event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`;
@@ -17,7 +18,7 @@ export async function sendOpenAIResponsesStream(reply: FastifyReply, model: stri
 
   if (result.type === "tool_call") {
     reply.raw.write(event("response.output_item.added", { output_index: 0, item: { id: "fc_mock_0001", type: "function_call", name: result.toolName ?? "mock_tool", arguments: JSON.stringify(result.toolArguments ?? {}) } }));
-    reply.raw.write(event("response.completed", { response: { id: "resp_mock_0001", status: "completed", model } }));
+    reply.raw.write(event("response.completed", { response: { id: "resp_mock_0001", object: "response", status: "completed", model, usage: formatResponsesUsage(result) } }));
     reply.raw.write("data: [DONE]\n\n");
     reply.raw.end();
     return;
@@ -36,7 +37,7 @@ export async function sendOpenAIResponsesStream(reply: FastifyReply, model: stri
   }
 
   reply.raw.write(event("response.output_text.done", { text: chunks.join("") }));
-  reply.raw.write(event("response.completed", { response: { id: "resp_mock_0001", status: "completed", model } }));
+  reply.raw.write(event("response.completed", { response: { id: "resp_mock_0001", object: "response", status: "completed", model, usage: formatResponsesUsage(result) } }));
   reply.raw.write("data: [DONE]\n\n");
   reply.raw.end();
 }

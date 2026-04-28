@@ -8,11 +8,15 @@ import { delay } from "../../shared/time.js";
 import { formatChatCompletion, formatOpenAIError } from "./adapter.js";
 import { isArray, isString, requireFields } from "../validation.js";
 import { sendOpenAIStream } from "./stream.js";
+import { withEstimatedUsage } from "../usage.js";
 
 export type OpenAICompatibleChatBody = {
   model?: string;
   messages?: unknown[];
   stream?: boolean;
+  stream_options?: {
+    include_usage?: boolean;
+  };
   tools?: unknown[];
 };
 
@@ -44,7 +48,7 @@ export async function handleOpenAICompatibleChat(
     query: requestQuery(request)
   };
   const found = context.scenarios.find(mockRequest);
-  const result = renderResult(found.result ?? { type: "text", content: defaultContent(provider) }, mockRequest);
+  const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: defaultContent(provider) }, mockRequest), body.messages);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
@@ -55,7 +59,7 @@ export async function handleOpenAICompatibleChat(
   if (body.stream) {
     const responseBody = { stream: true, format: "text/event-stream", content: result.chunks ?? result.content ?? "" };
     context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
-    return sendOpenAIStream(reply, body.model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs);
+    return sendOpenAIStream(reply, body.model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs, body.stream_options?.include_usage === true);
   }
   const responseBody = formatChatCompletion(body.model ?? "mock-model", result);
   context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });

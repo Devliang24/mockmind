@@ -6,6 +6,7 @@ import { requestHeaders, requestQuery } from "../../shared/http.js";
 import { delay } from "../../shared/time.js";
 import type { ProtocolHandlerContext } from "../types.js";
 import { isArray, isString, requireFields } from "../validation.js";
+import { estimateTokenCount } from "../usage.js";
 
 type RerankBody = {
   model?: string;
@@ -38,7 +39,8 @@ export async function handleRerank(handlerContext: ProtocolHandlerContext, reque
     query: requestQuery(request)
   };
   const found = context.scenarios.find(mockRequest);
-  const result = renderResult(found.result ?? { type: "json", json: formatRerankResponse(provider, body) }, mockRequest);
+  const usage = estimateTokenCount([body.query, body.documents]);
+  const result = renderResult(found.result ?? { type: "json", json: formatRerankResponse(provider, body, usage) }, mockRequest);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
@@ -46,12 +48,12 @@ export async function handleRerank(handlerContext: ProtocolHandlerContext, reque
     context.recorder.add({ provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
     return reply.code(result.error.status).send(responseBody);
   }
-  const responseBody = result.type === "json" && result.json ? result.json : formatRerankResponse(provider, body);
+  const responseBody = result.type === "json" && result.json ? result.json : formatRerankResponse(provider, body, usage);
   context.recorder.add({ provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
   return reply.send(responseBody);
 }
 
-function formatRerankResponse(provider: string, body: RerankBody): unknown {
+function formatRerankResponse(provider: string, body: RerankBody, totalTokens = 0): unknown {
   const documents = body.documents ?? [];
   const topN = Math.min(body.top_n ?? body.topN ?? documents.length, documents.length);
   const results = documents.slice(0, topN).map((document, index) => ({
@@ -64,7 +66,7 @@ function formatRerankResponse(provider: string, body: RerankBody): unknown {
     return {
       request_id: "req_mock_rerank_0001",
       output: { results },
-      usage: { total_tokens: 0 }
+      usage: { total_tokens: totalTokens }
     };
   }
 
@@ -73,7 +75,7 @@ function formatRerankResponse(provider: string, body: RerankBody): unknown {
     object: "rerank",
     model: body.model,
     results,
-    usage: { total_tokens: 0 }
+    usage: { total_tokens: totalTokens }
   };
 }
 

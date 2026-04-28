@@ -8,6 +8,7 @@ import { formatAnthropicError, formatAnthropicMessage } from "./adapter.js";
 import { sendAnthropicStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
 import { isArray, isString, requireFields, requireHeaders } from "../validation.js";
+import { withEstimatedUsage } from "../usage.js";
 
 type AnthropicBody = {
   model?: string;
@@ -40,7 +41,7 @@ export async function handleAnthropicMessages(handlerContext: ProtocolHandlerCon
     query: requestQuery(request)
   };
   const found = context.scenarios.find(mockRequest);
-  const result = renderResult(found.result ?? { type: "text", content: "Hello from mock Anthropic." }, mockRequest);
+  const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: "Hello from mock Anthropic." }, mockRequest), body.messages);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {

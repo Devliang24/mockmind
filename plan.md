@@ -56,7 +56,6 @@
 - 百度千帆 / 文心一言
 - 腾讯混元
 - 智谱 GLM
-- 火山方舟 / 豆包
 - MiniMax
 - 讯飞星火
 
@@ -90,7 +89,6 @@
 - 百度千帆 / 文心一言
 - 腾讯混元
 - 智谱 GLM
-- 火山方舟 / 豆包
 - MiniMax
 - 零一万物 / 01.AI
 - 讯飞星火
@@ -140,7 +138,6 @@ mockmind/
       deepseek/
       moonshot/
       minimax/
-      volcengine-ark/
       xfyun-spark/
     core/
       scenario/
@@ -188,7 +185,6 @@ mockmind/
     zhipu-glm.md
     deepseek.md
     moonshot-kimi.md
-    volcengine-ark.md
     minimax.md
     streaming.md
     errors.md
@@ -302,7 +298,6 @@ type Provider =
   | "deepseek"
   | "moonshot"
   | "minimax"
-  | "volcengine-ark"
   | "xfyun-spark"
   | "sense-nova";
 
@@ -360,18 +355,16 @@ models:
     provider: deepseek
   - id: deepseek-reasoner
     provider: deepseek
-  - id: moonshot-v1-8k
+  - id: kimi-k2.6
     provider: moonshot
-  - id: qwen-plus
+  - id: qwen3.6-plus
     provider: aliyun-bailian
   - id: ernie-4.0
     provider: baidu-qianfan
   - id: hunyuan-standard
     provider: tencent-hunyuan
-  - id: glm-4
+  - id: glm-5.1
     provider: zhipu
-  - id: doubao-pro
-    provider: volcengine-ark
 
 defaults:
   latencyMs: 50
@@ -415,7 +408,7 @@ scenarios:
     provider: aliyun-bailian
     endpoint: /compatible-mode/v1/chat/completions
     match:
-      model: qwen-plus
+      model: qwen3.6-plus
     response:
       type: text
       content: "你好，我是模拟的通义千问响应。"
@@ -547,7 +540,6 @@ type ProviderPreset = {
 | 百度千帆 / 文心 | partial | ✅ | ✅ | planned | planned | planned | P1 |
 | 腾讯混元 | partial | ✅ | ✅ | planned | planned | planned | P1 |
 | 智谱 GLM | ✅ | ✅ | ✅ | ✅ | planned | planned | P1 |
-| 火山方舟 / 豆包 | ✅ | ✅ | ✅ | ✅ | planned | planned | P1 |
 | MiniMax | partial | ✅ | ✅ | planned | planned | planned | P1 |
 | 零一万物 / 01.AI | ✅ | partial | ✅ | planned | planned | - | P2 |
 | 讯飞星火 | partial | planned | planned | planned | - | planned | P2 |
@@ -580,7 +572,6 @@ type ProviderPreset = {
 - Moonshot / Kimi preset。
 - 智谱 GLM OpenAI-compatible preset。
 - 阿里百炼 OpenAI-compatible preset。
-- 火山方舟 / 豆包 OpenAI-compatible preset。
 - provider-specific response variants。
 - reasoning content mock。
 - tool calls mock。
@@ -610,10 +601,8 @@ type ProviderPreset = {
 - GLM tool calling。
 - provider-specific errors。
 
-### v0.6.0：火山方舟 / 豆包 + MiniMax
+### v0.6.0：MiniMax
 
-- Ark 原生调用格式。
-- 豆包模型 preset。
 - MiniMax chatcompletion。
 - MiniMax streaming。
 
@@ -727,7 +716,6 @@ type ProviderPreset = {
 - `docs/zhipu-glm.md`
 - `docs/deepseek.md`
 - `docs/moonshot-kimi.md`
-- `docs/volcengine-ark.md`
 - `docs/minimax.md`
 - `docs/streaming.md`
 - `docs/errors.md`
@@ -788,7 +776,7 @@ ghcr.io/<owner>/mockmind
 3. SSE streaming。
 4. request recorder。
 5. 国产 Provider preset 机制。
-6. DeepSeek、Kimi、智谱、百炼、豆包的 OpenAI-compatible preset。
+6. DeepSeek、Kimi、智谱、百炼的 OpenAI-compatible preset。
 
 这样可以快速形成可用的 `v0.1.0`，同时为后续国产原生协议扩展打好基础。
 
@@ -1422,7 +1410,7 @@ Content-Type: application/json
 
 ```json
 {
-  "model": "qwen-plus",
+  "model": "qwen3.6-plus",
   "messages": [
     { "role": "user", "content": "你好" }
   ]
@@ -1436,7 +1424,7 @@ Content-Type: application/json
   "id": "chatcmpl_mock_qwen_0001",
   "object": "chat.completion",
   "created": 1710000000,
-  "model": "qwen-plus",
+  "model": "qwen3.6-plus",
   "choices": [
     {
       "index": 0,
@@ -1467,7 +1455,7 @@ Content-Type: application/json
 
 ```json
 {
-  "model": "qwen-plus",
+  "model": "qwen3.6-plus",
   "input": {
     "messages": [
       { "role": "user", "content": "你好" }
@@ -1653,50 +1641,9 @@ Content-Type: application/json
 }
 ```
 
-### 23.11 火山方舟 / 豆包 OpenAI-compatible 响应
+### 23.11 未规划厂商
 
-#### 请求
-
-```http
-POST /api/v3/chat/completions
-Authorization: Bearer test-key
-Content-Type: application/json
-```
-
-```json
-{
-  "model": "doubao-pro",
-  "messages": [
-    { "role": "user", "content": "你好" }
-  ]
-}
-```
-
-#### 响应
-
-```json
-{
-  "id": "chatcmpl_mock_doubao_0001",
-  "object": "chat.completion",
-  "created": 1710000000,
-  "model": "doubao-pro",
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "你好，我是模拟的豆包响应。"
-      },
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 4,
-    "completion_tokens": 9,
-    "total_tokens": 13
-  }
-}
-```
+Volcengine Ark / Doubao 不在当前实现计划内。
 
 ### 23.12 MiniMax 响应
 
@@ -1710,7 +1657,7 @@ Content-Type: application/json
 
 ```json
 {
-  "model": "abab6.5s-chat",
+  "model": "MiniMax-M2.7",
   "messages": [
     { "role": "user", "content": "你好" }
   ]
@@ -1733,13 +1680,15 @@ Content-Type: application/json
     }
   ],
   "created": 1710000000,
-  "model": "abab6.5s-chat",
+  "model": "MiniMax-M2.7",
   "usage": {
+    "prompt_tokens": 8,
+    "completion_tokens": 6,
     "total_tokens": 14
   },
   "base_resp": {
     "status_code": 0,
-    "status_msg": "success"
+    "status_msg": ""
   }
 }
 ```
@@ -1757,7 +1706,7 @@ Content-Type: application/json
 
 ```json
 {
-  "model": "claude-3-5-sonnet-latest",
+  "model": "claude-sonnet-4-6",
   "max_tokens": 128,
   "messages": [
     { "role": "user", "content": "hello" }
@@ -1772,7 +1721,7 @@ Content-Type: application/json
   "id": "msg_mock_0001",
   "type": "message",
   "role": "assistant",
-  "model": "claude-3-5-sonnet-latest",
+  "model": "claude-sonnet-4-6",
   "content": [
     {
       "type": "text",
@@ -1792,7 +1741,7 @@ Content-Type: application/json
 
 ```txt
 event: message_start
-data: {"type":"message_start","message":{"id":"msg_mock_0001","type":"message","role":"assistant","model":"claude-3-5-sonnet-latest","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":8,"output_tokens":0}}}
+data: {"type":"message_start","message":{"id":"msg_mock_0001","type":"message","role":"assistant","model":"claude-sonnet-4-6","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":8,"output_tokens":0}}}
 
 event: content_block_start
 data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
@@ -1818,7 +1767,7 @@ data: {"type":"message_stop"}
 #### 请求
 
 ```http
-POST /v1beta/models/gemini-1.5-pro:generateContent?key=test-key
+POST /v1beta/models/gemini-3-flash-preview:generateContent
 Content-Type: application/json
 ```
 
@@ -2573,9 +2522,6 @@ Enabled providers:
   智谱 GLM:
     endpoint: POST /api/paas/v4/chat/completions
 
-  火山方舟 / 豆包:
-    endpoint: POST /api/v3/chat/completions
-
   MiniMax:
     endpoint: POST /v1/text/chatcompletion_v2
 
@@ -2624,7 +2570,7 @@ openai-compatible
   启用 OpenAI-compatible 通用路由和相关国产厂商兼容 preset。
 
 chinese
-  启用国产厂商：DeepSeek、Kimi、百炼、千帆、混元、智谱、豆包、MiniMax、讯飞星火等。
+  启用国产厂商：DeepSeek、Kimi、百炼、千帆、混元、智谱、MiniMax、讯飞星火等。
 
 international
   启用 OpenAI、Anthropic、Gemini。
@@ -2654,7 +2600,6 @@ http://127.0.0.1:4000
 /rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions    # 百度千帆原生
 /hunyuan/v1/chat/completions                             # 腾讯混元 mock 入口
 /api/paas/v4/chat/completions                            # 智谱 GLM
-/api/v3/chat/completions                                 # 火山方舟 / 豆包
 /v1/text/chatcompletion_v2                               # MiniMax
 /v1/messages                                             # Anthropic
 /v1beta/models/:model:generateContent                    # Gemini
@@ -2670,7 +2615,6 @@ http://127.0.0.1:4000
 /moonshot/v1
 /zhipu/v1
 /aliyun-bailian/compatible-mode/v1
-/volcengine-ark/api/v3
 /anthropic/v1
 /gemini/v1beta
 ```
@@ -2706,7 +2650,6 @@ moonshot-*            -> moonshot
 kimi-*                -> moonshot
 qwen-*                -> aliyun-bailian
 glm-*                 -> zhipu
-doubao-*              -> volcengine-ark
 abab*                 -> minimax
 yi-*                  -> 01-ai
 ```
@@ -2940,7 +2883,7 @@ GET  /__admin/routes
   "enabled": ["openai", "deepseek", "moonshot", "aliyun-bailian", "zhipu"],
   "disabled": ["anthropic", "gemini"],
   "groups": {
-    "chinese": ["deepseek", "moonshot", "aliyun-bailian", "baidu-qianfan", "tencent-hunyuan", "zhipu", "volcengine-ark", "minimax"],
+    "chinese": ["deepseek", "moonshot", "aliyun-bailian", "baidu-qianfan", "tencent-hunyuan", "zhipu", "minimax"],
     "international": ["openai", "anthropic", "gemini"]
   }
 }
@@ -2996,7 +2939,6 @@ MVP 可先支持这些 Provider preset：
 - Moonshot / Kimi
 - 阿里云百炼 OpenAI-compatible
 - 智谱 GLM OpenAI-compatible
-- 火山方舟 / 豆包 OpenAI-compatible
 
 后续版本逐步补充原生协议。
 
@@ -3097,7 +3039,6 @@ POST /v1/embeddings
 - Moonshot / Kimi
 - 阿里云百炼 OpenAI-compatible
 - 智谱 GLM OpenAI-compatible
-- 火山方舟 / 豆包 OpenAI-compatible
 
 必须支持模型名自动分流：
 
@@ -3106,7 +3047,6 @@ deepseek-* -> deepseek
 moonshot-* / kimi-* -> moonshot
 glm-* -> zhipu
 qwen-* -> aliyun-bailian
-doubao-* -> volcengine-ark
 ```
 
 #### Anthropic 原生协议
@@ -3248,8 +3188,6 @@ src/
       preset.ts
     zhipu/
       preset.ts
-    volcengine-ark/
-      preset.ts
     anthropic/
       routes.ts
       adapter.ts
@@ -3292,17 +3230,15 @@ models:
     provider: openai
   - id: deepseek-chat
     provider: deepseek
-  - id: moonshot-v1-8k
+  - id: kimi-k2.6
     provider: moonshot
-  - id: qwen-plus
+  - id: qwen3.6-plus
     provider: aliyun-bailian
-  - id: glm-4
+  - id: glm-5.1
     provider: zhipu
-  - id: doubao-pro
-    provider: volcengine-ark
-  - id: claude-3-5-sonnet-latest
+  - id: claude-sonnet-4-6
     provider: anthropic
-  - id: gemini-1.5-pro
+  - id: gemini-3-flash-preview
     provider: gemini
 
 defaults:
@@ -3339,7 +3275,7 @@ scenarios:
     provider: anthropic
     endpoint: /v1/messages
     match:
-      model: claude-3-5-sonnet-latest
+      model: claude-sonnet-4-6
     response:
       type: text
       content: "Hello from mock Anthropic."
@@ -3348,7 +3284,7 @@ scenarios:
     provider: gemini
     endpoint: /v1beta/models/:model:generateContent
     match:
-      model: gemini-1.5-pro
+      model: gemini-3-flash-preview
     response:
       type: text
       content: "Hello from mock Gemini."
@@ -3357,7 +3293,7 @@ scenarios:
     provider: aliyun-bailian
     endpoint: /api/v1/services/aigc/text-generation/generation
     match:
-      model: qwen-plus
+      model: qwen3.6-plus
     response:
       type: text
       content: "你好，我是模拟的 DashScope 原生响应。"
@@ -3384,11 +3320,10 @@ scenarios:
 17. 实现 DeepSeek reasoning content 响应变体。
 18. 实现 Kimi / Moonshot preset。
 19. 实现 智谱 GLM preset。
-20. 实现 火山方舟 / 豆包 preset。
-21. 实现 百炼 OpenAI-compatible 路径。
-22. 实现 Anthropic `/v1/messages` 非流式。
-23. 实现 Anthropic `/v1/messages` SSE 流式。
-24. 实现 Anthropic 错误格式。
+20. 实现 百炼 OpenAI-compatible 路径。
+21. 实现 Anthropic `/v1/messages` 非流式。
+22. 实现 Anthropic `/v1/messages` SSE 流式。
+23. 实现 Anthropic 错误格式。
 25. 实现 Gemini `generateContent` 非流式。
 26. 实现 Gemini `streamGenerateContent` 流式。
 27. 实现 Gemini 错误格式。
@@ -3418,7 +3353,7 @@ mockmind start --all
 ```bash
 curl http://127.0.0.1:4000/v1/chat/completions
 curl http://127.0.0.1:4000/v1/messages
-curl http://127.0.0.1:4000/v1beta/models/gemini-1.5-pro:generateContent
+curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:generateContent
 curl http://127.0.0.1:4000/api/v1/services/aigc/text-generation/generation
 ```
 

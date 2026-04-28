@@ -30,15 +30,27 @@ export async function sendAnthropicStream(reply: FastifyReply, model: string, re
     return;
   }
 
-  reply.raw.write(event("content_block_start", { type: "content_block_start", index: 0, content_block: { type: "text", text: "" } }));
+  let textIndex = 0;
+  const thinkingChunks = result.reasoningChunks ?? (result.reasoningContent ? [result.reasoningContent] : []);
+  if (thinkingChunks.length) {
+    reply.raw.write(event("content_block_start", { type: "content_block_start", index: 0, content_block: { type: "thinking", thinking: "" } }));
+    for (const thinking of thinkingChunks) {
+      reply.raw.write(event("content_block_delta", { type: "content_block_delta", index: 0, delta: { type: "thinking_delta", thinking } }));
+      if (chunkDelayMs > 0) await delay(chunkDelayMs);
+    }
+    reply.raw.write(event("content_block_stop", { type: "content_block_stop", index: 0 }));
+    textIndex = 1;
+  }
+
+  reply.raw.write(event("content_block_start", { type: "content_block_start", index: textIndex, content_block: { type: "text", text: "" } }));
 
   const chunks = result.chunks?.length ? result.chunks : [result.content ?? ""];
   for (const text of chunks) {
-    reply.raw.write(event("content_block_delta", { type: "content_block_delta", index: 0, delta: { type: "text_delta", text } }));
+    reply.raw.write(event("content_block_delta", { type: "content_block_delta", index: textIndex, delta: { type: "text_delta", text } }));
     if (chunkDelayMs > 0) await delay(chunkDelayMs);
   }
 
-  reply.raw.write(event("content_block_stop", { type: "content_block_stop", index: 0 }));
+  reply.raw.write(event("content_block_stop", { type: "content_block_stop", index: textIndex }));
   reply.raw.write(event("message_delta", { type: "message_delta", delta: { stop_reason: "end_turn", stop_sequence: null }, usage: { output_tokens: result.usage?.completionTokens ?? 0 } }));
   reply.raw.write(event("message_stop", { type: "message_stop" }));
   reply.raw.end();

@@ -27,7 +27,18 @@ export function formatAnthropicError(type: string | undefined, message: string):
 }
 
 export function formatAnthropicContent(result: MockResult): unknown[] {
-  if (result.type !== "tool_call") return [{ type: "text", text: result.content ?? "" }];
+  if (result.type !== "tool_call") {
+    const content: unknown[] = [];
+    if (result.reasoningContent || result.reasoningChunks?.length) {
+      content.push({
+        type: "thinking",
+        thinking: result.reasoningContent ?? result.reasoningChunks?.join("") ?? "",
+        signature: "mockmind_signature"
+      });
+    }
+    content.push({ type: "text", text: result.content ?? "" });
+    return content;
+  }
   if (result.toolCalls?.length) return result.toolCalls;
   return [{
     type: "tool_use",

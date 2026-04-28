@@ -8,6 +8,7 @@ import { formatGeminiContent, formatGeminiError } from "./adapter.js";
 import { sendGeminiStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
 import { isArray, requireFields } from "../validation.js";
+import { withEstimatedUsage } from "../usage.js";
 
 type GeminiBody = {
   contents?: unknown[];
@@ -34,7 +35,7 @@ export async function handleGeminiGenerateContent(handlerContext: ProtocolHandle
     query: requestQuery(request)
   };
   const found = context.scenarios.find(mockRequest);
-  const result = renderResult(found.result ?? { type: "text", content: "Hello from mock Gemini." }, mockRequest);
+  const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: "Hello from mock Gemini." }, mockRequest), body.contents);
   if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
@@ -43,7 +44,7 @@ export async function handleGeminiGenerateContent(handlerContext: ProtocolHandle
     return reply.code(result.error.status).send(responseBody);
   }
   if (stream) {
-    const responseBody = { stream: true, format: "application/json", content: result.chunks ?? result.content ?? "" };
+    const responseBody = { stream: true, format: "text/event-stream", content: result.chunks ?? result.content ?? "" };
     context.recorder.add({ provider: mockRequest.provider, endpoint, model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest, responseBody });
     return sendGeminiStream(reply, result, context.config.defaults.streamChunkDelayMs);
   }

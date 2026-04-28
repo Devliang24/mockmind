@@ -8,11 +8,15 @@ export function formatDashScopeGeneration(result: MockResult): unknown {
         finish_reason: "stop",
         message: {
           role: "assistant",
+          ...(result.reasoningContent ? { reasoning_content: result.reasoningContent } : {}),
           content: result.content ?? ""
         }
       }]
     },
-    usage: formatDashScopeUsage(result)
+    usage: formatDashScopeUsage(result),
+    status_code: 200,
+    code: "",
+    message: ""
   };
 }
 

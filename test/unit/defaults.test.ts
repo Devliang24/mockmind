@@ -7,6 +7,8 @@ describe("config defaults", () => {
   it("builds default models from provider registry", () => {
     expect(defaultModels().map((model) => model.id)).toContain("gpt-5.5");
     expect(defaultModels().map((model) => model.id)).toContain("gemini-3-flash-preview");
+    expect(defaultModels().map((model) => model.id)).toContain("qwen3.6-plus");
+    expect(defaultModels().map((model) => model.id)).toContain("MiniMax-M2.7");
   });
 
   it("uses sqlite persistence by default", () => {

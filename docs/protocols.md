@@ -25,8 +25,9 @@ Protocols live under `src/protocols` and are reusable across providers.
 3. Build unified `MockRequest`.
 4. Match scenario.
 5. Render `MockResult`.
-6. Format provider-specific response.
-7. Record request in recorder.
+6. Fill missing token usage with deterministic local estimates.
+7. Format provider-specific response.
+8. Record request in recorder.
 
 ## Adding a Protocol
 

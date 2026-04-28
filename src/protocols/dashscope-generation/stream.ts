@@ -15,6 +15,16 @@ export async function sendDashScopeStream(reply: FastifyReply, result: MockResul
   });
 
   const chunks = result.chunks?.length ? result.chunks : [result.content ?? ""];
+  for (const reasoningContent of result.reasoningChunks ?? (result.reasoningContent ? [result.reasoningContent] : [])) {
+    reply.raw.write(dashScopeEvent({
+      request_id: "req_mock_dashscope_0001",
+      output: {
+        choices: [{ finish_reason: null, message: { role: "assistant", reasoning_content: reasoningContent, content: "" } }]
+      }
+    }));
+    if (chunkDelayMs > 0) await delay(chunkDelayMs);
+  }
+
   for (const content of chunks) {
     reply.raw.write(dashScopeEvent({
       request_id: "req_mock_dashscope_0001",

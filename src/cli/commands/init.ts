@@ -23,11 +23,11 @@ models:
     provider: deepseek
   - id: kimi-k2.6
     provider: moonshot
-  - id: qwen3-max
+  - id: qwen3.6-plus
     provider: aliyun-bailian
   - id: glm-5.1
     provider: zhipu
-  - id: abab6.5s-chat
+  - id: MiniMax-M2.7
     provider: minimax
   - id: claude-sonnet-4-6
     provider: anthropic
@@ -112,7 +112,7 @@ scenarios:
     provider: minimax
     endpoint: /v1/text/chatcompletion_v2
     match:
-      model: abab6.5s-chat
+      model: MiniMax-M2.7
       lastUserMessageContains: hello
     response:
       type: text
@@ -122,7 +122,7 @@ scenarios:
     provider: aliyun-bailian
     endpoint: /compatible-mode/v1/chat/completions
     match:
-      model: qwen3-max
+      model: qwen3.6-plus
     response:
       type: text
       content: 你好，我是模拟的通义千问响应。
@@ -149,7 +149,7 @@ scenarios:
     provider: aliyun-bailian
     endpoint: /api/v1/services/aigc/text-generation/generation
     match:
-      model: qwen3-max
+      model: qwen3.6-plus
     response:
       type: text
       content: 你好，我是模拟的 DashScope 原生响应。

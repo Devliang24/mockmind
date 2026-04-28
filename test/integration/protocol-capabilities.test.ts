@@ -10,7 +10,7 @@ const config: MockMindConfig = {
     { id: "gpt-4o-mini", provider: "openai" },
     { id: "claude-sonnet-4-6", provider: "anthropic" },
     { id: "gemini-3-flash-preview", provider: "gemini" },
-    { id: "qwen-plus", provider: "aliyun-bailian" }
+    { id: "qwen3.6-plus", provider: "aliyun-bailian" }
   ],
   defaults: { latencyMs: 0, streamChunkDelayMs: 0 },
   fallback: { enabled: true, response: { type: "text", content: "fallback" } },
@@ -69,9 +69,10 @@ describe("protocol capabilities", () => {
 
   it("returns OpenAI stream usage", async () => {
     const { app } = await createMockMindServer(config);
-    const response = await app.inject({ method: "POST", url: "/v1/chat/completions", payload: { model: "gpt-4o-mini", stream: true, messages: [{ role: "user", content: "stream" }] } });
+    const response = await app.inject({ method: "POST", url: "/v1/chat/completions", payload: { model: "gpt-4o-mini", stream: true, stream_options: { include_usage: true }, messages: [{ role: "user", content: "stream" }] } });
     expect(response.body).toContain("hello");
     expect(response.body).toContain('"usage"');
+    expect(response.body).toContain('"choices":[]');
     expect(response.body).toContain("[DONE]");
     await app.close();
   });
@@ -93,7 +94,7 @@ describe("protocol capabilities", () => {
 
   it("returns DashScope errors", async () => {
     const { app } = await createMockMindServer(config);
-    const response = await app.inject({ method: "POST", url: "/api/v1/services/aigc/text-generation/generation", payload: { model: "qwen-plus", input: { messages: [{ role: "user", content: "error" }] } } });
+    const response = await app.inject({ method: "POST", url: "/api/v1/services/aigc/text-generation/generation", payload: { model: "qwen3.6-plus", input: { messages: [{ role: "user", content: "error" }] } } });
     expect(response.statusCode).toBe(429);
     expect(response.json().code).toBe("Throttling");
     await app.close();

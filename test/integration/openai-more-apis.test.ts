@@ -33,6 +33,15 @@ describe("OpenAI additional APIs", () => {
     await app.close();
   });
 
+  it("serves Alibaba compatible Responses API", async () => {
+    const { app } = await createMockMindServer(config);
+    const response = await app.inject({ method: "POST", url: "/compatible-mode/v1/responses", payload: { model: "qwen3.6-plus", input: "hello" } });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().object).toBe("response");
+    expect(response.json().usage.input_tokens).toBeGreaterThan(0);
+    await app.close();
+  });
+
   it("serves image generation", async () => {
     const { app } = await createMockMindServer(config);
     const response = await app.inject({ method: "POST", url: "/v1/images/generations", payload: { model: "gpt-image-1", prompt: "cat" } });

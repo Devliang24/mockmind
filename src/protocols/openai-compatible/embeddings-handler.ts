@@ -7,6 +7,7 @@ import { delay } from "../../shared/time.js";
 import { formatEmbedding, formatOpenAIError } from "./adapter.js";
 import type { ProtocolHandlerContext } from "../types.js";
 import { isString, requireFields } from "../validation.js";
+import { estimateTokenCount } from "../usage.js";
 
 type EmbeddingBody = {
   model?: string;
@@ -45,7 +46,8 @@ export async function handleOpenAIEmbeddings(
     context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
     return reply.code(result.error.status).send(responseBody);
   }
-  const responseBody = formatEmbedding(body.model ?? "text-embedding-3-small", result.embedding ?? [0.0123, -0.0456, 0.0789]);
+  const promptTokens = result.usage?.promptTokens ?? estimateTokenCount(body.input);
+  const responseBody = formatEmbedding(body.model ?? "text-embedding-3-small", result.embedding ?? [0.0123, -0.0456, 0.0789], promptTokens);
   context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
   return reply.send(responseBody);
 }
