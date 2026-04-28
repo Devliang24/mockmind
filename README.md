@@ -95,7 +95,7 @@ http://127.0.0.1:4000/v1
 说明：
 
 - Docker 镜像使用 `package-lock.json` 对应的依赖版本构建。
-- Docker 构建阶段会安装 `python3`、`make`、`g++` 以支持 `better-sqlite3` 原生依赖，并将裁剪后的生产依赖复制到运行镜像。
+- Dockerfile 强绑定清华 Debian 源；构建阶段会安装 `python3`、`make`、`g++` 以支持 `better-sqlite3` 原生依赖，并将裁剪后的生产依赖复制到运行镜像。
 - 运行阶段使用非 root 的 `node` 用户。
 - `docker-compose.yml` 会把当前目录下的 `mockmind.yaml` 只读挂载到容器内，并用 `mockmind-data` volume 持久化 SQLite 数据。
 

@@ -1,4 +1,17 @@
-FROM node:20-slim AS deps
+FROM node:20-slim AS base
+RUN set -eux; \
+  for file in /etc/apt/sources.list /etc/apt/sources.list.d/debian.sources; do \
+    if [ -f "$file" ]; then \
+      sed -i \
+        -e 's|http://deb.debian.org/debian|http://mirrors.tuna.tsinghua.edu.cn/debian|g' \
+        -e 's|http://security.debian.org/debian-security|http://mirrors.tuna.tsinghua.edu.cn/debian-security|g' \
+        -e 's|http://deb.debian.org/debian-security|http://mirrors.tuna.tsinghua.edu.cn/debian-security|g' \
+        "$file"; \
+    fi; \
+  done; \
+  find /etc/apt -type f \( -name "*.list" -o -name "*.sources" \) -exec grep -H "mirrors.tuna.tsinghua.edu.cn" {} +
+
+FROM base AS deps
 WORKDIR /app
 RUN apt-get update \
   && apt-get install -y --no-install-recommends python3 make g++ \
@@ -15,7 +28,7 @@ FROM deps AS prod-deps
 WORKDIR /app
 RUN npm prune --omit=dev && npm cache clean --force
 
-FROM node:20-slim
+FROM base
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --chown=node:node package*.json ./
