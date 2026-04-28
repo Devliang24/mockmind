@@ -50,6 +50,7 @@ describe("web ui", () => {
     expect(js.body).toContain("完整 cURL");
     expect(js.body).toContain("请求体");
     expect(js.body).toContain("响应体");
+    expect(js.body).not.toContain("命中场景");
     expect(js.body).toContain("requestCurl(request)");
     expect(js.body).toContain("responseBody");
     expect(js.body).toContain("request-id");

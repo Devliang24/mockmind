@@ -350,7 +350,7 @@ const renderers = {
     return pageHeader(provider.displayName) + providerHeader(provider) + protocolTabs(protocols) + protocolModelSection(provider, protocol) + (selectedRoute ? endpointDetail(selectedRoute, protocol) : '<p>该供应商暂无可展示端点。</p>');
   },
   requests() {
-    const requests = filtered(state.data.requests, [r => r.id, r => r.provider, r => r.endpoint, r => r.model, r => r.matchedScenarioId, r => r.status]);
+    const requests = filtered(state.data.requests, [r => r.id, r => r.provider, r => r.endpoint, r => r.model, r => r.status]);
     const selected = selectedRequest(requests);
     return pageHeader('请求记录') + requestsTable(requests) + requestDrawer(selected);
   }
@@ -517,7 +517,7 @@ function table(rows, className = '') { return '<table' + (className ? ' class="'
 function badges(values = []) { return values.length ? values.map((v) => '<span class="badge">' + esc(v) + '</span>').join('') : '<span class="muted">-</span>'; }
 function requestsTable(requests) {
   if (!requests.length) return '<div class="requests-empty">暂无请求记录。</div>';
-  return '<table><thead><tr><th>ID</th><th>状态</th><th>提供商</th><th>模型</th><th>端点</th><th>命中场景</th><th>耗时</th></tr></thead><tbody>' + requests.slice().reverse().map((r) => '<tr><td><button class="request-id" data-request-id="' + esc(r.id) + '">' + esc(r.id) + '</button></td><td>' + esc(r.status) + '</td><td>' + esc(r.provider) + '</td><td>' + esc(r.model || '-') + '</td><td><code>' + esc(r.endpoint) + '</code></td><td>' + esc(r.matchedScenarioId || '-') + '</td><td>' + esc(r.durationMs) + 'ms</td></tr>').join('') + '</tbody></table>';
+  return '<table><thead><tr><th>ID</th><th>状态</th><th>提供商</th><th>模型</th><th>端点</th><th>耗时</th></tr></thead><tbody>' + requests.slice().reverse().map((r) => '<tr><td><button class="request-id" data-request-id="' + esc(r.id) + '">' + esc(r.id) + '</button></td><td>' + esc(r.status) + '</td><td>' + esc(r.provider) + '</td><td>' + esc(r.model || '-') + '</td><td><code>' + esc(r.endpoint) + '</code></td><td>' + esc(r.durationMs) + 'ms</td></tr>').join('') + '</tbody></table>';
 }
 function selectedRequest(requests) {
   const source = requests.length ? requests : state.data.requests || [];
@@ -527,7 +527,7 @@ function selectedRequest(requests) {
 function requestDrawer(request) {
   if (!request) return '';
   return '<div class="drawer-backdrop" aria-hidden="true"></div><aside class="request-drawer" role="dialog" aria-modal="true" aria-label="请求详情"><div class="drawer-head"><div><h2>请求详情 ' + esc(request.id) + '</h2><p>' + esc(request.provider) + ' · ' + esc(request.endpoint) + ' · ' + esc(request.status) + '</p></div><button class="drawer-close" type="button" title="关闭" aria-label="关闭">×</button></div><div class="drawer-body">' +
-    '<div class="drawer-section"><h3>摘要</h3>' + table([['ID', request.id], ['状态', request.status], ['提供商', request.provider], ['模型', request.model || '-'], ['端点', request.endpoint], ['命中场景', request.matchedScenarioId || '-'], ['流式', request.stream ? '是' : '否'], ['耗时', request.durationMs + 'ms']]) + '</div>' +
+    '<div class="drawer-section"><h3>摘要</h3>' + table([['ID', request.id], ['状态', request.status], ['提供商', request.provider], ['模型', request.model || '-'], ['端点', request.endpoint], ['流式', request.stream ? '是' : '否'], ['耗时', request.durationMs + 'ms']]) + '</div>' +
     '<div class="drawer-section">' + codeBlock('完整 cURL', requestCurl(request)) + '</div>' +
     '<div class="drawer-section">' + codeBlock('请求体', prettyJson(request.request?.rawBody ?? {})) + '</div>' +
     '<div class="drawer-section">' + codeBlock('响应体', prettyJson(request.responseBody ?? { note: 'Response body was not recorded for this request.' })) + '</div>' +
