@@ -57,10 +57,10 @@ a:hover { text-decoration: underline; }
 .provider-link { color: var(--muted); font-size: 14px; font-weight: 500; }
 .content { min-width: 0; min-height: 0; padding: 0; overflow: auto; }
 .sidebar-title { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin: 4px 0 8px; }
-h1 { margin: 0; font-size: 26px; line-height: 1.25; font-weight: 600; }
+h1 { margin: 0; font-size: 18px; line-height: 1.25; font-weight: 600; }
 h2 { margin: 20px 0 10px; font-size: 18px; font-weight: 600; }
 .panel > h2:first-child { margin-top: 0; }
-.page-header { display: flex; align-items: center; min-height: 40px; margin: 0 0 16px; }
+.page-header { display: flex; align-items: center; min-height: 40px; margin: 0 0 18px; padding: 0 0 16px; border-bottom: 1px solid var(--border); }
 .page-header h1 { margin: 0; }
 h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--text); }
 input { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; min-width: 320px; outline: none; }
