@@ -9,7 +9,7 @@ function config(sqlitePath: string): MockMindConfig {
   return {
     server: { host: "127.0.0.1", port: 0 },
     providers: { enabled: "all" },
-    auth: { mode: "permissive", apiKeys: ["test-key"] },
+    auth: { mode: "permissive", apiKeys: ["123456"] },
     models: [{ id: "gpt-5.5", provider: "openai" }],
     defaults: { latencyMs: 0, streamChunkDelayMs: 0 },
     persistence: { enabled: true, driver: "sqlite", sqlite: { path: sqlitePath } },

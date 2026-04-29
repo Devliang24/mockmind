@@ -346,7 +346,7 @@ server:
 auth:
   mode: permissive
   apiKeys:
-    - test-key
+    - "123456"
 
 models:
   - id: gpt-4o-mini
@@ -1015,7 +1015,7 @@ OpenAI SDK 示例：
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  apiKey: "test-key",
+  apiKey: "123456",
   baseURL: "http://127.0.0.1:4000/v1",
 });
 
@@ -1147,7 +1147,7 @@ afterAll(async () => {
 
 ```http
 POST /chat/completions
-Authorization: Bearer test-key
+Authorization: Bearer 123456
 Content-Type: application/json
 ```
 
@@ -1271,7 +1271,7 @@ data: [DONE]
 
 ```http
 POST /v1/embeddings
-Authorization: Bearer test-key
+Authorization: Bearer 123456
 Content-Type: application/json
 ```
 
@@ -1310,7 +1310,7 @@ DeepSeek 按官网公开的 OpenAI-compatible 路径接入，并支持 `reasonin
 
 ```http
 POST /chat/completions
-Authorization: Bearer test-key
+Authorization: Bearer 123456
 Content-Type: application/json
 ```
 
@@ -1404,7 +1404,7 @@ Kimi 使用 OpenAI-compatible 风格，重点测试长上下文和普通 chat �
 
 ```http
 POST /compatible-mode/v1/chat/completions
-Authorization: Bearer test-key
+Authorization: Bearer 123456
 Content-Type: application/json
 ```
 
@@ -1449,7 +1449,7 @@ Content-Type: application/json
 
 ```http
 POST /api/v1/services/aigc/text-generation/generation
-Authorization: Bearer test-key
+Authorization: Bearer 123456
 Content-Type: application/json
 ```
 
@@ -1543,7 +1543,7 @@ Content-Type: application/json
 
 ```http
 POST /hunyuan/v1/chat/completions
-Authorization: Bearer test-key
+Authorization: Bearer 123456
 Content-Type: application/json
 ```
 
@@ -1603,7 +1603,7 @@ Content-Type: application/json
 
 ```http
 POST /api/paas/v4/chat/completions
-Authorization: Bearer test-key
+Authorization: Bearer 123456
 Content-Type: application/json
 ```
 
@@ -1651,7 +1651,7 @@ Volcengine Ark / Doubao 不在当前实现计划内。
 
 ```http
 POST /v1/text/chatcompletion_v2
-Authorization: Bearer test-key
+Authorization: Bearer 123456
 Content-Type: application/json
 ```
 
@@ -1699,7 +1699,7 @@ Content-Type: application/json
 
 ```http
 POST /v1/messages
-x-api-key: test-key
+x-api-key: 123456
 anthropic-version: 2023-06-01
 Content-Type: application/json
 ```
@@ -2919,7 +2919,7 @@ mockmind start
 
 ```bash
 curl http://127.0.0.1:4000/chat/completions \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "deepseek-v4-flash",
@@ -3173,7 +3173,7 @@ providers:
 auth:
   mode: permissive
   apiKeys:
-    - test-key
+    - "123456"
 
 models:
   - id: gpt-4o-mini

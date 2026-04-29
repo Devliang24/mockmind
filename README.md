@@ -15,7 +15,7 @@ npm run dev -- start --config mockmind.yaml --port 4000
 
 ```bash
 curl http://127.0.0.1:4000/v1/chat/completions \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "gpt-5.5",
@@ -216,14 +216,14 @@ MockMind 的严格鉴权只接受各家官网公开的 API Key 传递方式：
 
 | Provider | 官方鉴权方式 | MockMind strict 行为 |
 |---|---|---|
-| OpenAI | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
-| DeepSeek | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
-| Moonshot / Kimi | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
-| Zhipu GLM / Coding Plan | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
-| Alibaba Bailian / DashScope | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
-| MiniMax | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
-| Anthropic | `x-api-key: <API_KEY>`，并按 Messages API 要求携带 `anthropic-version` | 只接受 `x-api-key` |
-| Gemini | `x-goog-api-key: <API_KEY>`，REST API 同时支持 `?key=<API_KEY>` | 接受 `x-goog-api-key` 或 `?key=` |
+| OpenAI | `Authorization: Bearer 123456` | 只接受 Bearer |
+| DeepSeek | `Authorization: Bearer 123456` | 只接受 Bearer |
+| Moonshot / Kimi | `Authorization: Bearer 123456` | 只接受 Bearer |
+| Zhipu GLM / Coding Plan | `Authorization: Bearer 123456` | 只接受 Bearer |
+| Alibaba Bailian / DashScope | `Authorization: Bearer 123456` | 只接受 Bearer |
+| MiniMax | `Authorization: Bearer 123456` | 只接受 Bearer |
+| Anthropic | `x-api-key: 123456`，并按 Messages API 要求携带 `anthropic-version` | 只接受 `x-api-key` |
+| Gemini | `x-goog-api-key: 123456`，REST API 同时支持 `?key=123456` | 接受 `x-goog-api-key` 或 `?key=` |
 
 ## Token 用量
 
@@ -238,7 +238,7 @@ MockMind 的严格鉴权只接受各家官网公开的 API Key 传递方式：
 
 ```bash
 curl http://127.0.0.1:4000/v1/responses \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "gpt-5.5",
@@ -250,7 +250,7 @@ curl http://127.0.0.1:4000/v1/responses \
 
 ```bash
 curl http://127.0.0.1:4000/v1/images/generations \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "gpt-image-1",
@@ -262,7 +262,7 @@ curl http://127.0.0.1:4000/v1/images/generations \
 
 ```bash
 curl http://127.0.0.1:4000/v1/audio/speech \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "gpt-4o-mini-tts",
@@ -275,7 +275,7 @@ curl http://127.0.0.1:4000/v1/audio/speech \
 
 ```bash
 curl http://127.0.0.1:4000/v1/moderations \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "omni-moderation-latest",
@@ -287,10 +287,10 @@ curl http://127.0.0.1:4000/v1/moderations \
 
 ```bash
 curl http://127.0.0.1:4000/v1/files \
-  -H 'Authorization: Bearer test-key'
+  -H 'Authorization: Bearer 123456'
 
 curl http://127.0.0.1:4000/v1/batches \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "input_file_id": "file-mock-0001",
@@ -303,7 +303,7 @@ curl http://127.0.0.1:4000/v1/batches \
 
 ```bash
 curl http://127.0.0.1:4000/v1/chat/completions \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "gpt-5.5",
@@ -315,7 +315,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
 
 ```bash
 curl -N http://127.0.0.1:4000/v1/chat/completions \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "gpt-5.5",
@@ -345,7 +345,7 @@ data: [DONE]
 
 ```bash
 curl http://127.0.0.1:4000/v1/chat/completions \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "gpt-5.5",
@@ -400,7 +400,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
 
 ```bash
 curl -N http://127.0.0.1:4000/v1/chat/completions \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "gpt-5.5",
@@ -419,7 +419,7 @@ curl -N http://127.0.0.1:4000/v1/chat/completions \
 
 ```bash
 curl -i http://127.0.0.1:4000/v1/chat/completions \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "gpt-5.5",
@@ -444,7 +444,7 @@ curl -i http://127.0.0.1:4000/v1/chat/completions \
 
 ```bash
 curl http://127.0.0.1:4000/v1/embeddings \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "text-embedding-3-small",
@@ -461,7 +461,7 @@ DeepSeek 使用官方 OpenAI 兼容端点。
 
 ```bash
 curl http://127.0.0.1:4000/chat/completions \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "deepseek-v4-pro",
@@ -492,7 +492,7 @@ curl http://127.0.0.1:4000/chat/completions \
 
 ```bash
 curl http://127.0.0.1:4000/v1/chat/completions \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "kimi-k2.6",
@@ -515,7 +515,7 @@ curl http://127.0.0.1:4000/v1/chat/completions \
 
 ```bash
 curl http://127.0.0.1:4000/api/paas/v4/chat/completions \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "glm-5.1",
@@ -540,7 +540,7 @@ curl http://127.0.0.1:4000/api/paas/v4/chat/completions \
 
 ```bash
 curl http://127.0.0.1:4000/api/coding/paas/v4/chat/completions \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "GLM-5.1",
@@ -566,7 +566,7 @@ curl http://127.0.0.1:4000/api/coding/paas/v4/chat/completions \
 
 ```bash
 curl http://127.0.0.1:4000/v1/messages \
-  -H 'x-api-key: test-key' \
+  -H 'x-api-key: 123456' \
   -H 'anthropic-version: 2023-06-01' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -593,7 +593,7 @@ curl http://127.0.0.1:4000/v1/messages \
 
 ```bash
 curl http://127.0.0.1:4000/v1/messages \
-  -H 'x-api-key: test-key' \
+  -H 'x-api-key: 123456' \
   -H 'anthropic-version: 2023-06-01' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -625,7 +625,7 @@ curl http://127.0.0.1:4000/v1/messages \
 
 ```bash
 curl -N http://127.0.0.1:4000/v1/messages \
-  -H 'x-api-key: test-key' \
+  -H 'x-api-key: 123456' \
   -H 'anthropic-version: 2023-06-01' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -646,7 +646,7 @@ curl -N http://127.0.0.1:4000/v1/messages \
 
 ```bash
 curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:generateContent \
-  -H 'x-goog-api-key: test-key' \
+  -H 'x-goog-api-key: 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "contents": [
@@ -679,7 +679,7 @@ curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:generateContent 
 
 ```bash
 curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:generateContent \
-  -H 'x-goog-api-key: test-key' \
+  -H 'x-goog-api-key: 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "contents": [
@@ -725,7 +725,7 @@ curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:generateContent 
 
 ```bash
 curl -N 'http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse' \
-  -H 'x-goog-api-key: test-key' \
+  -H 'x-goog-api-key: 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "contents": [{"role":"user","parts":[{"text":"hello"}]}]
@@ -747,7 +747,7 @@ data: {"candidates":[{"content":{"role":"model","parts":[{"text":" from Gemini /
 
 ```bash
 curl http://127.0.0.1:4000/v1/text/chatcompletion_v2 \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "MiniMax-M2.7",
@@ -811,7 +811,7 @@ MiniMax 也支持 `"stream": true` 的 SSE 流式响应，并通过 `base_resp` 
 
 ```bash
 curl http://127.0.0.1:4000/api/v1/services/aigc/text-generation/generation \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "qwen3.6-plus",
@@ -855,7 +855,7 @@ curl http://127.0.0.1:4000/api/v1/services/aigc/text-generation/generation \
 
 ```bash
 curl -N http://127.0.0.1:4000/api/v1/services/aigc/text-generation/generation \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "qwen3.6-plus",
@@ -884,7 +884,7 @@ data: {"request_id":"req_mock_dashscope_0001","output":{"choices":[{"finish_reas
 
 ```bash
 curl http://127.0.0.1:4000/compatible-api/v1/reranks \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "qwen3-rerank",
@@ -917,7 +917,7 @@ curl http://127.0.0.1:4000/compatible-api/v1/reranks \
 
 ```bash
 curl http://127.0.0.1:4000/api/v1/services/rerank/text-rerank/text-rerank \
-  -H 'Authorization: Bearer test-key' \
+  -H 'Authorization: Bearer 123456' \
   -H 'Content-Type: application/json' \
   -d '{
     "model": "gte-rerank-v2",

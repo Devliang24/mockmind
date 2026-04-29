@@ -5,7 +5,7 @@ import type { MockMindConfig } from "../../src/core/scenario/types.js";
 const config: MockMindConfig = {
   server: { host: "127.0.0.1", port: 0 },
   providers: { enabled: "all" },
-  auth: { mode: "permissive", apiKeys: ["test-key"] },
+  auth: { mode: "permissive", apiKeys: ["123456"] },
   models: [
     { id: "deepseek-v4-pro", provider: "deepseek" },
     { id: "kimi-k2.6", provider: "moonshot" },

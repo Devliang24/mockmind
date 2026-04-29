@@ -5,7 +5,7 @@ import type { MockMindConfig } from "../../src/core/scenario/types.js";
 const config: MockMindConfig = {
   server: { host: "127.0.0.1", port: 0 },
   providers: { enabled: "all" },
-  auth: { mode: "permissive", apiKeys: ["test-key"] },
+  auth: { mode: "permissive", apiKeys: ["123456"] },
   models: [
     { id: "claude-sonnet-4-5-20250929", provider: "anthropic" },
     { id: "gemini-3-flash-preview", provider: "gemini" },

@@ -12,7 +12,7 @@ providers:
 auth:
   mode: permissive
   apiKeys:
-    - test-key
+    - "123456"
 
 models:
   - id: gpt-5.5

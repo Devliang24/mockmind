@@ -73,7 +73,7 @@ export const configSchema = z.object({
   }).prefault({}),
   auth: z.object({
     mode: z.enum(["disabled", "permissive", "strict"]).default("permissive"),
-    apiKeys: z.array(z.string()).default(["test-key"])
+    apiKeys: z.array(z.string()).default(["123456"])
   }).prefault({}),
   models: z.array(z.object({
     id: z.string(),

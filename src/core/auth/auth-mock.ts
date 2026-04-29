@@ -28,11 +28,11 @@ export function checkProviderAuth(
   return false;
 }
 
-export function authInfoForProvider(provider: Provider): ProviderAuthInfo {
+export function authInfoForProvider(provider: Provider, apiKey = "123456"): ProviderAuthInfo {
   if (provider === "anthropic") {
     return {
       scheme: "x-api-key",
-      label: "x-api-key: <API_KEY>",
+      label: `x-api-key: ${apiKey}`,
       headers: ["x-api-key"],
       query: []
     };
@@ -40,14 +40,14 @@ export function authInfoForProvider(provider: Provider): ProviderAuthInfo {
   if (provider === "gemini") {
     return {
       scheme: "x-goog-api-key-or-query-key",
-      label: "x-goog-api-key: <API_KEY> 或 ?key=<API_KEY>",
+      label: `x-goog-api-key: ${apiKey} 或 ?key=${apiKey}`,
       headers: ["x-goog-api-key"],
       query: ["key"]
     };
   }
   return {
     scheme: "authorization-bearer",
-    label: "Authorization: Bearer <API_KEY>",
+    label: `Authorization: Bearer ${apiKey}`,
     headers: ["Authorization"],
     query: []
   };

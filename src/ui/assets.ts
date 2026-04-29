@@ -367,7 +367,7 @@ function providerHeader(provider) {
 }
 
 function authLabel(auth) {
-  return auth?.label ?? 'Authorization: Bearer <API_KEY>';
+  return auth?.label ?? 'Authorization: Bearer 123456';
 }
 
 function protocolTabs(protocols) {
@@ -428,11 +428,11 @@ function exampleFor(route) {
   if (route.protocol === 'openai-embeddings') return openAIExample(route, docsUrl, { model: embeddingModel(route.provider), input: 'hello' }, openAIEmbeddingResponse(embeddingModel(route.provider), route), ['model', 'input']);
   if (route.protocol === 'anthropic-messages') {
     const body = { model, max_tokens: 128, messages: [{ role: 'user', content: 'hello' }] };
-    return { docsUrl, headers: ['x-api-key', 'anthropic-version', 'Content-Type'], required: ['model', 'max_tokens', 'messages'], requestBody: body, responseBody: anthropicMessageResponse(model, route), curl: curl(route.path, body, ['x-api-key: test-key', 'anthropic-version: 2023-06-01', 'Content-Type: application/json']), stream: { curl: curl(route.path, { ...body, stream: true }, ['x-api-key: test-key', 'anthropic-version: 2023-06-01', 'Content-Type: application/json']), responseText: anthropicMessageStream(model, route, nl) } };
+    return { docsUrl, headers: ['x-api-key', 'anthropic-version', 'Content-Type'], required: ['model', 'max_tokens', 'messages'], requestBody: body, responseBody: anthropicMessageResponse(model, route), curl: curl(route.path, body, ['x-api-key: 123456', 'anthropic-version: 2023-06-01', 'Content-Type: application/json']), stream: { curl: curl(route.path, { ...body, stream: true }, ['x-api-key: 123456', 'anthropic-version: 2023-06-01', 'Content-Type: application/json']), responseText: anthropicMessageStream(model, route, nl) } };
   }
   if (route.protocol === 'gemini-generate-content') {
     const body = { contents: [{ role: 'user', parts: [{ text: 'hello' }] }] };
-    return { docsUrl, headers: ['x-goog-api-key', 'Content-Type'], required: ['contents'], requestBody: body, responseBody: geminiContentResponse(route, model), curl: curl(route.path.replace(':modelAndMethod', model + ':generateContent'), body, ['x-goog-api-key: test-key', 'Content-Type: application/json']), stream: { curl: curl(route.path.replace(':modelAndMethod', model + ':streamGenerateContent?alt=sse'), body, ['x-goog-api-key: test-key', 'Content-Type: application/json']), responseText: geminiStreamResponse(route, model, nl) } };
+    return { docsUrl, headers: ['x-goog-api-key', 'Content-Type'], required: ['contents'], requestBody: body, responseBody: geminiContentResponse(route, model), curl: curl(route.path.replace(':modelAndMethod', model + ':generateContent'), body, ['x-goog-api-key: 123456', 'Content-Type: application/json']), stream: { curl: curl(route.path.replace(':modelAndMethod', model + ':streamGenerateContent?alt=sse'), body, ['x-goog-api-key: 123456', 'Content-Type: application/json']), responseText: geminiStreamResponse(route, model, nl) } };
   }
   if (route.protocol === 'dashscope-generation') return { docsUrl, headers: ['Authorization', 'Content-Type'], required: ['model', 'input.messages'], requestBody: { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { result_format: 'message' } }, responseBody: dashScopeGenerationResponse(route, model), curl: curl(route.path, { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { result_format: 'message' } }), stream: streamExampleFor(route, { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { incremental_output: true } }, dashScopeGenerationStream(route, model, nl)) };
   if (route.protocol === 'minimax-chat') return { docsUrl, headers: ['Authorization', 'Content-Type'], required: ['model', 'messages'], requestBody: { model, messages: [{ role: 'user', content: 'hello' }] }, responseBody: miniMaxChatResponse(model, route), curl: curl(route.path, { model, messages: [{ role: 'user', content: 'hello' }] }), stream: streamExampleFor(route, { model, messages: [{ role: 'user', content: 'hello' }] }, miniMaxChatStream(model, route, nl)) };
@@ -486,7 +486,7 @@ function modelsResponse(providerId) { const provider = orderedProviders().find((
 function openAIExample(route, docsUrl, requestBody, responseBody, required) {
   return { docsUrl, headers: ['Authorization', 'Content-Type'], required, requestBody, responseBody, curl: curl(route.path, requestBody, undefined, route.method) };
 }
-function curl(path, body, headers = ['Authorization: Bearer test-key', 'Content-Type: application/json'], method = 'POST') {
+function curl(path, body, headers = ['Authorization: Bearer 123456', 'Content-Type: application/json'], method = 'POST') {
   const normalizedPath = path.replace(':modelAndMethod', 'gemini-3-flash-preview:generateContent');
   const baseUrl = currentBaseUrl();
   if (method === 'GET') return 'curl ' + baseUrl + normalizedPath;

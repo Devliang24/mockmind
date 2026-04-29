@@ -5,7 +5,7 @@ import type { MockMindConfig } from "../../src/core/scenario/types.js";
 const config: MockMindConfig = {
   server: { host: "127.0.0.1", port: 0 },
   providers: { enabled: "all" },
-  auth: { mode: "permissive", apiKeys: ["test-key"] },
+  auth: { mode: "permissive", apiKeys: ["123456"] },
   models: [{ id: "gpt-4o-mini", provider: "openai" }],
   defaults: { latencyMs: 0, streamChunkDelayMs: 0 },
   fallback: { enabled: true, response: { type: "text", content: "fallback" } },
@@ -157,12 +157,12 @@ describe("web ui", () => {
     const moonshot = response.json().providers.find((provider: { provider: string }) => provider.provider === "moonshot");
     const aliyun = response.json().providers.find((provider: { provider: string }) => provider.provider === "aliyun-bailian");
     expect(openai.latestModels).toEqual(["gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano"]);
-    expect(openai.auth.label).toBe("Authorization: Bearer <API_KEY>");
+    expect(openai.auth.label).toBe("Authorization: Bearer 123456");
     expect(openai.latestModels).toHaveLength(4);
     expect(anthropic.latestModels).toEqual(["claude-opus-4-1-20250805", "claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"]);
-    expect(anthropic.auth.label).toBe("x-api-key: <API_KEY>");
+    expect(anthropic.auth.label).toBe("x-api-key: 123456");
     expect(gemini.latestModels).toEqual(["gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.5-flash-lite"]);
-    expect(gemini.auth.label).toBe("x-goog-api-key: <API_KEY> 或 ?key=<API_KEY>");
+    expect(gemini.auth.label).toBe("x-goog-api-key: 123456 或 ?key=123456");
     expect(deepseek.latestModels).toEqual(["deepseek-v4-pro", "deepseek-v4-flash"]);
     expect(moonshot.latestModels).toEqual(["kimi-k2.6", "kimi-k2.5", "kimi-k2-thinking", "kimi-k2-thinking-turbo"]);
     expect(aliyun.latestModels).toEqual(["qwen3.6-max-preview", "qwen3.6-plus", "qwen3.6-flash", "qwen3.5-plus"]);

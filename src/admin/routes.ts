@@ -37,7 +37,7 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
       provider: registration.provider,
       displayName: registration.displayName,
       groups: registration.groups,
-      auth: authInfoForProvider(registration.provider),
+      auth: authInfoForProvider(registration.provider, defaultApiKey(context)),
       defaultModels: registration.defaultModels,
       latestModels: registration.latestModels ?? registration.defaultModels,
       configuredModels: context.config.models.filter((model) => model.provider === registration.provider).map((model) => model.id),
@@ -49,7 +49,7 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
     provider: registration.provider,
     displayName: registration.displayName,
     groups: registration.groups,
-    auth: authInfoForProvider(registration.provider),
+    auth: authInfoForProvider(registration.provider, defaultApiKey(context)),
     method: route.method,
     path: route.path,
     protocol: route.protocol,
@@ -61,6 +61,10 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
     return { ok: true };
   });
   app.post("/__admin/reload", async () => ({ ok: false, message: "Reload is not implemented in this MVP." }));
+}
+
+function defaultApiKey(context: ServerContext): string {
+  return context.config.auth.apiKeys[0] ?? "123456";
 }
 
 function packageVersion(): string {

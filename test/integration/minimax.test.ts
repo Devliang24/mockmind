@@ -5,7 +5,7 @@ import type { MockMindConfig } from "../../src/core/scenario/types.js";
 const config: MockMindConfig = {
   server: { host: "127.0.0.1", port: 0 },
   providers: { enabled: "all" },
-  auth: { mode: "permissive", apiKeys: ["test-key"] },
+  auth: { mode: "permissive", apiKeys: ["123456"] },
   models: [{ id: "MiniMax-M2.7", provider: "minimax" }],
   defaults: { latencyMs: 0, streamChunkDelayMs: 0 },
   fallback: { enabled: true, response: { type: "text", content: "fallback" } },
