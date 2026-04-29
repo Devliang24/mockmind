@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { checkAuth } from "../../core/auth/auth-mock.js";
+import { checkProviderAuth } from "../../core/auth/auth-mock.js";
 import { renderResult } from "../../core/renderer/render.js";
 import type { MockRequest, Provider } from "../../core/scenario/types.js";
 import type { ServerContext } from "../../server/context.js";
@@ -28,7 +28,7 @@ export async function handleOpenAICompatibleChat(
   provider: Provider,
   endpoint: string
 ): Promise<unknown> {
-  if (!checkAuth(context.config, request, reply)) return;
+  if (!checkProviderAuth(context.config, request, reply, provider, formatOpenAIError(401, "invalid_api_key", "Invalid API key", "authentication_error"))) return;
   const validationError = requireFields(request.body, [
     { path: "model", validate: isString },
     { path: "messages", validate: isArray }

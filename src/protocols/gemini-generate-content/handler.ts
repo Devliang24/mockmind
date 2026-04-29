@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { checkAuth } from "../../core/auth/auth-mock.js";
+import { checkProviderAuth } from "../../core/auth/auth-mock.js";
 import { renderResult } from "../../core/renderer/render.js";
 import type { MockRequest } from "../../core/scenario/types.js";
 import { requestHeaders, requestQuery } from "../../shared/http.js";
@@ -16,7 +16,7 @@ type GeminiBody = {
 
 export async function handleGeminiGenerateContent(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
   const { context, endpoint } = handlerContext;
-  if (!checkAuth(context.config, request, reply)) return;
+  if (!checkProviderAuth(context.config, request, reply, "gemini", formatGeminiError(401, "API key not valid. Please pass a valid API key.", "UNAUTHENTICATED"))) return;
   const validationError = requireFields(request.body, [{ path: "contents", validate: isArray }]);
   if (validationError) return reply.code(validationError.status).send(formatGeminiError(validationError.status, validationError.message, validationError.code));
   const started = Date.now();

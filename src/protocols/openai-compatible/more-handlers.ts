@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { checkAuth } from "../../core/auth/auth-mock.js";
+import { checkProviderAuth } from "../../core/auth/auth-mock.js";
 import { renderResult } from "../../core/renderer/render.js";
 import type { MockRequest } from "../../core/scenario/types.js";
 import { requestHeaders, requestQuery } from "../../shared/http.js";
@@ -11,6 +11,7 @@ import { formatOpenAIError } from "./adapter.js";
 type Body = Record<string, unknown>;
 
 export async function handleOpenAIImages(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
+  if (!checkOpenAICompatibleAuth(handlerContext, request, reply)) return;
   const validationError = requireFields(request.body, [{ path: "prompt", validate: isString }]);
   if (validationError) return reply.code(validationError.status).send(formatOpenAIError(validationError.status, validationError.code, validationError.message, validationError.type));
   return sendRendered(handlerContext, request, reply, "image", (body, content) => ({
@@ -20,6 +21,7 @@ export async function handleOpenAIImages(handlerContext: ProtocolHandlerContext,
 }
 
 export async function handleOpenAIAudio(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
+  if (!checkOpenAICompatibleAuth(handlerContext, request, reply)) return;
   const endpoint = handlerContext.endpoint;
   const fields = endpoint.endsWith("/speech")
     ? [{ path: "model", validate: isString }, { path: "input", validate: isString }, { path: "voice", validate: isString }]
@@ -31,6 +33,7 @@ export async function handleOpenAIAudio(handlerContext: ProtocolHandlerContext, 
 }
 
 export async function handleOpenAIModerations(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
+  if (!checkOpenAICompatibleAuth(handlerContext, request, reply)) return;
   const validationError = requireFields(request.body, [{ path: "model", validate: isString }, { path: "input" }]);
   if (validationError) return reply.code(validationError.status).send(formatOpenAIError(validationError.status, validationError.code, validationError.message, validationError.type));
   return sendRendered(handlerContext, request, reply, "moderation", () => ({
@@ -41,7 +44,7 @@ export async function handleOpenAIModerations(handlerContext: ProtocolHandlerCon
 }
 
 export async function handleOpenAIFiles(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
-  if (!checkAuth(handlerContext.context.config, request, reply)) return;
+  if (!checkOpenAICompatibleAuth(handlerContext, request, reply)) return;
   if (request.method === "POST") {
     const validationError = validateJsonObjectBody(request.body);
     if (validationError) return reply.code(validationError.status).send(formatOpenAIError(validationError.status, validationError.code, validationError.message, validationError.type));
@@ -55,7 +58,7 @@ export async function handleOpenAIFiles(handlerContext: ProtocolHandlerContext, 
 }
 
 export async function handleOpenAIBatch(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
-  if (!checkAuth(handlerContext.context.config, request, reply)) return;
+  if (!checkOpenAICompatibleAuth(handlerContext, request, reply)) return;
   if (request.method === "POST" && handlerContext.routePath === "/v1/batches") {
     const validationError = requireFields(request.body, [
       { path: "input_file_id", validate: isString },
@@ -97,7 +100,6 @@ async function sendRendered(
   format: (body: Body, content: string) => unknown
 ): Promise<unknown> {
   const { context, provider, endpoint } = handlerContext;
-  if (!checkAuth(context.config, request, reply)) return;
   const body = request.body as Body;
   const mockRequest: MockRequest = {
     provider,
@@ -120,6 +122,16 @@ async function sendRendered(
   const responseBody = format(body, result.content ?? "");
   context.recorder.add({ provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: 0, stream: false, request: mockRequest, responseBody });
   return reply.send(responseBody);
+}
+
+function checkOpenAICompatibleAuth(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): boolean {
+  return checkProviderAuth(
+    handlerContext.context.config,
+    request,
+    reply,
+    handlerContext.provider,
+    formatOpenAIError(401, "invalid_api_key", "Invalid API key", "authentication_error")
+  );
 }
 
 function fileObject(id: string): Record<string, unknown> {

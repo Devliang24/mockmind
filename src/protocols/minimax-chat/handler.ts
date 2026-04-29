@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { checkAuth } from "../../core/auth/auth-mock.js";
+import { checkProviderAuth } from "../../core/auth/auth-mock.js";
 import { renderResult } from "../../core/renderer/render.js";
 import type { MockRequest } from "../../core/scenario/types.js";
 import { requestHeaders, requestQuery } from "../../shared/http.js";
@@ -19,7 +19,7 @@ type MiniMaxBody = {
 
 export async function handleMiniMaxChat(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
   const { context, provider, endpoint } = handlerContext;
-  if (!checkAuth(context.config, request, reply)) return;
+  if (!checkProviderAuth(context.config, request, reply, provider, formatMiniMaxError("1001", "Invalid API key"))) return;
   const validationError = requireFields(request.body, [
     { path: "model", validate: isString },
     { path: "messages", validate: isArray }

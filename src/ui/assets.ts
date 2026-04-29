@@ -363,7 +363,11 @@ function pageHeader(title) {
 }
 
 function providerHeader(provider) {
-  return table([['Provider', provider.provider], ['分组', provider.groups.join(', ')], ['Base URL', protocolBaseUrl()], ['官方文档', '<a href="' + providersDocs[provider.provider] + '" target="_blank">' + providersDocs[provider.provider] + '</a>']], 'provider-meta');
+  return table([['Provider', provider.provider], ['分组', provider.groups.join(', ')], ['Base URL', protocolBaseUrl()], ['鉴权', authLabel(provider.auth)], ['官方文档', '<a href="' + providersDocs[provider.provider] + '" target="_blank">' + providersDocs[provider.provider] + '</a>']], 'provider-meta');
+}
+
+function authLabel(auth) {
+  return auth?.label ?? 'Authorization: Bearer <API_KEY>';
 }
 
 function protocolTabs(protocols) {
@@ -428,7 +432,7 @@ function exampleFor(route) {
   }
   if (route.protocol === 'gemini-generate-content') {
     const body = { contents: [{ role: 'user', parts: [{ text: 'hello' }] }] };
-    return { docsUrl, headers: ['Content-Type'], required: ['contents'], requestBody: body, responseBody: geminiContentResponse(route, model), curl: curl(route.path.replace(':modelAndMethod', model + ':generateContent'), body, ['Content-Type: application/json']), stream: { curl: curl(route.path.replace(':modelAndMethod', model + ':streamGenerateContent?alt=sse'), body, ['Content-Type: application/json']), responseText: geminiStreamResponse(route, model, nl) } };
+    return { docsUrl, headers: ['x-goog-api-key', 'Content-Type'], required: ['contents'], requestBody: body, responseBody: geminiContentResponse(route, model), curl: curl(route.path.replace(':modelAndMethod', model + ':generateContent'), body, ['x-goog-api-key: test-key', 'Content-Type: application/json']), stream: { curl: curl(route.path.replace(':modelAndMethod', model + ':streamGenerateContent?alt=sse'), body, ['x-goog-api-key: test-key', 'Content-Type: application/json']), responseText: geminiStreamResponse(route, model, nl) } };
   }
   if (route.protocol === 'dashscope-generation') return { docsUrl, headers: ['Authorization', 'Content-Type'], required: ['model', 'input.messages'], requestBody: { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { result_format: 'message' } }, responseBody: dashScopeGenerationResponse(route, model), curl: curl(route.path, { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { result_format: 'message' } }), stream: streamExampleFor(route, { model, input: { messages: [{ role: 'user', content: 'hello' }] }, parameters: { incremental_output: true } }, dashScopeGenerationStream(route, model, nl)) };
   if (route.protocol === 'minimax-chat') return { docsUrl, headers: ['Authorization', 'Content-Type'], required: ['model', 'messages'], requestBody: { model, messages: [{ role: 'user', content: 'hello' }] }, responseBody: miniMaxChatResponse(model, route), curl: curl(route.path, { model, messages: [{ role: 'user', content: 'hello' }] }), stream: streamExampleFor(route, { model, messages: [{ role: 'user', content: 'hello' }] }, miniMaxChatStream(model, route, nl)) };
@@ -554,7 +558,7 @@ function requestDrawer(request) {
 }
 function requestCurl(request) {
   const method = request.request?.method || 'POST';
-  const url = currentBaseUrl() + (request.endpoint || '');
+  const url = requestUrl(request);
   const headers = replayHeaders(request.request?.headers || {});
   const body = request.request?.rawBody;
   const slash = String.fromCharCode(92);
@@ -565,8 +569,13 @@ function requestCurl(request) {
   if (method !== 'GET' && body !== undefined) lines.push("  -d '" + prettyJson(body).replace(/'/g, "'\\\\''") + "'");
   return lines.map((line, index) => index < lines.length - 1 ? line + ' ' + slash : line).join(nl);
 }
+function requestUrl(request) {
+  const query = request.request?.query || {};
+  const params = Object.entries(query).filter(([, value]) => value !== undefined && value !== null && value !== '').map(([key, value]) => encodeURIComponent(key) + '=' + encodeURIComponent(String(value)));
+  return currentBaseUrl() + (request.endpoint || '') + (params.length ? '?' + params.join('&') : '');
+}
 function replayHeaders(headers) {
-  const wanted = ['authorization', 'x-api-key', 'anthropic-version', 'content-type'];
+  const wanted = ['authorization', 'x-api-key', 'x-goog-api-key', 'anthropic-version', 'content-type'];
   return wanted.map((name) => [name, headers[name]]).filter(([, value]) => value);
 }
 function esc(value) { return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }

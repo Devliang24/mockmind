@@ -38,6 +38,8 @@ describe("web ui", () => {
     expect(js.body).toContain("非流式示例");
     expect(js.body).toContain("流式示例");
     expect(js.body).toContain("Base URL");
+    expect(js.body).toContain("鉴权");
+    expect(js.body).toContain("authLabel(provider.auth)");
     expect(js.body).toContain("currentBaseUrl()");
     expect(js.body).toContain("return 'curl ' + baseUrl + normalizedPath");
     expect(js.body).toContain("inline-copy-btn");
@@ -52,6 +54,7 @@ describe("web ui", () => {
     expect(js.body).toContain("响应体");
     expect(js.body).not.toContain("命中场景");
     expect(js.body).toContain("requestCurl(request)");
+    expect(js.body).toContain("x-goog-api-key");
     expect(js.body).toContain("responseBody");
     expect(js.body).toContain("request-id");
     expect(js.body).toContain("model-chip");
@@ -75,6 +78,7 @@ describe("web ui", () => {
     expect(js.body).toContain("rerankRequestBody(route, model)");
     expect(js.body).toContain("input.query");
     expect(js.body).toContain("return_documents");
+    expect(js.body).toContain("requestUrl(request)");
     expect(js.body).toContain("stream_options");
     expect(js.body).toContain("reasoning_content");
     expect(js.body).toContain("thinking_delta");
@@ -135,6 +139,7 @@ describe("web ui", () => {
     expect(response.statusCode).toBe(200);
     const routes = response.json();
     expect(routes[0]).toMatchObject({ provider: expect.any(String), displayName: expect.any(String), method: expect.any(String), path: expect.any(String), protocol: expect.any(String), endpoint: expect.any(String) });
+    expect(routes[0].auth).toMatchObject({ label: expect.any(String), headers: expect.any(Array) });
     expect(routes.some((route: { provider: string; protocol: string }) => route.provider === "openai" && route.protocol === "openai-compatible")).toBe(true);
     expect(routes.some((route: { provider: string; path: string }) => route.provider === "zhipu" && route.path === "/api/coding/paas/v4/chat/completions")).toBe(true);
     expect(routes.find((route: { path: string }) => route.path === "/v1/models")?.description).toBe("Models");
@@ -152,9 +157,12 @@ describe("web ui", () => {
     const moonshot = response.json().providers.find((provider: { provider: string }) => provider.provider === "moonshot");
     const aliyun = response.json().providers.find((provider: { provider: string }) => provider.provider === "aliyun-bailian");
     expect(openai.latestModels).toEqual(["gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano"]);
+    expect(openai.auth.label).toBe("Authorization: Bearer <API_KEY>");
     expect(openai.latestModels).toHaveLength(4);
     expect(anthropic.latestModels).toEqual(["claude-opus-4-1-20250805", "claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"]);
+    expect(anthropic.auth.label).toBe("x-api-key: <API_KEY>");
     expect(gemini.latestModels).toEqual(["gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.5-flash-lite"]);
+    expect(gemini.auth.label).toBe("x-goog-api-key: <API_KEY> 或 ?key=<API_KEY>");
     expect(deepseek.latestModels).toEqual(["deepseek-v4-pro", "deepseek-v4-flash"]);
     expect(moonshot.latestModels).toEqual(["kimi-k2.6", "kimi-k2.5", "kimi-k2-thinking", "kimi-k2-thinking-turbo"]);
     expect(aliyun.latestModels).toEqual(["qwen3.6-max-preview", "qwen3.6-plus", "qwen3.6-flash", "qwen3.5-plus"]);

@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { checkAuth } from "../../core/auth/auth-mock.js";
+import { checkProviderAuth } from "../../core/auth/auth-mock.js";
 import { renderResult } from "../../core/renderer/render.js";
 import type { MockRequest } from "../../core/scenario/types.js";
 import { requestHeaders, requestQuery } from "../../shared/http.js";
@@ -18,7 +18,7 @@ type AnthropicBody = {
 
 export async function handleAnthropicMessages(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
   const { context, endpoint } = handlerContext;
-  if (!checkAuth(context.config, request, reply)) return;
+  if (!checkProviderAuth(context.config, request, reply, "anthropic", formatAnthropicError("authentication_error", "Invalid API key"))) return;
   const headerError = requireHeaders(request, ["anthropic-version"]);
   if (headerError) return reply.code(headerError.status).send(formatAnthropicError(headerError.code, headerError.message));
   const validationError = requireFields(request.body, [

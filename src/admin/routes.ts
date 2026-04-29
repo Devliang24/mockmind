@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
+import { authInfoForProvider } from "../core/auth/auth-mock.js";
 import { providerGroups, providerRegistry, providerRouteSummaries } from "../providers/registry.js";
 import type { ServerContext } from "../server/context.js";
 
@@ -36,6 +37,7 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
       provider: registration.provider,
       displayName: registration.displayName,
       groups: registration.groups,
+      auth: authInfoForProvider(registration.provider),
       defaultModels: registration.defaultModels,
       latestModels: registration.latestModels ?? registration.defaultModels,
       configuredModels: context.config.models.filter((model) => model.provider === registration.provider).map((model) => model.id),
@@ -47,6 +49,7 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
     provider: registration.provider,
     displayName: registration.displayName,
     groups: registration.groups,
+    auth: authInfoForProvider(registration.provider),
     method: route.method,
     path: route.path,
     protocol: route.protocol,

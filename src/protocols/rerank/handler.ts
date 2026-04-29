@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { checkAuth } from "../../core/auth/auth-mock.js";
+import { checkProviderAuth } from "../../core/auth/auth-mock.js";
 import { renderResult } from "../../core/renderer/render.js";
 import type { MockRequest } from "../../core/scenario/types.js";
 import { requestHeaders, requestQuery } from "../../shared/http.js";
@@ -28,7 +28,7 @@ type RerankBody = {
 
 export async function handleRerank(handlerContext: ProtocolHandlerContext, request: FastifyRequest, reply: FastifyReply): Promise<unknown> {
   const { context, provider, endpoint } = handlerContext;
-  if (!checkAuth(context.config, request, reply)) return;
+  if (!checkProviderAuth(context.config, request, reply, provider, formatRerankError(provider, "invalid_api_key", "Invalid API key"))) return;
   const validationError = requireFields(request.body, [
     { path: "model", validate: isString }
   ]);

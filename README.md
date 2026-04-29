@@ -199,6 +199,7 @@ Web UI 和 Provider Registry 默认展示每家供应商最多 4 个可用于当
 
 MockMind 会在进入场景匹配前执行轻量协议校验：
 
+- `auth.mode: strict` 时会按各家官网鉴权方式校验 API Key；`permissive` 和 `disabled` 不阻断本地调试请求。
 - OpenAI Chat：要求 `model` 和 `messages`。
 - OpenAI Embeddings：要求 `model` 和 `input`。
 - OpenAI Responses：要求 `model` 和 `input`。
@@ -208,6 +209,21 @@ MockMind 会在进入场景匹配前执行轻量协议校验：
 - MiniMax：要求 `model` 和 `messages`。
 
 校验失败会返回对应 Provider 风格的错误结构，例如 OpenAI `error`、Anthropic `type:error`、DashScope `code/message`、MiniMax `base_resp`。
+
+### 鉴权方式
+
+MockMind 的严格鉴权只接受各家官网公开的 API Key 传递方式：
+
+| Provider | 官方鉴权方式 | MockMind strict 行为 |
+|---|---|---|
+| OpenAI | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
+| DeepSeek | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
+| Moonshot / Kimi | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
+| Zhipu GLM / Coding Plan | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
+| Alibaba Bailian / DashScope | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
+| MiniMax | `Authorization: Bearer <API_KEY>` | 只接受 Bearer |
+| Anthropic | `x-api-key: <API_KEY>`，并按 Messages API 要求携带 `anthropic-version` | 只接受 `x-api-key` |
+| Gemini | `x-goog-api-key: <API_KEY>`，REST API 同时支持 `?key=<API_KEY>` | 接受 `x-goog-api-key` 或 `?key=` |
 
 ## Token 用量
 
@@ -630,6 +646,7 @@ curl -N http://127.0.0.1:4000/v1/messages \
 
 ```bash
 curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:generateContent \
+  -H 'x-goog-api-key: test-key' \
   -H 'Content-Type: application/json' \
   -d '{
     "contents": [
@@ -662,6 +679,7 @@ curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:generateContent 
 
 ```bash
 curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:generateContent \
+  -H 'x-goog-api-key: test-key' \
   -H 'Content-Type: application/json' \
   -d '{
     "contents": [
@@ -707,6 +725,7 @@ curl http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:generateContent 
 
 ```bash
 curl -N 'http://127.0.0.1:4000/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse' \
+  -H 'x-goog-api-key: test-key' \
   -H 'Content-Type: application/json' \
   -d '{
     "contents": [{"role":"user","parts":[{"text":"hello"}]}]
