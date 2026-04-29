@@ -25,6 +25,8 @@ models:
     provider: aliyun-bailian
   - id: glm-5.1
     provider: zhipu
+  - id: GLM-5.1
+    provider: zhipu
   - id: MiniMax-M2.7
     provider: minimax
   - id: claude-sonnet-4-5-20250929
@@ -100,6 +102,16 @@ scenarios:
     response:
       type: text
       content: Hello from mock Zhipu GLM.
+
+  - id: zhipu-coding-plan-basic
+    provider: zhipu
+    endpoint: /api/coding/paas/v4/chat/completions
+    match:
+      model: GLM-5.1
+      lastUserMessageContains: hello
+    response:
+      type: text
+      content: Hello from mock Zhipu GLM Coding Plan.
 
   - id: minimax-basic
     provider: minimax

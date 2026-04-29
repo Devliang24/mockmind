@@ -415,8 +415,10 @@ function streamExampleFor(route, body, responseText) {
 }
 
 function exampleFor(route) {
-  const model = defaultModel(route.provider, route.protocol, protocolMenuKey(route));
-  const docsUrl = providersDocs[route.provider] ?? providersDocs.openai;
+  let model = defaultModel(route.provider, route.protocol, protocolMenuKey(route));
+  const isZhipuCodingPlan = route.provider === 'zhipu' && route.path.includes('/api/coding/paas/v4');
+  if (isZhipuCodingPlan) model = 'GLM-5.1';
+  const docsUrl = isZhipuCodingPlan ? 'https://docs.bigmodel.cn/cn/coding-plan/tool/others' : providersDocs[route.provider] ?? providersDocs.openai;
   const nl = String.fromCharCode(10);
   if (route.protocol === 'openai-responses') return { ...openAIExample(route, docsUrl, { model, input: 'hello' }, openAIResponsesResponse(model, route), ['model', 'input']), stream: streamExampleFor(route, { model, input: 'hello' }, openAIResponsesStream(model, route, nl)) };
   if (route.protocol === 'openai-embeddings') return openAIExample(route, docsUrl, { model: embeddingModel(route.provider), input: 'hello' }, openAIEmbeddingResponse(embeddingModel(route.provider), route), ['model', 'input']);

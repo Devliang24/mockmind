@@ -67,6 +67,8 @@ describe("web ui", () => {
     expect(js.body).toContain("claude-sonnet-4-5-20250929");
     expect(js.body).toContain("gemini-3-pro-preview");
     expect(js.body).toContain("qwen3.6-plus");
+    expect(js.body).toContain("GLM-5.1");
+    expect(js.body).toContain("https://docs.bigmodel.cn/cn/coding-plan/tool/others");
     expect(js.body).toContain("qwen3-rerank");
     expect(js.body).toContain("gte-rerank-v2");
     expect(js.body).toContain("qwen3-vl-rerank");
@@ -134,6 +136,7 @@ describe("web ui", () => {
     const routes = response.json();
     expect(routes[0]).toMatchObject({ provider: expect.any(String), displayName: expect.any(String), method: expect.any(String), path: expect.any(String), protocol: expect.any(String), endpoint: expect.any(String) });
     expect(routes.some((route: { provider: string; protocol: string }) => route.provider === "openai" && route.protocol === "openai-compatible")).toBe(true);
+    expect(routes.some((route: { provider: string; path: string }) => route.provider === "zhipu" && route.path === "/api/coding/paas/v4/chat/completions")).toBe(true);
     expect(routes.find((route: { path: string }) => route.path === "/v1/models")?.description).toBe("Models");
     await app.close();
   });

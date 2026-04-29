@@ -9,14 +9,16 @@ const config: MockMindConfig = {
   models: [
     { id: "deepseek-v4-pro", provider: "deepseek" },
     { id: "kimi-k2.6", provider: "moonshot" },
-    { id: "glm-5.1", provider: "zhipu" }
+    { id: "glm-5.1", provider: "zhipu" },
+    { id: "GLM-5.1", provider: "zhipu" }
   ],
   defaults: { latencyMs: 0, streamChunkDelayMs: 0 },
   fallback: { enabled: true, response: { type: "text", content: "fallback" } },
   scenarios: [
     { id: "deepseek", provider: "deepseek", endpoint: "/chat/completions", priority: 0, match: { model: "deepseek-v4-pro" }, response: { type: "text", reasoningContent: "reasoning", content: "deepseek" } },
     { id: "moonshot", provider: "moonshot", endpoint: "/v1/chat/completions", priority: 0, match: { model: "kimi-k2.6" }, response: { type: "text", content: "moonshot" } },
-    { id: "zhipu", provider: "zhipu", endpoint: "/api/paas/v4/chat/completions", priority: 0, match: { model: "glm-5.1" }, response: { type: "text", content: "zhipu" } }
+    { id: "zhipu", provider: "zhipu", endpoint: "/api/paas/v4/chat/completions", priority: 0, match: { model: "glm-5.1" }, response: { type: "text", content: "zhipu" } },
+    { id: "zhipu-coding", provider: "zhipu", endpoint: "/api/coding/paas/v4/chat/completions", priority: 0, match: { model: "GLM-5.1" }, response: { type: "text", content: "zhipu coding" } }
   ]
 };
 
@@ -39,6 +41,13 @@ describe("provider official routes", () => {
     const { app } = await createMockMindServer(config);
     const response = await app.inject({ method: "POST", url: "/api/paas/v4/chat/completions", payload: { model: "glm-5.1", messages: [{ role: "user", content: "hello" }] } });
     expect(response.json().choices[0].message.content).toBe("zhipu");
+    await app.close();
+  });
+
+  it("serves Zhipu Coding Plan OpenAI-compatible route", async () => {
+    const { app } = await createMockMindServer(config);
+    const response = await app.inject({ method: "POST", url: "/api/coding/paas/v4/chat/completions", payload: { model: "GLM-5.1", messages: [{ role: "user", content: "hello" }] } });
+    expect(response.json().choices[0].message.content).toBe("zhipu coding");
     await app.close();
   });
 
