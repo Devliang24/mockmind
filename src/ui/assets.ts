@@ -82,7 +82,7 @@ tr.endpoint-row:hover { background: var(--panel-2); }
 tr.endpoint-row.active { background: var(--accent-soft); }
 .badge { display: inline-block; background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; padding: 2px 7px; margin: 2px; color: var(--muted); font-size: 12px; }
 .model-picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
-.model-chip { position: relative; display: flex; flex: 0 0 228px; flex-direction: column; justify-content: flex-start; gap: 6px; align-items: flex-start; max-width: 228px; min-height: 80px; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; cursor: pointer; }
+.model-chip { position: relative; display: flex; flex: 1 1 300px; flex-direction: column; justify-content: flex-start; gap: 6px; align-items: flex-start; min-width: 280px; max-width: 420px; min-height: 104px; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; cursor: pointer; }
 .model-chip:hover { background: var(--panel-2); }
 .model-chip.active { color: var(--accent); background: var(--accent-soft); border-color: #b6e3ff; }
 .model-chip strong { display: block; padding-right: 28px; font-size: 13px; line-height: 1.25; overflow-wrap: anywhere; word-break: break-word; }
@@ -92,6 +92,8 @@ tr.endpoint-row.active { background: var(--accent-soft); }
 .model-copy-btn[data-copied="true"] { color: var(--good); border-color: rgba(26, 127, 55, 0.4); }
 .model-meta { display: flex; gap: 4px; flex-wrap: wrap; }
 .model-meta span { color: var(--muted); background: var(--panel-2); border: 1px solid var(--border); border-radius: 999px; padding: 1px 6px; font-size: 11px; }
+.model-price { display: block; width: 100%; color: var(--muted); font-size: 11px; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.model-price strong { display: inline; padding: 0; color: var(--text); font-size: 11px; font-weight: 600; }
 .model-note { color: var(--muted); line-height: 1.6; }
 .model-note strong { color: var(--text); font-weight: 600; }
 .protocol-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 16px; }
@@ -136,7 +138,7 @@ button { font: inherit; }
 .drawer-section { margin-bottom: 18px; }
 .drawer-section pre { max-height: none; height: auto; }
 .requests-empty { color: var(--muted); padding: 20px 0; }
-@media (max-width: 900px) { body { overflow: auto; } .layout { grid-template-columns: 1fr; height: auto; } .sidebar { height: auto; overflow: visible; border-right: 0; border-bottom: 1px solid var(--border); } .content { overflow: visible; } .cards, .grid-2 { grid-template-columns: 1fr; } .model-chip { flex-basis: 100%; max-width: none; } input { min-width: 0; width: 100%; } .code-block { height: auto; } }
+@media (max-width: 900px) { body { overflow: auto; } .layout { grid-template-columns: 1fr; height: auto; } .sidebar { height: auto; overflow: visible; border-right: 0; border-bottom: 1px solid var(--border); } .content { overflow: visible; } .cards, .grid-2 { grid-template-columns: 1fr; } .model-chip { flex-basis: 100%; min-width: 0; max-width: none; } input { min-width: 0; width: 100%; } .code-block { height: auto; } }
 `;
 
 export const uiJs = `const state = { view: 'provider', search: '', selectedProvider: 'openai', selectedProtocol: '', selectedEndpoint: '', selectedRequestId: '', selectedModels: {}, data: {} };
@@ -193,6 +195,29 @@ const modelCapabilities = {
   'gte-rerank-v2': ['重排'],
   'qwen3-vl-rerank': ['多模态重排'],
   'rerank-mock': ['重排']
+};
+const modelPricing = {
+  'gpt-5.5': { input: '¥34.28', output: '¥205.69', unit: '1M tokens', source: 'OpenAI API Pricing', url: 'https://openai.com/api/pricing/', note: '按 USD/CNY 6.8562 换算' },
+  'gpt-5.4': { input: '¥17.14', output: '¥102.84', unit: '1M tokens', source: 'OpenAI API Pricing', url: 'https://openai.com/api/pricing/', note: '按 USD/CNY 6.8562 换算' },
+  'gpt-5.4-mini': { input: '¥5.14', output: '¥30.85', unit: '1M tokens', source: 'OpenAI API Pricing', url: 'https://openai.com/api/pricing/', note: '按 USD/CNY 6.8562 换算' },
+  'claude-opus-4-1-20250805': { input: '¥102.84', output: '¥514.22', unit: 'MTok', source: 'Claude API Pricing', url: 'https://platform.claude.com/docs/en/about-claude/pricing', note: '按 USD/CNY 6.8562 换算' },
+  'claude-sonnet-4-5-20250929': { input: '¥20.57', output: '¥102.84', unit: 'MTok', source: 'Claude API Pricing', url: 'https://platform.claude.com/docs/en/about-claude/pricing', note: '按 USD/CNY 6.8562 换算' },
+  'claude-haiku-4-5-20251001': { input: '¥6.86', output: '¥34.28', unit: 'MTok', source: 'Claude API Pricing', url: 'https://platform.claude.com/docs/en/about-claude/pricing', note: '按 USD/CNY 6.8562 换算' },
+  'gemini-3-flash-preview': { input: '¥3.43', output: '¥20.57', unit: '1M tokens', source: 'Gemini API Pricing', url: 'https://ai.google.dev/gemini-api/docs/pricing', note: 'text/image/video input · 按 USD/CNY 6.8562 换算' },
+  'gemini-2.5-flash': { input: '¥2.06', output: '¥17.14', unit: '1M tokens', source: 'Gemini API Pricing', url: 'https://ai.google.dev/gemini-api/docs/pricing', note: 'text/image/video input · 按 USD/CNY 6.8562 换算' },
+  'gemini-2.5-flash-lite': { input: '¥0.69', output: '¥2.74', unit: '1M tokens', source: 'Gemini API Pricing', url: 'https://ai.google.dev/gemini-api/docs/pricing', note: 'text/image/video input · 按 USD/CNY 6.8562 换算' },
+  'deepseek-v4-pro': { input: '¥2.98', output: '¥5.96', unit: '1M tokens', source: 'DeepSeek Models & Pricing', url: 'https://api-docs.deepseek.com/quick_start/pricing', note: '75% off until 2026-05-31 · 按 USD/CNY 6.8562 换算' },
+  'deepseek-v4-flash': { input: '¥0.96', output: '¥1.92', unit: '1M tokens', source: 'DeepSeek Models & Pricing', url: 'https://api-docs.deepseek.com/quick_start/pricing', note: 'cache miss input · 按 USD/CNY 6.8562 换算' },
+  'kimi-k2.6': { input: '¥6.50', output: '¥27.00', unit: 'MTok', source: 'Kimi API 开放平台价格', url: 'https://platform.kimi.com/' },
+  'kimi-k2.5': { input: '¥4.00', output: '¥21.00', unit: 'MTok', source: 'Kimi API 开放平台价格', url: 'https://platform.kimi.com/' },
+  'qwen3.6-max-preview': { input: '¥9', output: '¥54', unit: '1M tokens', source: '阿里云百炼模型计费', url: 'https://help.aliyun.com/zh/model-studio/models', note: '中国内地最低价' },
+  'qwen3.6-plus': { input: '¥2', output: '¥12', unit: '1M tokens', source: '阿里云百炼模型计费', url: 'https://help.aliyun.com/zh/model-studio/models', note: '中国内地最低价' },
+  'qwen3.6-flash': { input: '¥1.2', output: '¥7.2', unit: '1M tokens', source: '阿里云百炼模型计费', url: 'https://help.aliyun.com/zh/model-studio/models', note: '中国内地最低价' },
+  'qwen3.5-plus': { input: '¥0.8', output: '¥4.8', unit: '1M tokens', source: '阿里云百炼模型计费', url: 'https://help.aliyun.com/zh/model-studio/models', note: '中国内地最低价' },
+  'MiniMax-M2.7': { input: '¥2.06', output: '¥8.23', unit: 'M tokens', source: 'MiniMax Pay as You Go', url: 'https://platform.minimax.io/docs/guides/pricing-paygo', note: '按 USD/CNY 6.8562 换算' },
+  'MiniMax-M2.7-highspeed': { input: '¥4.11', output: '¥16.45', unit: 'M tokens', source: 'MiniMax Pay as You Go', url: 'https://platform.minimax.io/docs/guides/pricing-paygo', note: '按 USD/CNY 6.8562 换算' },
+  'MiniMax-M2.5': { input: '¥2.06', output: '¥8.23', unit: 'M tokens', source: 'MiniMax Pay as You Go', url: 'https://platform.minimax.io/docs/guides/pricing-paygo', note: '按 USD/CNY 6.8562 换算' },
+  'MiniMax-M2.5-highspeed': { input: '¥4.11', output: '¥16.45', unit: 'M tokens', source: 'MiniMax Pay as You Go', url: 'https://platform.minimax.io/docs/guides/pricing-paygo', note: '按 USD/CNY 6.8562 换算' }
 };
 const modelCodeMap = {
 };
@@ -278,11 +303,27 @@ function modelCode(model) {
   return modelCodeMap[key] ?? model;
 }
 
+function modelPrice(model) {
+  return modelPricing[canonicalModelKey(model)];
+}
+
+function modelPriceLabel(model) {
+  const price = modelPrice(model);
+  if (!price) return '价格：官网未列出输入/输出单价';
+  return '价格：输入 ' + price.input + ' · 输出 ' + price.output + ' / ' + price.unit + (price.note ? ' · ' + price.note : '');
+}
+
+function modelPriceHtml(model) {
+  const price = modelPrice(model);
+  if (!price) return '价格：官网未列出输入/输出单价';
+  return '价格：输入 <strong>' + esc(price.input) + '</strong> · 输出 <strong>' + esc(price.output) + '</strong> / ' + esc(price.unit) + (price.note ? ' · ' + esc(price.note) : '') + ' · <a href="' + esc(price.url) + '" target="_blank">' + esc(price.source) + '</a>';
+}
+
 function modelPicker(provider, protocolKey) {
   const models = protocolModels(provider, protocolKey);
   if (!models.length) return '<span class="muted">当前协议不需要选择模型。</span>';
   const selected = selectedModelFor(provider, protocolKey);
-  return '<div class="model-picker">' + models.map((model) => '<div class="model-chip ' + (model === selected ? 'active' : '') + '" data-provider="' + esc(provider.provider) + '" data-protocol="' + esc(protocolKey) + '" data-model="' + esc(model) + '"><button class="model-copy-btn" type="button" title="复制模型代码" aria-label="复制模型代码" data-copy="' + esc(modelCode(model)) + '"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M0 6.75C0 5.78.78 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .14.11.25.25.25h7.5c.14 0 .25-.11.25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path fill="currentColor" d="M5 1.75C5 .78 5.78 0 6.75 0h7.5C15.22 0 16 .78 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .14.11.25.25.25h7.5c.14 0 .25-.11.25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg></button><strong>' + esc(modelCode(model)) + '</strong><span class="model-meta">' + modelMeta(model) + '</span></div>').join('') + '</div>';
+  return '<div class="model-picker">' + models.map((model) => '<div class="model-chip ' + (model === selected ? 'active' : '') + '" data-provider="' + esc(provider.provider) + '" data-protocol="' + esc(protocolKey) + '" data-model="' + esc(model) + '"><button class="model-copy-btn" type="button" title="复制模型代码" aria-label="复制模型代码" data-copy="' + esc(modelCode(model)) + '"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M0 6.75C0 5.78.78 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .14.11.25.25.25h7.5c.14 0 .25-.11.25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path fill="currentColor" d="M5 1.75C5 .78 5.78 0 6.75 0h7.5C15.22 0 16 .78 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .14.11.25.25.25h7.5c.14 0 .25-.11.25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg></button><strong>' + esc(modelCode(model)) + '</strong><span class="model-meta">' + modelMeta(model) + '</span><span class="model-price">' + esc(modelPriceLabel(model)) + '</span></div>').join('') + '</div>';
 }
 
 function modelMeta(model) {
@@ -299,7 +340,7 @@ function selectedModelSummary(provider, protocol) {
   }
   const labels = modelCapabilityLabels(model);
   const fields = isThinkingModel(model) ? '响应示例会展示 reasoning_content / thinking / thought 等思考字段。' : '响应示例按普通文本模型展示。';
-  return '<div class="model-note">当前示例模型：<strong>' + esc(modelCode(model)) + '</strong>' + (labels.length ? ' · ' + esc(labels.join(' / ')) : '') + '<br>切换模型后，cURL、非流式响应、流式响应会同步刷新；' + fields + '</div>';
+  return '<div class="model-note">当前示例模型：<strong>' + esc(modelCode(model)) + '</strong>' + (labels.length ? ' · ' + esc(labels.join(' / ')) : '') + '<br>' + modelPriceHtml(model) + '<br>切换模型后，cURL、非流式响应、流式响应会同步刷新；' + fields + '</div>';
 }
 
 function visibleRoutes(providerId) {

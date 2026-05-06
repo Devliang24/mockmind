@@ -59,6 +59,12 @@ describe("web ui", () => {
     expect(js.body).toContain("request-id");
     expect(js.body).toContain("model-chip");
     expect(js.body).toContain("model-copy-btn");
+    expect(js.body).toContain("modelPricing");
+    expect(js.body).toContain("modelPriceLabel(model)");
+    expect(js.body).toContain("价格：官网未列出输入/输出单价");
+    expect(js.body).toContain("'gpt-5.5': { input: '¥34.28', output: '¥205.69'");
+    expect(js.body).toContain("按 USD/CNY 6.8562 换算");
+    expect(js.body).toContain("'qwen3.6-plus': { input: '¥2', output: '¥12'");
     expect(js.body).toContain("data-protocol");
     expect(js.body).toContain("协议模型");
     expect(js.body).toContain("当前协议");
@@ -95,6 +101,7 @@ describe("web ui", () => {
     expect(css.statusCode).toBe(200);
     expect(css.body).toContain(".sidebar-brand");
     expect(css.body).toContain(".inline-copy-btn");
+    expect(css.body).toContain(".model-price");
     expect(css.body).toContain("已复制");
     expect(css.body).toContain(".provider-menu");
     expect(css.body).toContain(".request-drawer");
