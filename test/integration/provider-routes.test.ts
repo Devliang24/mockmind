@@ -51,6 +51,20 @@ describe("provider official routes", () => {
     await app.close();
   });
 
+  it("records the concrete model in stream response summaries", async () => {
+    const { app } = await createMockMindServer(config);
+    await app.inject({ method: "POST", url: "/api/paas/v4/chat/completions", payload: { model: "glm-5.1", stream: true, messages: [{ role: "user", content: "hello" }] } });
+    const response = await app.inject({ method: "GET", url: "/__admin/requests" });
+
+    expect(response.json()[0].responseBody).toMatchObject({
+      stream: true,
+      format: "text/event-stream",
+      content: "zhipu (model: glm-5.1)"
+    });
+    expect(response.json()[0].responseBody).not.toHaveProperty("model");
+    await app.close();
+  });
+
   it.each([
     "/deepseek/v1/chat/completions",
     "/moonshot/v1/chat/completions",

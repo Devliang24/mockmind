@@ -9,6 +9,7 @@ import { formatOpenAIError, formatResponsesUsage, normalizeOpenAIToolCalls } fro
 import { sendOpenAIResponsesStream } from "./responses-stream.js";
 import { isString, requireFields } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
+import { streamResponseBody } from "../stream-summary.js";
 
 export type OpenAIResponsesBody = {
   model?: string;
@@ -56,7 +57,7 @@ export async function handleOpenAIResponses(
     return reply.code(result.error.status).send(responseBody);
   }
   if (body.stream) {
-    const responseBody = { stream: true, format: "text/event-stream", content: result.chunks ?? result.content ?? "" };
+    const responseBody = streamResponseBody(result, body.model ?? "mock-model");
     context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
     return sendOpenAIResponsesStream(reply, body.model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs);
   }

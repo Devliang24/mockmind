@@ -10,6 +10,7 @@ import { isArray, isString, requireFields } from "../validation.js";
 import { sendOpenAIStream } from "./stream.js";
 import { withEstimatedUsage } from "../usage.js";
 import { resolveOpenAICompatibleProvider } from "./resolver.js";
+import { streamResponseBody } from "../stream-summary.js";
 
 export type OpenAICompatibleChatBody = {
   model?: string;
@@ -59,7 +60,7 @@ export async function handleOpenAICompatibleChat(
     return reply.code(result.error.status).send(responseBody);
   }
   if (body.stream) {
-    const responseBody = { stream: true, format: "text/event-stream", content: result.chunks ?? result.content ?? "" };
+    const responseBody = streamResponseBody(result, body.model ?? "mock-model");
     context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
     return sendOpenAIStream(reply, body.model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs, body.stream_options?.include_usage === true);
   }

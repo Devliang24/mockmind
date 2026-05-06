@@ -9,6 +9,7 @@ import { sendGeminiStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
 import { isArray, requireFields } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
+import { streamResponseBody } from "../stream-summary.js";
 
 type GeminiBody = {
   contents?: unknown[];
@@ -44,7 +45,7 @@ export async function handleGeminiGenerateContent(handlerContext: ProtocolHandle
     return reply.code(result.error.status).send(responseBody);
   }
   if (stream) {
-    const responseBody = { stream: true, format: "text/event-stream", content: result.chunks ?? result.content ?? "" };
+    const responseBody = streamResponseBody(result, model ?? "gemini-mock");
     context.recorder.add({ provider: mockRequest.provider, endpoint, model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest, responseBody });
     return sendGeminiStream(reply, result, context.config.defaults.streamChunkDelayMs);
   }

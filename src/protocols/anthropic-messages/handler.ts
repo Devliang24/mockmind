@@ -9,6 +9,7 @@ import { sendAnthropicStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
 import { isArray, isString, requireFields, requireHeaders } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
+import { streamResponseBody } from "../stream-summary.js";
 
 type AnthropicBody = {
   model?: string;
@@ -50,7 +51,7 @@ export async function handleAnthropicMessages(handlerContext: ProtocolHandlerCon
     return reply.code(result.error.status).send(responseBody);
   }
   if (body.stream) {
-    const responseBody = { stream: true, format: "text/event-stream", content: result.chunks ?? result.content ?? "" };
+    const responseBody = streamResponseBody(result, body.model ?? "claude-mock");
     context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
     return sendAnthropicStream(reply, body.model ?? "claude-mock", result, context.config.defaults.streamChunkDelayMs);
   }

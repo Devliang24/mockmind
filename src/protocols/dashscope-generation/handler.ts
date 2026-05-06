@@ -9,6 +9,7 @@ import { sendDashScopeStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
 import { isArray, isString, requireFields } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
+import { streamResponseBody } from "../stream-summary.js";
 
 type DashScopeBody = {
   model?: string;
@@ -54,7 +55,7 @@ export async function handleDashScopeGeneration(handlerContext: ProtocolHandlerC
     return reply.code(result.error.status).send(responseBody);
   }
   if (stream) {
-    const responseBody = { stream: true, format: "text/event-stream", content: result.chunks ?? result.content ?? "" };
+    const responseBody = streamResponseBody(result, body.model ?? "qwen-mock");
     context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest, responseBody });
     return sendDashScopeStream(reply, result, context.config.defaults.streamChunkDelayMs);
   }
