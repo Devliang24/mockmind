@@ -29,7 +29,7 @@ describe("OpenAI-compatible routes", () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json().choices[0].message.content).toBe("Hello from test.");
+    expect(response.json().choices[0].message.content).toBe("Hello from test. (model: gpt-4o-mini)");
     await app.close();
   });
 
@@ -44,7 +44,7 @@ describe("OpenAI-compatible routes", () => {
 
     expect(response.json()).toHaveLength(1);
     expect(response.json()[0].request.rawBody.model).toBe("gpt-4o-mini");
-    expect(response.json()[0].responseBody.choices[0].message.content).toBe("Hello from test.");
+    expect(response.json()[0].responseBody.choices[0].message.content).toBe("Hello from test. (model: gpt-4o-mini)");
     await app.close();
   });
 });

@@ -21,7 +21,7 @@ describe("OpenAI additional APIs", () => {
     const response = await app.inject({ method: "POST", url: "/v1/responses", payload: { model: "gpt-4o-mini", input: "hello" } });
     expect(response.statusCode).toBe(200);
     expect(response.json().object).toBe("response");
-    expect(response.json().output_text).toBe("responses ok");
+    expect(response.json().output_text).toBe("responses ok (model: gpt-4o-mini)");
     await app.close();
   });
 

@@ -31,7 +31,7 @@ describe("sqlite persistence", () => {
       const requests = await second.app.inject({ method: "GET", url: "/__admin/requests" });
       expect(requests.json()).toHaveLength(1);
       expect(requests.json()[0].request.rawBody.model).toBe("gpt-5.5");
-      expect(requests.json()[0].responseBody.choices[0].message.content).toBe("persisted");
+      expect(requests.json()[0].responseBody.choices[0].message.content).toBe("persisted (model: gpt-5.5)");
       await second.app.inject({ method: "POST", url: "/__admin/reset" });
       expect((await second.app.inject({ method: "GET", url: "/__admin/requests" })).json()).toHaveLength(0);
       await second.app.close();

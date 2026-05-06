@@ -32,7 +32,7 @@ describe("native protocol routes", () => {
     const { app } = await createMockMindServer(config);
     const response = await app.inject({ method: "POST", url: "/v1beta/models/gemini-3-flash-preview:generateContent", payload: { contents: [{ role: "user", parts: [{ text: "hello" }] }] } });
     expect(response.statusCode).toBe(200);
-    expect(response.json().candidates[0].content.parts[0].text).toBe("fallback");
+    expect(response.json().candidates[0].content.parts[0].text).toBe("fallback (model: gemini-3-flash-preview)");
     expect(response.json().usageMetadata.promptTokenCount).toBeGreaterThan(0);
     await app.close();
   });
@@ -51,7 +51,7 @@ describe("native protocol routes", () => {
     const { app } = await createMockMindServer(config);
     const response = await app.inject({ method: "POST", url: "/api/v1/services/aigc/text-generation/generation", payload: { model: "qwen3.6-plus", input: { messages: [{ role: "user", content: "你好" }] } } });
     expect(response.statusCode).toBe(200);
-    expect(response.json().output.choices[0].message.content).toBe("fallback");
+    expect(response.json().output.choices[0].message.content).toBe("fallback (model: qwen3.6-plus)");
     expect(response.json().usage.input_tokens).toBeGreaterThan(0);
     expect(response.json().status_code).toBe(200);
     await app.close();

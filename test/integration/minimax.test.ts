@@ -20,7 +20,7 @@ describe("MiniMax routes", () => {
     const { app } = await createMockMindServer(config);
     const response = await app.inject({ method: "POST", url: "/v1/text/chatcompletion_v2", payload: { model: "MiniMax-M2.7", messages: [{ role: "user", content: "hello" }] } });
     expect(response.statusCode).toBe(200);
-    expect(response.json().choices[0].message.content).toBe("minimax");
+    expect(response.json().choices[0].message.content).toBe("minimax (model: MiniMax-M2.7)");
     expect(response.json().base_resp.status_code).toBe(0);
     await app.close();
   });

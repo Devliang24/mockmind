@@ -33,21 +33,21 @@ describe("provider official routes", () => {
   it("serves shared OpenAI-compatible route", async () => {
     const { app } = await createMockMindServer(config);
     const response = await app.inject({ method: "POST", url: "/v1/chat/completions", payload: { model: "kimi-k2.6", messages: [{ role: "user", content: "hello" }] } });
-    expect(response.json().choices[0].message.content).toBe("moonshot");
+    expect(response.json().choices[0].message.content).toBe("moonshot (model: kimi-k2.6)");
     await app.close();
   });
 
   it("serves Zhipu native-compatible route", async () => {
     const { app } = await createMockMindServer(config);
     const response = await app.inject({ method: "POST", url: "/api/paas/v4/chat/completions", payload: { model: "glm-5.1", messages: [{ role: "user", content: "hello" }] } });
-    expect(response.json().choices[0].message.content).toBe("zhipu");
+    expect(response.json().choices[0].message.content).toBe("zhipu (model: glm-5.1)");
     await app.close();
   });
 
   it("serves Zhipu Coding Plan OpenAI-compatible route", async () => {
     const { app } = await createMockMindServer(config);
     const response = await app.inject({ method: "POST", url: "/api/coding/paas/v4/chat/completions", payload: { model: "GLM-5.1", messages: [{ role: "user", content: "hello" }] } });
-    expect(response.json().choices[0].message.content).toBe("zhipu coding");
+    expect(response.json().choices[0].message.content).toBe("zhipu coding (model: GLM-5.1)");
     await app.close();
   });
 
