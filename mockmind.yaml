@@ -29,7 +29,7 @@ models:
     provider: zhipu
   - id: MiniMax-M2.7
     provider: minimax
-  - id: claude-sonnet-4-5-20250929
+  - id: claude-sonnet-4-6
     provider: anthropic
   - id: gemini-3-flash-preview
     provider: gemini
@@ -127,7 +127,7 @@ scenarios:
     provider: anthropic
     endpoint: /v1/messages
     match:
-      model: claude-sonnet-4-5-20250929
+      model: claude-sonnet-4-6
     response:
       type: text
       content: Hello from mock Anthropic.

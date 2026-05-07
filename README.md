@@ -184,7 +184,7 @@ Web UI 和 Provider Registry 默认展示每家供应商最多 4 个可用于当
 | Provider | 模型 |
 |---|---|
 | OpenAI | `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` |
-| Anthropic | `claude-opus-4-1-20250805`, `claude-sonnet-4-5-20250929`, `claude-haiku-4-5-20251001` |
+| Anthropic | `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001` |
 | Gemini | `gemini-3-pro-preview`, `gemini-3-flash-preview`, `gemini-2.5-flash`, `gemini-2.5-flash-lite` |
 | DeepSeek | `deepseek-v4-pro`, `deepseek-v4-flash` |
 | Moonshot / Kimi | `kimi-k2.6`, `kimi-k2.5`, `kimi-k2-thinking`, `kimi-k2-thinking-turbo` |
@@ -570,7 +570,7 @@ curl http://127.0.0.1:4000/v1/messages \
   -H 'anthropic-version: 2023-06-01' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "claude-sonnet-4-5-20250929",
+    "model": "claude-sonnet-4-6",
     "max_tokens": 128,
     "messages": [{"role":"user","content":"hello"}]
   }'
@@ -583,7 +583,7 @@ curl http://127.0.0.1:4000/v1/messages \
   "id": "msg_mock_0001",
   "type": "message",
   "role": "assistant",
-  "model": "claude-sonnet-4-5-20250929",
+  "model": "claude-sonnet-4-6",
   "content": [{"type":"text","text":"Hello from mock Anthropic."}],
   "stop_reason": "end_turn"
 }
@@ -597,7 +597,7 @@ curl http://127.0.0.1:4000/v1/messages \
   -H 'anthropic-version: 2023-06-01' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "claude-sonnet-4-5-20250929",
+    "model": "claude-sonnet-4-6",
     "max_tokens": 128,
     "messages": [{"role":"user","content":"weather"}],
     "tools": [{"name":"get_weather","input_schema":{"type":"object"}}]
@@ -629,7 +629,7 @@ curl -N http://127.0.0.1:4000/v1/messages \
   -H 'anthropic-version: 2023-06-01' \
   -H 'Content-Type: application/json' \
   -d '{
-    "model": "claude-sonnet-4-5-20250929",
+    "model": "claude-sonnet-4-6",
     "stream": true,
     "messages": [{"role":"user","content":"hello"}]
   }'

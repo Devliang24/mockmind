@@ -72,8 +72,8 @@ describe("web ui", () => {
     expect(js.body).toContain("menuProviderName(provider)");
     expect(js.body).toContain("name.split(' / ').pop()");
     expect(js.body).toContain("gpt-5.5");
-    expect(js.body).toContain("claude-opus-4-1-20250805");
-    expect(js.body).toContain("claude-sonnet-4-5-20250929");
+    expect(js.body).toContain("claude-opus-4-7");
+    expect(js.body).toContain("claude-sonnet-4-6");
     expect(js.body).toContain("gemini-3-pro-preview");
     expect(js.body).toContain("qwen3.6-plus");
     expect(js.body).toContain("GLM-5.1");
@@ -166,7 +166,7 @@ describe("web ui", () => {
     expect(openai.latestModels).toEqual(["gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano"]);
     expect(openai.auth.label).toBe("Authorization: Bearer 123456");
     expect(openai.latestModels).toHaveLength(4);
-    expect(anthropic.latestModels).toEqual(["claude-opus-4-1-20250805", "claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"]);
+    expect(anthropic.latestModels).toEqual(["claude-opus-4-7", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"]);
     expect(anthropic.auth.label).toBe("x-api-key: 123456");
     expect(gemini.latestModels).toEqual(["gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.5-flash-lite"]);
     expect(gemini.auth.label).toBe("x-goog-api-key: 123456 或 ?key=123456");

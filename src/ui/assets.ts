@@ -163,8 +163,8 @@ const modelCapabilities = {
   'gpt-5.4': ['思考', '工具'],
   'gpt-5.4-mini': ['快速', '工具'],
   'gpt-5.4-nano': ['低成本'],
-  'claude-opus-4-1-20250805': ['自适应思考', '工具'],
-  'claude-sonnet-4-5-20250929': ['扩展思考', '工具'],
+  'claude-opus-4-7': ['深度思考', '工具'],
+  'claude-sonnet-4-6': ['扩展思考', '工具'],
   'claude-haiku-4-5-20251001': ['扩展思考', '快速'],
   'gemini-3-pro-preview': ['思考', '工具'],
   'gemini-3-flash-preview': ['思考', '快速'],
@@ -200,8 +200,8 @@ const modelPricing = {
   'gpt-5.5': { input: '¥34.28', output: '¥205.69', unit: '1M tokens', source: 'OpenAI API Pricing', url: 'https://openai.com/api/pricing/', note: '按 USD/CNY 6.8562 换算' },
   'gpt-5.4': { input: '¥17.14', output: '¥102.84', unit: '1M tokens', source: 'OpenAI API Pricing', url: 'https://openai.com/api/pricing/', note: '按 USD/CNY 6.8562 换算' },
   'gpt-5.4-mini': { input: '¥5.14', output: '¥30.85', unit: '1M tokens', source: 'OpenAI API Pricing', url: 'https://openai.com/api/pricing/', note: '按 USD/CNY 6.8562 换算' },
-  'claude-opus-4-1-20250805': { input: '¥102.84', output: '¥514.22', unit: 'MTok', source: 'Claude API Pricing', url: 'https://platform.claude.com/docs/en/about-claude/pricing', note: '按 USD/CNY 6.8562 换算' },
-  'claude-sonnet-4-5-20250929': { input: '¥20.57', output: '¥102.84', unit: 'MTok', source: 'Claude API Pricing', url: 'https://platform.claude.com/docs/en/about-claude/pricing', note: '按 USD/CNY 6.8562 换算' },
+  'claude-opus-4-7': { input: '¥34.28', output: '¥171.41', unit: 'MTok', source: 'Claude API Pricing', url: 'https://platform.claude.com/docs/en/about-claude/pricing', note: '按 USD/CNY 6.8562 换算' },
+  'claude-sonnet-4-6': { input: '¥20.57', output: '¥102.84', unit: 'MTok', source: 'Claude API Pricing', url: 'https://platform.claude.com/docs/en/about-claude/pricing', note: '按 USD/CNY 6.8562 换算' },
   'claude-haiku-4-5-20251001': { input: '¥6.86', output: '¥34.28', unit: 'MTok', source: 'Claude API Pricing', url: 'https://platform.claude.com/docs/en/about-claude/pricing', note: '按 USD/CNY 6.8562 换算' },
   'gemini-3-flash-preview': { input: '¥3.43', output: '¥20.57', unit: '1M tokens', source: 'Gemini API Pricing', url: 'https://ai.google.dev/gemini-api/docs/pricing', note: 'text/image/video input · 按 USD/CNY 6.8562 换算' },
   'gemini-2.5-flash': { input: '¥2.06', output: '¥17.14', unit: '1M tokens', source: 'Gemini API Pricing', url: 'https://ai.google.dev/gemini-api/docs/pricing', note: 'text/image/video input · 按 USD/CNY 6.8562 换算' },
@@ -571,7 +571,7 @@ function defaultModel(provider, protocol, protocolKey = protocol) {
   if (provider === 'zhipu' && protocol === 'rerank') return 'rerank-mock';
   if (provider === 'aliyun-bailian' && protocol === 'rerank') return 'qwen3-rerank';
   const selectedProvider = orderedProviders().find((item) => item.provider === provider);
-  return modelCode(selectedModelFor(selectedProvider, protocolKey) ?? ({ anthropic: 'claude-sonnet-4-5-20250929', gemini: 'gemini-3-flash-preview', deepseek: 'deepseek-v4-flash', moonshot: 'kimi-k2.6', zhipu: 'glm-5.1', 'aliyun-bailian': 'qwen3.6-plus', minimax: 'MiniMax-M2.7', openai: 'gpt-5.5' }[provider] ?? 'gpt-5.5'));
+  return modelCode(selectedModelFor(selectedProvider, protocolKey) ?? ({ anthropic: 'claude-sonnet-4-6', gemini: 'gemini-3-flash-preview', deepseek: 'deepseek-v4-flash', moonshot: 'kimi-k2.6', zhipu: 'glm-5.1', 'aliyun-bailian': 'qwen3.6-plus', minimax: 'MiniMax-M2.7', openai: 'gpt-5.5' }[provider] ?? 'gpt-5.5'));
 }
 function embeddingModel(provider) { if (provider === 'aliyun-bailian') return 'text-embedding-v3'; if (provider === 'zhipu') return 'embedding-3'; return 'text-embedding-3-small'; }
 function filtered(items, fields) { const query = state.search.trim().toLowerCase(); return query ? items.filter((item) => fields.some((field) => String(field(item) ?? '').toLowerCase().includes(query))) : items; }

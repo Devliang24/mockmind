@@ -20,7 +20,7 @@ MockMind starts all implemented providers by default.
 | Provider | Models shown by default |
 |---|---|
 | OpenAI | `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` |
-| Anthropic | `claude-opus-4-1-20250805`, `claude-sonnet-4-5-20250929`, `claude-haiku-4-5-20251001` |
+| Anthropic | `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001` |
 | Gemini | `gemini-3-pro-preview`, `gemini-3-flash-preview`, `gemini-2.5-flash`, `gemini-2.5-flash-lite` |
 | DeepSeek | `deepseek-v4-pro`, `deepseek-v4-flash` |
 | Moonshot / Kimi | `kimi-k2.6`, `kimi-k2.5`, `kimi-k2-thinking`, `kimi-k2-thinking-turbo` |

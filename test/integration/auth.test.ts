@@ -26,7 +26,7 @@ describe("provider official auth", () => {
 
   it("accepts Anthropic x-api-key auth and rejects Bearer", async () => {
     const { app } = await createMockMindServer(config);
-    const payload = { model: "claude-sonnet-4-5-20250929", max_tokens: 128, messages: [{ role: "user", content: "hello" }] };
+    const payload = { model: "claude-sonnet-4-6", max_tokens: 128, messages: [{ role: "user", content: "hello" }] };
     const accepted = await app.inject({ method: "POST", url: "/v1/messages", headers: { "x-api-key": "123456", "anthropic-version": "2023-06-01" }, payload });
     const rejected = await app.inject({ method: "POST", url: "/v1/messages", headers: { authorization: "Bearer 123456", "anthropic-version": "2023-06-01" }, payload });
     expect(accepted.statusCode).toBe(200);
