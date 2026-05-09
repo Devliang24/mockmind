@@ -44,14 +44,14 @@
 
 ## 7. Web App Migration
 
-- [ ] 7.1 Scaffold `apps/web` with Vite, React, and TypeScript.
-- [ ] 7.2 Implement a typed Admin API client in `apps/web/src/api`.
-- [ ] 7.3 Migrate provider navigation and provider metadata views.
-- [ ] 7.4 Migrate protocol tabs, endpoint table, and example code blocks.
-- [ ] 7.5 Migrate model picker, model prices, and model-specific example refresh.
-- [ ] 7.6 Migrate request table and request drawer.
-- [ ] 7.7 Preserve copy button behavior and copied feedback states.
-- [ ] 7.8 Remove the old embedded UI string implementation after parity is reached.
+- [x] 7.1 Scaffold `apps/web` with Vite, React, and TypeScript.
+- [x] 7.2 Implement a typed Admin API client in `apps/web/src/api`.
+- [x] 7.3 Migrate provider navigation and provider metadata views.
+- [x] 7.4 Migrate protocol tabs, endpoint table, and example code blocks.
+- [x] 7.5 Migrate model picker, model prices, and model-specific example refresh.
+- [x] 7.6 Migrate request table and request drawer.
+- [x] 7.7 Preserve copy button behavior and copied feedback states.
+- [x] 7.8 Remove the old embedded UI string implementation after parity is reached.
 
 ## 8. Server/Web Integration
 
@@ -64,7 +64,7 @@
 ## 9. Packaging and Release Validation
 
 - [x] 9.1 Update package `files`, `bin`, and build outputs so npm publication includes server and web dist assets.
-- [ ] 9.2 Verify Docker build still includes the built console.
+- [x] 9.2 Verify Docker build still includes the built console.
 - [x] 9.3 Run `npm run build`, `npm run typecheck`, and `npm test`.
 - [x] 9.4 Start the built CLI locally and manually verify `/console`.
 - [x] 9.5 Document any changed development commands.

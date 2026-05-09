@@ -4,13 +4,21 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx scripts/write-embedded-console.ts && vite --host 127.0.0.1",
-    "build": "tsx scripts/write-embedded-console.ts",
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "echo \"no web tests yet\""
   },
+  "dependencies": {
+    "@mockmind/shared": "file:../../packages/shared",
+    "react": "latest",
+    "react-dom": "latest"
+  },
   "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
     "@types/node": "latest",
+    "@vitejs/plugin-react": "latest",
     "tsx": "latest",
     "typescript": "latest",
     "vite": "latest"

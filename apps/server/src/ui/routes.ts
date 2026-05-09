@@ -1,27 +1,26 @@
 import { existsSync, readFileSync, realpathSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, extname, join, relative, resolve } from "node:path";
 import type { FastifyInstance } from "fastify";
-import { uiCss, uiHtml, uiJs } from "./assets.js";
 
 export async function registerUiRoutes(app: FastifyInstance): Promise<void> {
   app.get("/", async (_request, reply) => reply.redirect("/console"));
   app.get("/console", async (_request, reply) => {
     const html = readConsoleAsset("index.html");
-    return reply.type("text/html; charset=utf-8").send(html ?? uiHtml);
+    if (!html) return reply.code(404).send({ error: "Console assets are not built. Run npm run build first." });
+    return reply.type(contentType("index.html")).send(html);
   });
-  app.get("/console/style.css", async (_request, reply) => {
-    const css = readConsoleAsset("style.css");
-    return reply.type("text/css; charset=utf-8").send(css ?? uiCss);
-  });
-  app.get("/console/app.js", async (_request, reply) => {
-    const js = readConsoleAsset("app.js");
-    return reply.type("application/javascript; charset=utf-8").send(js ?? uiJs);
+  app.get("/console/*", async (request, reply) => {
+    const params = request.params as { "*": string };
+    const asset = readConsoleAsset(params["*"]);
+    if (!asset) return reply.code(404).send({ error: "Console asset not found." });
+    return reply.type(contentType(params["*"])).send(asset);
   });
 }
 
-function readConsoleAsset(fileName: "index.html" | "style.css" | "app.js"): string | undefined {
+function readConsoleAsset(fileName: string): string | undefined {
   for (const root of consoleAssetRoots()) {
-    const filePath = join(root, fileName);
+    const filePath = safeAssetPath(root, fileName);
+    if (!filePath) continue;
     if (existsSync(filePath)) return readFileSync(filePath, "utf8");
   }
   return undefined;
@@ -44,4 +43,20 @@ function cliConsoleRoot(): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+function safeAssetPath(root: string, fileName: string): string | undefined {
+  const rootPath = resolve(root);
+  const filePath = resolve(rootPath, fileName);
+  const traversal = relative(rootPath, filePath).startsWith("..");
+  return traversal ? undefined : filePath;
+}
+
+function contentType(fileName: string): string {
+  if (fileName.endsWith(".html")) return "text/html; charset=utf-8";
+  if (fileName.endsWith(".css")) return "text/css; charset=utf-8";
+  if (fileName.endsWith(".js")) return "application/javascript; charset=utf-8";
+  if (fileName.endsWith(".json")) return "application/json; charset=utf-8";
+  if (extname(fileName) === ".svg") return "image/svg+xml";
+  return "application/octet-stream";
 }
