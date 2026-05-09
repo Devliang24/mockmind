@@ -1,0 +1,18 @@
+{
+  "name": "@mockmind/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx scripts/write-embedded-console.ts && vite --host 127.0.0.1",
+    "build": "tsx scripts/write-embedded-console.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "echo \"no web tests yet\""
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "tsx": "latest",
+    "typescript": "latest",
+    "vite": "latest"
+  }
+}

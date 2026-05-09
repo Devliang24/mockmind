@@ -1,13 +1,24 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import type {
+  AdminModelsResponse,
+  AdminOverviewResponse,
+  AdminProvidersResponse,
+  AdminRecordedRequest,
+  AdminRequestsResponse,
+  AdminResetResponse,
+  AdminRoute,
+  AdminRoutesResponse,
+  AdminScenario
+} from "@mockmind/shared";
 import type { FastifyInstance } from "fastify";
 import { authInfoForProvider } from "../core/auth/auth-mock.js";
 import { providerGroups, providerRegistry, providerRouteSummaries } from "../providers/registry.js";
 import type { ServerContext } from "../server/context.js";
 
 export async function registerAdminRoutes(app: FastifyInstance, context: ServerContext): Promise<void> {
-  app.get("/__admin/overview", async () => {
-    const requests = context.recorder.list();
+  app.get("/__admin/overview", async (): Promise<AdminOverviewResponse> => {
+    const requests = context.recorder.list() as AdminRecordedRequest[];
     return {
       ok: true,
       name: "mockmind",
@@ -23,15 +34,19 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
     };
   });
   app.get("/__admin/config", async () => context.config);
-  app.get("/__admin/models", async () => ({
+  app.get("/__admin/models", async (): Promise<AdminModelsResponse> => ({
     data: context.config.models.map((model) => ({
       ...model,
       displayName: providerRegistry.find((registration) => registration.provider === model.provider)?.displayName ?? model.provider
     }))
   }));
-  app.get("/__admin/scenarios", async () => context.scenarios.list());
-  app.get("/__admin/requests", async () => context.recorder.list());
-  app.get("/__admin/providers", async () => ({
+  app.get("/__admin/scenarios", async (): Promise<AdminScenario[]> => context.scenarios.list().map((scenario) => ({
+    ...scenario,
+    match: scenario.match,
+    response: scenario.response as Record<string, unknown>
+  })));
+  app.get("/__admin/requests", async (): Promise<AdminRequestsResponse> => context.recorder.list() as AdminRecordedRequest[]);
+  app.get("/__admin/providers", async (): Promise<AdminProvidersResponse> => ({
     mode: "all",
     providers: providerRegistry.map((registration) => ({
       provider: registration.provider,
@@ -45,7 +60,7 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
     })),
     groups: providerGroups()
   }));
-  app.get("/__admin/routes", async () => providerRegistry.flatMap((registration) => registration.routes.map((route) => ({
+  app.get("/__admin/routes", async (): Promise<AdminRoutesResponse> => providerRegistry.flatMap((registration) => registration.routes.map((route): AdminRoute => ({
     provider: registration.provider,
     displayName: registration.displayName,
     groups: registration.groups,
@@ -56,7 +71,7 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
     endpoint: route.endpoint,
     description: route.description ?? protocolLabel(route.protocol, route.path)
   }))));
-  app.post("/__admin/reset", async () => {
+  app.post("/__admin/reset", async (): Promise<AdminResetResponse> => {
     context.recorder.reset();
     return { ok: true };
   });

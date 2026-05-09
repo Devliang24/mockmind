@@ -1,0 +1,362 @@
+openapi: 3.1.0
+info:
+  title: MockMind Admin API
+  version: 0.1.0
+  description: Admin API endpoints consumed by the MockMind web console.
+servers:
+  - url: http://127.0.0.1:4000
+paths:
+  /__admin/overview:
+    get:
+      summary: Get server overview
+      operationId: getAdminOverview
+      responses:
+        "200":
+          description: Server overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminOverview"
+  /__admin/providers:
+    get:
+      summary: List providers
+      operationId: listAdminProviders
+      responses:
+        "200":
+          description: Provider metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminProviders"
+  /__admin/routes:
+    get:
+      summary: List mock API routes
+      operationId: listAdminRoutes
+      responses:
+        "200":
+          description: Route metadata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminRoute"
+  /__admin/models:
+    get:
+      summary: List configured models
+      operationId: listAdminModels
+      responses:
+        "200":
+          description: Model metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminModels"
+  /__admin/scenarios:
+    get:
+      summary: List configured scenarios
+      operationId: listAdminScenarios
+      responses:
+        "200":
+          description: Scenario metadata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminScenario"
+  /__admin/requests:
+    get:
+      summary: List recorded requests
+      operationId: listAdminRequests
+      responses:
+        "200":
+          description: Request records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminRecordedRequest"
+  /__admin/reset:
+    post:
+      summary: Clear request records
+      operationId: resetAdminRequests
+      responses:
+        "200":
+          description: Reset result
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+                    const: true
+components:
+  schemas:
+    ProviderId:
+      type: string
+      enum: [openai, deepseek, moonshot, aliyun-bailian, zhipu, anthropic, gemini, minimax]
+    ProviderGroup:
+      type: string
+      enum: [chinese, international, openai-compatible, native]
+    ProviderAuth:
+      type: object
+      required: [scheme, label, headers, query]
+      properties:
+        scheme:
+          type: string
+          enum: [authorization-bearer, x-api-key, x-goog-api-key-or-query-key]
+        label:
+          type: string
+        headers:
+          type: array
+          items:
+            type: string
+        query:
+          type: array
+          items:
+            type: string
+    AdminOverview:
+      type: object
+      required:
+        - ok
+        - name
+        - version
+        - server
+        - auth
+        - providers
+        - providersCount
+        - modelsCount
+        - scenariosCount
+        - requestsCount
+        - recentRequests
+      properties:
+        ok:
+          type: boolean
+          const: true
+        name:
+          type: string
+          const: mockmind
+        version:
+          type: string
+        server:
+          type: object
+          required: [host, port]
+          properties:
+            host:
+              type: string
+            port:
+              type: integer
+        auth:
+          type: object
+          required: [mode]
+          properties:
+            mode:
+              type: string
+              enum: [disabled, permissive, strict]
+        providers:
+          type: object
+          required: [enabled]
+          properties:
+            enabled:
+              oneOf:
+                - type: string
+                  enum: [all, openai-compatible, chinese, international]
+                - type: array
+                  items:
+                    $ref: "#/components/schemas/ProviderId"
+        providersCount:
+          type: integer
+        modelsCount:
+          type: integer
+        scenariosCount:
+          type: integer
+        requestsCount:
+          type: integer
+        recentRequests:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminRecordedRequest"
+    AdminProvider:
+      type: object
+      required:
+        - provider
+        - displayName
+        - groups
+        - auth
+        - defaultModels
+        - latestModels
+        - configuredModels
+        - routes
+      properties:
+        provider:
+          $ref: "#/components/schemas/ProviderId"
+        displayName:
+          type: string
+        groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProviderGroup"
+        auth:
+          $ref: "#/components/schemas/ProviderAuth"
+        defaultModels:
+          type: array
+          items:
+            type: string
+        latestModels:
+          type: array
+          items:
+            type: string
+        configuredModels:
+          type: array
+          items:
+            type: string
+        routes:
+          type: array
+          items:
+            type: string
+    AdminProviders:
+      type: object
+      required: [mode, providers, groups]
+      properties:
+        mode:
+          type: string
+          const: all
+        providers:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminProvider"
+        groups:
+          type: object
+          required: [chinese, international, openai-compatible, native]
+          properties:
+            chinese:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProviderId"
+            international:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProviderId"
+            openai-compatible:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProviderId"
+            native:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProviderId"
+    AdminRoute:
+      type: object
+      required: [provider, displayName, groups, auth, method, path, protocol, endpoint, description]
+      properties:
+        provider:
+          $ref: "#/components/schemas/ProviderId"
+        displayName:
+          type: string
+        groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProviderGroup"
+        auth:
+          $ref: "#/components/schemas/ProviderAuth"
+        method:
+          type: string
+          enum: [GET, POST, PUT, PATCH, DELETE]
+        path:
+          type: string
+        protocol:
+          type: string
+        endpoint:
+          type: string
+        description:
+          type: string
+    AdminModels:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            required: [id, provider, displayName]
+            properties:
+              id:
+                type: string
+              provider:
+                $ref: "#/components/schemas/ProviderId"
+              displayName:
+                type: string
+    AdminScenario:
+      type: object
+      required: [id, priority, response]
+      properties:
+        id:
+          type: string
+        provider:
+          $ref: "#/components/schemas/ProviderId"
+        endpoint:
+          type: string
+        priority:
+          type: integer
+        match:
+          type: object
+          additionalProperties: true
+        response:
+          type: object
+          additionalProperties: true
+    AdminRecordedRequest:
+      type: object
+      required: [id, provider, endpoint, status, durationMs, stream, request]
+      properties:
+        id:
+          type: string
+        provider:
+          type: string
+        endpoint:
+          type: string
+        model:
+          type: string
+        matchedScenarioId:
+          type: string
+        status:
+          type: integer
+        durationMs:
+          type: integer
+        stream:
+          type: boolean
+        request:
+          type: object
+          required: [provider, endpoint, method, rawBody, headers, query]
+          properties:
+            provider:
+              $ref: "#/components/schemas/ProviderId"
+            endpoint:
+              type: string
+            method:
+              type: string
+            model:
+              type: string
+            messages:
+              type: array
+              items: {}
+            prompt:
+              type: string
+            stream:
+              type: boolean
+            tools:
+              type: array
+              items: {}
+            rawBody: {}
+            headers:
+              type: object
+              additionalProperties:
+                type: string
+            query:
+              type: object
+              additionalProperties:
+                type: string
+        responseBody: {}

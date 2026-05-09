@@ -1,6 +1,9 @@
 node_modules
 dist
 coverage
+*.tsbuildinfo
+apps/web/index.html
+apps/web/public/
 .DS_Store
 .env
 .codex

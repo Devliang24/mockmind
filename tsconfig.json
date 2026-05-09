@@ -1,1 +1,8 @@
-{"compilerOptions":{"target":"ES2022","module":"NodeNext","moduleResolution":"NodeNext","strict":true,"esModuleInterop":true,"skipLibCheck":true,"forceConsistentCasingInFileNames":true,"declaration":true,"outDir":"dist","types":["node"],"ignoreDeprecations":"6.0"},"include":["src","test","*.ts"]}
+{
+  "files": [],
+  "references": [
+    { "path": "./apps/server" },
+    { "path": "./apps/web" },
+    { "path": "./packages/shared" }
+  ]
+}

@@ -58,6 +58,12 @@ http://127.0.0.1:4000/console
 
 内置控制台左侧直接展示供应商菜单，并提供请求记录页面。供应商按国外优先、国内随后排序，可查看每家 Provider 的协议、端点、必填项、非流式/流式 cURL 示例、响应 Body 和官方文档。
 
+## API 文档
+
+- [Admin API](docs/api/admin-api.md) documents the console-facing `__admin` endpoints and response fields.
+- [OpenAPI](docs/api/openapi.yaml) provides a machine-readable Admin API contract.
+- [Mock API](docs/api/mock-api.md) documents MockMind-supported provider routes, auth expectations, required fields, and streaming support.
+
 ## 持久化
 
 默认配置使用 SQLite 持久化请求记录，服务重启后 `__admin/requests` 和 Web UI 的请求记录仍可查看。
@@ -113,6 +119,20 @@ npm run dev -- start --config mockmind.yaml --port 4000
 ```
 
 MockMind 默认启动所有已实现的协议。`providers` 配置节仅作为文档、模型归属和 Admin API 输出的元数据，而不是路由启用/禁用开关。
+
+## 开发命令
+
+```bash
+npm run dev -- start --config mockmind.yaml --port 4000
+npm run dev:server -- start --config mockmind.yaml --port 4000
+npm run dev:web
+npm run build
+npm run typecheck
+npm test
+npm run docs:validate
+```
+
+仓库使用 npm workspaces：server package 位于 `apps/server`，web console 位于 `apps/web`，共享 Admin API 类型位于 `packages/shared`。根 `npm run build` 会按 shared、web、server 顺序构建，并将 web 静态产物复制到 server 的 `dist/console`。
 
 ## 已实现能力
 
