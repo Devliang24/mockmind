@@ -25,7 +25,7 @@ const providerDocs: Record<string, string> = {
 
 export function exampleForRoute(route: AdminRoute, model: string, baseUrl: string): RouteExample {
   if (route.protocol === "anthropic-messages") {
-    const body = { model, max_tokens: 256, messages: [{ role: "user", content: "hello" }] };
+    const body = nonStreamBody({ model, max_tokens: 256, messages: [{ role: "user", content: "hello" }] });
     return {
       docsUrl: providerDocs.anthropic,
       required: ["model", "max_tokens", "messages", "anthropic-version"],
@@ -57,7 +57,7 @@ export function exampleForRoute(route: AdminRoute, model: string, baseUrl: strin
   }
 
   if (route.protocol === "dashscope-generation") {
-    const body = { model, input: { messages: [{ role: "user", content: "hello" }] }, parameters: { result_format: "message" } };
+    const body = nonStreamBody({ model, input: { messages: [{ role: "user", content: "hello" }] }, parameters: { result_format: "message" } });
     return {
       docsUrl: providerDocs["aliyun-bailian"],
       required: ["model", "input.messages"],
@@ -83,7 +83,7 @@ export function exampleForRoute(route: AdminRoute, model: string, baseUrl: strin
   }
 
   if (route.protocol === "openai-responses") {
-    const body = { model, input: "hello" };
+    const body = nonStreamBody({ model, input: "hello" });
     return {
       docsUrl: providerDocs[route.provider] ?? providerDocs.openai,
       required: ["model", "input"],
@@ -118,7 +118,7 @@ export function exampleForRoute(route: AdminRoute, model: string, baseUrl: strin
     };
   }
 
-  const body = { model, messages: [{ role: "user", content: "hello" }] };
+  const body = nonStreamBody({ model, messages: [{ role: "user", content: "hello" }] });
   return {
     docsUrl: route.provider === "zhipu" && route.path.includes("/api/coding/") ? "https://docs.bigmodel.cn/cn/coding-plan/tool/others" : providerDocs[route.provider] ?? providerDocs.openai,
     required: ["model", "messages"],
@@ -136,6 +136,10 @@ function authHeaders(route: AdminRoute): string[] {
   if (route.auth.scheme === "x-api-key") return ["x-api-key: 123456"];
   if (route.auth.scheme === "x-goog-api-key-or-query-key") return ["x-goog-api-key: 123456"];
   return ["Authorization: Bearer 123456"];
+}
+
+function nonStreamBody<T extends Record<string, unknown>>(body: T): T & { stream: false } {
+  return { ...body, stream: false };
 }
 
 function curl(baseUrl: string, path: string, body: unknown, headers: string[]): string {

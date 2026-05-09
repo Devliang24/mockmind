@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
+  <title id="title">MockMind architecture</title>
+  <desc id="desc">Layered architecture diagram for MockMind showing clients, Fastify server, admin console, provider registry, protocol handlers, core scenario engine, config, and persistence.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .panel-blue { fill: #eff6ff; stroke: #93c5fd; stroke-width: 1.5; }
+      .panel-green { fill: #ecfdf5; stroke: #86efac; stroke-width: 1.5; }
+      .panel-amber { fill: #fffbeb; stroke: #fbbf24; stroke-width: 1.5; }
+      .panel-purple { fill: #faf5ff; stroke: #c084fc; stroke-width: 1.5; }
+      .panel-slate { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.5; }
+      .title { fill: #0f172a; font: 700 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+      .subtitle { fill: #475569; font: 400 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+      .label { fill: #0f172a; font: 700 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+      .text { fill: #334155; font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+      .mono { fill: #334155; font: 500 12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .small { fill: #64748b; font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+      .arrow { fill: none; stroke: #64748b; stroke-width: 1.8; marker-end: url(#arrow); }
+      .line { fill: none; stroke: #94a3b8; stroke-width: 1.2; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1280" height="760" rx="0"/>
+  <text class="title" x="48" y="52">MockMind Architecture</text>
+  <text class="subtitle" x="48" y="78">Provider-shaped HTTP APIs backed by one scenario engine and shared protocol adapters.</text>
+
+  <rect class="panel-blue" x="48" y="112" width="240" height="118" rx="12"/>
+  <text class="label" x="70" y="145">Clients</text>
+  <text class="text" x="70" y="172">SDKs, agents, API tools</text>
+  <text class="mono" x="70" y="197">POST /v1/chat/completions</text>
+
+  <rect class="panel-blue" x="48" y="270" width="240" height="118" rx="12"/>
+  <text class="label" x="70" y="303">Local Entry Points</text>
+  <text class="text" x="70" y="330">CLI start command</text>
+  <text class="text" x="70" y="354">Programmatic server API</text>
+
+  <rect class="panel" x="342" y="112" width="252" height="276" rx="14"/>
+  <text class="label" x="366" y="145">Fastify Server</text>
+  <text class="text" x="366" y="172">HTTP routing and lifecycle</text>
+  <text class="text" x="366" y="197">CORS, health, console assets</text>
+  <line class="line" x1="366" y1="218" x2="570" y2="218"/>
+  <text class="mono" x="366" y="246">apps/server/src/server/create-server.ts</text>
+  <text class="mono" x="366" y="270">apps/server/src/ui/routes.ts</text>
+  <text class="mono" x="366" y="294">apps/server/src/admin/routes.ts</text>
+
+  <rect class="panel-slate" x="342" y="430" width="252" height="154" rx="14"/>
+  <text class="label" x="366" y="463">Admin Console</text>
+  <text class="text" x="366" y="490">Provider docs and examples</text>
+  <text class="text" x="366" y="514">Model picker and prices</text>
+  <text class="text" x="366" y="538">Request recorder drawer</text>
+
+  <rect class="panel-purple" x="652" y="112" width="256" height="154" rx="14"/>
+  <text class="label" x="676" y="145">Provider Registry</text>
+  <text class="text" x="676" y="172">Provider metadata and routes</text>
+  <text class="text" x="676" y="196">Model patterns and groups</text>
+  <line class="line" x1="676" y1="217" x2="884" y2="217"/>
+  <text class="mono" x="676" y="245">apps/server/src/providers/registry.ts</text>
+
+  <rect class="panel-purple" x="652" y="304" width="256" height="180" rx="14"/>
+  <text class="label" x="676" y="337">Provider Route Bindings</text>
+  <text class="text" x="676" y="364">OpenAI, DeepSeek, Kimi</text>
+  <text class="text" x="676" y="388">Zhipu, DashScope, MiniMax</text>
+  <text class="text" x="676" y="412">Anthropic, Gemini</text>
+  <line class="line" x1="676" y1="433" x2="884" y2="433"/>
+  <text class="mono" x="676" y="461">apps/server/src/providers/*/routes.ts</text>
+
+  <rect class="panel-green" x="968" y="112" width="264" height="198" rx="14"/>
+  <text class="label" x="992" y="145">Protocol Handlers</text>
+  <text class="text" x="992" y="172">Validate provider payloads</text>
+  <text class="text" x="992" y="196">Build unified MockRequest</text>
+  <text class="text" x="992" y="220">Format provider responses</text>
+  <line class="line" x1="992" y1="241" x2="1208" y2="241"/>
+  <text class="mono" x="992" y="269">apps/server/src/protocols/*</text>
+
+  <rect class="panel-green" x="968" y="352" width="264" height="232" rx="14"/>
+  <text class="label" x="992" y="385">Core Scenario Engine</text>
+  <text class="text" x="992" y="412">Auth mock</text>
+  <text class="text" x="992" y="436">Scenario store and matcher</text>
+  <text class="text" x="992" y="460">Renderer and usage estimate</text>
+  <text class="text" x="992" y="484">Recorder</text>
+  <line class="line" x1="992" y1="505" x2="1208" y2="505"/>
+  <text class="mono" x="992" y="533">MockRequest -> MockResult</text>
+
+  <rect class="panel-amber" x="48" y="632" width="354" height="84" rx="12"/>
+  <text class="label" x="70" y="665">Configuration</text>
+  <text class="text" x="70" y="690">mockmind.yaml, defaults, scenarios, auth, models</text>
+
+  <rect class="panel-amber" x="462" y="632" width="354" height="84" rx="12"/>
+  <text class="label" x="484" y="665">Persistence</text>
+  <text class="text" x="484" y="690">Memory or SQLite request records</text>
+
+  <rect class="panel-slate" x="876" y="632" width="356" height="84" rx="12"/>
+  <text class="label" x="898" y="665">Provider-Shaped Response</text>
+  <text class="text" x="898" y="690">JSON or text/event-stream matching each API protocol</text>
+
+  <path class="arrow" d="M 288 171 L 342 171"/>
+  <path class="arrow" d="M 288 329 L 342 250"/>
+  <path class="arrow" d="M 594 184 L 652 184"/>
+  <path class="arrow" d="M 780 266 L 780 304"/>
+  <path class="arrow" d="M 908 394 L 968 211"/>
+  <path class="arrow" d="M 1100 310 L 1100 352"/>
+  <path class="arrow" d="M 968 468 L 908 468"/>
+  <path class="arrow" d="M 652 468 L 594 468"/>
+  <path class="arrow" d="M 1100 584 L 1100 632"/>
+  <path class="arrow" d="M 402 674 L 968 468"/>
+  <path class="arrow" d="M 639 632 L 1032 584"/>
+
+  <text class="small" x="304" y="158">HTTP requests</text>
+  <text class="small" x="610" y="171">register routes</text>
+  <text class="small" x="914" y="198">dispatch</text>
+  <text class="small" x="1114" y="334">invoke</text>
+  <text class="small" x="748" y="456">formatted admin data</text>
+  <text class="small" x="1096" y="616">send</text>
+</svg>

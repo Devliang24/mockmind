@@ -1,5 +1,7 @@
 # Architecture
 
+![MockMind architecture](./assets/architecture.svg)
+
 MockMind is organized around three layers:
 
 ```txt
@@ -12,7 +14,7 @@ Provider Registry
 
 ## Core
 
-`src/core` is provider-neutral. It owns:
+`apps/server/src/core` is provider-neutral. It owns:
 
 - Scenario types
 - Scenario store
@@ -25,7 +27,7 @@ Core receives a unified `MockRequest` and returns a unified `MockResult`.
 
 ## Protocols
 
-`src/protocols` contains protocol-specific formatting and request handling.
+`apps/server/src/protocols` contains protocol-specific formatting and request handling.
 
 Current protocols:
 
@@ -39,7 +41,7 @@ Protocol handlers convert provider HTTP requests into `MockRequest`, invoke the 
 
 ## Providers
 
-`src/providers` contains provider metadata and route bindings.
+`apps/server/src/providers` contains provider metadata and route bindings.
 
 Each provider should expose:
 
@@ -64,7 +66,7 @@ Provider code should not duplicate protocol formatting logic. It should bind rou
 
 ## Registry
 
-`src/providers/registry.ts` imports all provider registrations and exposes:
+`apps/server/src/providers/registry.ts` imports all provider registrations and exposes:
 
 - `providerRegistry`
 - `providerGroups()`

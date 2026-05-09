@@ -55,6 +55,7 @@ describe("web ui", () => {
     expect(js.body).toContain("https://docs.bigmodel.cn/cn/coding-plan/tool/others");
     expect(js.body).toContain("query");
     expect(js.body).toContain("return_documents");
+    expect(js.body).toContain("stream:!1");
 
     const css = await app.inject({ method: "GET", url: cssPath });
     expect(css.statusCode).toBe(200);
