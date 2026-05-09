@@ -1,7 +1,8 @@
 ## 1. Preflight
 
 - [x] 1.1 Commit or explicitly set aside current unrelated architecture diagram and UI example changes.
-- [ ] 1.2 Run the current test suite and record the clean baseline before moving files.
+- [x] 1.2 Run the current test suite and record the clean baseline before moving files.
+  - Baseline recorded from pre-split commit `4edffb6` (`ea2f45f^`): `npm test` passed with 15 test files and 67 tests.
 - [x] 1.3 Confirm the published CLI entry point and package output requirements.
 
 ## 2. Workspace Setup
