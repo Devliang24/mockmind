@@ -439,10 +439,6 @@ function ExampleSections({ example }: { example: RouteExample }) {
         <CodeBlock title="非流式响应 Body" value={prettyJson(example.responseBody)} copyKey="response" />
         {example.stream ? <CodeBlock title="流式响应示例" value={example.stream.responseText} copyKey="stream-response" /> : <p className="muted">该端点暂无流式示例。</p>}
       </div>
-      <div className="grid-2 example-row">
-        <CodeBlock title="请求 Body" value={prettyJson(example.requestBody)} copyKey="request-body-example" />
-        <CodeBlock title="必填字段" value={example.required.length ? example.required.join("\n") : "none"} copyKey="required" />
-      </div>
     </>
   );
 }

@@ -54,6 +54,9 @@ describe("web ui", () => {
     expect(js.body).toContain("drawer-close");
     expect(js.body).toContain("x-goog-api-key");
     expect(js.body).toContain("responseBody");
+    expect(js.body).toContain("chatcmpl_mock_");
+    expect(js.body).toContain("finish_reason");
+    expect(js.body).toContain("prompt_tokens");
     expect(js.body).toContain("model-chip");
     expect(js.body).toContain("Pricing: not listed in current snapshot");
     expect(js.body).toContain("Input ");
@@ -66,6 +69,8 @@ describe("web ui", () => {
     expect(js.body).toContain("query");
     expect(js.body).toContain("return_documents");
     expect(js.body).toContain("stream:!1");
+    expect(js.body).not.toContain("请求 Body");
+    expect(js.body).not.toContain("request-body-example");
     expect(js.body).not.toContain("app-shell");
     expect(js.body).not.toContain("activity-column");
     expect(js.body).not.toContain("brand-mark");
