@@ -58,8 +58,10 @@ describe("web ui", () => {
     expect(js.body).toContain("finish_reason");
     expect(js.body).toContain("prompt_tokens");
     expect(js.body).toContain("model-chip");
-    expect(js.body).toContain("Pricing: not listed in current snapshot");
-    expect(js.body).toContain("Input ");
+    expect(js.body).toContain("价格：官网未列出输入/输出单价");
+    expect(js.body).toContain("价格：输入");
+    expect(js.body).toContain("¥3.43");
+    expect(js.body).toContain("text/image/video input");
     expect(js.body).toContain("gpt-5.5");
     expect(js.body).toContain("claude-opus-4-7");
     expect(js.body).toContain("claude-sonnet-4-6");
