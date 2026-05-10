@@ -58,7 +58,7 @@ export function App() {
   const providers = useMemo(() => orderedProviders(data?.providers.providers ?? []), [data?.providers.providers]);
   const selectedProvider = providers.find((provider) => provider.provider === selectedProviderId) ?? providers[0];
   const providerRoutes = useMemo(
-    () => (data?.routes ?? []).filter((route) => route.provider === selectedProvider?.provider),
+    () => (data?.routes ?? []).filter((route) => route.provider === selectedProvider?.provider && isConsoleRouteVisible(route)),
     [data?.routes, selectedProvider?.provider]
   );
   const protocols = useMemo(() => orderedProtocols(unique(providerRoutes.map((route) => route.protocol))), [providerRoutes]);
@@ -697,6 +697,10 @@ function scenarioName(request: AdminRecordedRequest, scenarios: AdminScenario[])
 
 function routeKey(route: AdminRoute): string {
   return `${route.method} ${route.path}`;
+}
+
+function isConsoleRouteVisible(route: AdminRoute): boolean {
+  return !(route.method === "GET" && route.path === "/v1/models");
 }
 
 function requestCurl(request: AdminRecordedRequest): string {
