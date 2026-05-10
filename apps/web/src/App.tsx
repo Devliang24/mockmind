@@ -25,6 +25,7 @@ const protocolOrder = [
   "minimax-chat",
   "rerank"
 ];
+const hiddenConsoleProtocols = new Set(["openai-images", "openai-audio", "openai-moderations", "openai-files", "openai-batch"]);
 
 export function App() {
   const [data, setData] = useState<ConsoleData | null>(null);
@@ -700,7 +701,7 @@ function routeKey(route: AdminRoute): string {
 }
 
 function isConsoleRouteVisible(route: AdminRoute): boolean {
-  return !(route.method === "GET" && route.path === "/v1/models");
+  return !(route.method === "GET" && route.path === "/v1/models") && !hiddenConsoleProtocols.has(route.protocol);
 }
 
 function requestCurl(request: AdminRecordedRequest): string {
