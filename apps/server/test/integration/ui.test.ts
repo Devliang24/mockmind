@@ -60,6 +60,8 @@ describe("web ui", () => {
     expect(js.body).toContain("model-chip");
     expect(js.body).toContain("价格：官网未列出输入/输出单价");
     expect(js.body).toContain("¥3.43");
+    expect(js.body).toContain("¥13.71 / ¥27.42");
+    expect(js.body).toContain("Gemini 3.1 Pro Preview");
     expect(js.body).toContain("¥0.5");
     expect(js.body).toContain("按输入长度 <32K / ≥32K 阶梯");
     expect(js.body).toContain("输出不计费");
