@@ -1,4 +1,5 @@
 import type { AdminRoute } from "@mockmind/shared";
+import { embeddingModelForProvider, rerankModelsForProvider } from "./provider-models";
 
 export type RouteExample = {
   docsUrl: string;
@@ -59,7 +60,7 @@ export function exampleForRoute(route: AdminRoute, selectedModel: string, baseUr
   }
 
   if (route.protocol === "openai-embeddings") {
-    const embedding = embeddingModel(route.provider);
+    const embedding = embeddingModelForProvider(route.provider);
     return openAIExample(baseUrl, route, docsUrl, { model: embedding, input: "hello" }, openAIEmbeddingResponse(embedding, route), ["model", "input"]);
   }
 
@@ -152,8 +153,8 @@ export function exampleForRoute(route: AdminRoute, selectedModel: string, baseUr
 
 function exampleModel(route: AdminRoute, selectedModel: string): string {
   if (route.provider === "zhipu" && route.path.includes("/api/coding/paas/v4")) return "GLM-5.1";
-  if (route.protocol === "openai-embeddings") return embeddingModel(route.provider);
-  if (route.protocol === "rerank") return rerankModels(route.provider).includes(selectedModel) ? selectedModel : rerankModels(route.provider)[0] ?? selectedModel;
+  if (route.protocol === "openai-embeddings") return embeddingModelForProvider(route.provider);
+  if (route.protocol === "rerank") return rerankModelsForProvider(route.provider).includes(selectedModel) ? selectedModel : rerankModelsForProvider(route.provider)[0] ?? selectedModel;
   return selectedModel;
 }
 
@@ -380,20 +381,8 @@ function rerankResponse(route: AdminRoute, body: { model: string }) {
 }
 
 function modelsResponse(providerId: string, selectedModel: string) {
-  const models = unique([selectedModel, ...rerankModels(providerId), embeddingModel(providerId)]).filter(Boolean);
+  const models = unique([selectedModel, ...rerankModelsForProvider(providerId), embeddingModelForProvider(providerId)]).filter(Boolean);
   return { object: "list", data: models.map((id) => ({ id, object: "model", owned_by: "mockmind" })) };
-}
-
-function rerankModels(providerId: string): string[] {
-  if (providerId === "aliyun-bailian") return ["qwen3-rerank", "gte-rerank-v2", "qwen3-vl-rerank"];
-  if (providerId === "zhipu") return ["rerank-mock"];
-  return [];
-}
-
-function embeddingModel(providerId: string): string {
-  if (providerId === "aliyun-bailian") return "text-embedding-v3";
-  if (providerId === "zhipu") return "embedding-3";
-  return "text-embedding-3-small";
 }
 
 function isThinkingModel(model: string): boolean {

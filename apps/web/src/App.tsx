@@ -9,6 +9,7 @@ import type {
 import { loadConsoleData, type ConsoleData } from "./api/client";
 import { exampleForRoute, type RouteExample } from "./examples";
 import { priceLabel } from "./model-pricing";
+import { embeddingModelForProvider, rerankModelsForProvider } from "./provider-models";
 
 type ConsoleView = "provider" | "requests";
 type ProviderView = AdminProvidersResponse["providers"][number];
@@ -69,7 +70,7 @@ export function App() {
     protocolRoutes.find((route) => routeKey(route) === selectedRouteKey) ??
     protocolRoutes[0] ??
     providerRoutes[0];
-  const providerModels = useMemo(() => modelsForProvider(selectedProvider, data?.models), [data?.models, selectedProvider]);
+  const providerModels = useMemo(() => modelsForProviderProtocol(selectedProvider, data?.models, activeProtocol), [activeProtocol, data?.models, selectedProvider]);
   const activeModel = selectedModel && providerModels.includes(selectedModel) ? selectedModel : providerModels[0] ?? "mock-model";
   const selectedRequest = data?.requests.find((request) => request.id === selectedRequestId);
 
@@ -689,6 +690,19 @@ function modelsForProvider(provider: ProviderView | undefined, models: AdminMode
     ...provider.latestModels,
     ...provider.defaultModels
   ]);
+}
+
+function modelsForProviderProtocol(provider: ProviderView | undefined, models: AdminModelsResponse | undefined, protocol: string): string[] {
+  if (!provider) return [];
+  const providerModels = modelsForProvider(provider, models);
+  const rerankModels = rerankModelsForProvider(provider.provider);
+  const embeddingModel = embeddingModelForProvider(provider.provider);
+
+  if (protocol === "rerank") return unique([...providerModels.filter((model) => rerankModels.includes(model)), ...rerankModels]);
+  if (protocol === "openai-embeddings") return unique([...providerModels.filter((model) => model === embeddingModel), embeddingModel].filter(Boolean));
+
+  const nonChatModels = new Set([...rerankModels, embeddingModel].filter(Boolean));
+  return providerModels.filter((model) => !nonChatModels.has(model));
 }
 
 function scenarioName(request: AdminRecordedRequest, scenarios: AdminScenario[]): string {

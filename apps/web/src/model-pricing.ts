@@ -1,6 +1,6 @@
 export type ModelPricing = {
   input: string;
-  output: string;
+  output?: string;
   unit: string;
   source: string;
   url: string;
@@ -34,7 +34,7 @@ export const modelPricing: Record<string, ModelPricing> = {
   "qwen3.6-plus": { input: "¥2", output: "¥12", unit: "1M tokens", source: "阿里云百炼模型计费", url: "https://help.aliyun.com/zh/model-studio/models", note: "中国内地最低价" },
   "qwen3.6-flash": { input: "¥1.2", output: "¥7.2", unit: "1M tokens", source: "阿里云百炼模型计费", url: "https://help.aliyun.com/zh/model-studio/models", note: "中国内地最低价" },
   "qwen3.5-plus": { input: "¥0.8", output: "¥4.8", unit: "1M tokens", source: "阿里云百炼模型计费", url: "https://help.aliyun.com/zh/model-studio/models", note: "中国内地最低价" },
-  "qwen3-rerank": { input: "¥0.5", output: "¥0", unit: "1M tokens", source: "阿里云百炼模型计费", url: "https://help.aliyun.com/zh/model-studio/model-pricing", note: "文本排序输出不计费 · 中国内地" },
+  "qwen3-rerank": { input: "¥0.5", unit: "1M tokens", source: "阿里云百炼模型计费", url: "https://help.aliyun.com/zh/model-studio/model-pricing", note: "输出不计费 · 中国内地" },
   "glm-5.1": zhipuGlm51Pricing,
   "GLM-5.1": zhipuGlm51Pricing,
   "MiniMax-M2.7": { input: "¥2.06", output: "¥8.23", unit: "M tokens", source: "MiniMax Pay as You Go", url: "https://platform.minimax.io/docs/guides/pricing-paygo", note: "按 USD/CNY 6.8562 换算" },
@@ -46,5 +46,6 @@ export const modelPricing: Record<string, ModelPricing> = {
 export function priceLabel(model: string): string {
   const price = modelPricing[model];
   if (!price) return "价格：官网未列出输入/输出单价";
-  return `价格：输入 ${price.input} · 输出 ${price.output} / ${price.unit}${price.note ? ` · ${price.note}` : ""}`;
+  const usage = price.output ? `输入 ${price.input} · 输出 ${price.output} / ${price.unit}` : `输入 ${price.input} / ${price.unit}`;
+  return `价格：${usage}${price.note ? ` · ${price.note}` : ""}`;
 }
