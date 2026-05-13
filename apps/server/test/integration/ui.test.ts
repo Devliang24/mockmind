@@ -141,6 +141,8 @@ describe("web ui", () => {
     expect(routes[0].auth).toMatchObject({ label: expect.any(String), headers: expect.any(Array) });
     expect(routes.some((route: { provider: string; protocol: string }) => route.provider === "openai" && route.protocol === "openai-compatible")).toBe(true);
     expect(routes.some((route: { provider: string; path: string }) => route.provider === "zhipu" && route.path === "/api/coding/paas/v4/chat/completions")).toBe(true);
+    expect(routes.some((route: { provider: string; path: string }) => route.provider === "aliyun-bailian" && route.path === "/compatible-api/v1/reranks")).toBe(true);
+    expect(routes.some((route: { provider: string; path: string }) => route.provider === "aliyun-bailian" && route.path === "/api/v1/services/rerank/text-rerank/text-rerank")).toBe(false);
     expect(routes.find((route: { path: string }) => route.path === "/v1/models")?.description).toBe("Models");
     await app.close();
   });

@@ -165,7 +165,6 @@ npm run docs:validate
 - `POST /compatible-mode/v1/embeddings`
 - `POST /api/paas/v4/rerank`
 - `POST /compatible-api/v1/reranks`
-- `POST /api/v1/services/rerank/text-rerank/text-rerank`
 - OpenAI 兼容的文本、流式、错误、嵌入向量、工具调用和 Responses API 响应
 - DeepSeek 风格的 `reasoning_content`
 - DeepSeek、Moonshot/Kimi、智谱、阿里百炼和 MiniMax 的官方 OpenAI 兼容路径
@@ -190,7 +189,7 @@ npm run docs:validate
 | Moonshot / Kimi OpenAI-compatible | `/v1/chat/completions` | [Kimi API Overview](https://platform.kimi.ai/docs/api/overview) |
 | Zhipu GLM Chat Completions / Coding Plan / Embeddings / Rerank | `/api/paas/v4/chat/completions`, `/api/coding/paas/v4/chat/completions`, `/api/paas/v4/embeddings`, `/api/paas/v4/rerank` | [智谱 AI 对话补全](https://docs.bigmodel.cn/api-reference), [智谱 Coding Plan 其他工具配置](https://docs.bigmodel.cn/cn/coding-plan/tool/others) |
 | Alibaba Bailian OpenAI-compatible | `/compatible-mode/v1/chat/completions`, `/compatible-mode/v1/responses`, `/compatible-mode/v1/embeddings` | [Alibaba Model Studio OpenAI Chat API](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-openai-chat-completions), [Alibaba Responses API](https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-responses) |
-| DashScope Text Generation / Rerank | `/api/v1/services/aigc/text-generation/generation`, `/compatible-api/v1/reranks`, `/api/v1/services/rerank/text-rerank/text-rerank` | [DashScope API Reference](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope), [DashScope Rerank API](https://help.aliyun.com/zh/model-studio/text-rerank-api) |
+| DashScope Text Generation / Rerank | `/api/v1/services/aigc/text-generation/generation`, `/compatible-api/v1/reranks` | [DashScope API Reference](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-dashscope), [DashScope Rerank API](https://help.aliyun.com/zh/model-studio/text-rerank-api) |
 | Anthropic Messages | `/v1/messages` | [Anthropic Messages examples](https://platform.claude.com/docs/en/build-with-claude/working-with-messages) |
 | Gemini generateContent | `/v1beta/models/:model:generateContent` | [Gemini API Reference](https://ai.google.dev/api) |
 | MiniMax ChatCompletion v2 | `/v1/text/chatcompletion_v2` | [MiniMax Text Generation API](https://platform.minimax.io/docs/api-reference/text-post) |
@@ -931,25 +930,6 @@ curl http://127.0.0.1:4000/compatible-api/v1/reranks \
   },
   "usage": {"total_tokens": 2}
 }
-```
-
-### Rerank 原生接口
-
-```bash
-curl http://127.0.0.1:4000/api/v1/services/rerank/text-rerank/text-rerank \
-  -H 'Authorization: Bearer 123456' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "model": "gte-rerank-v2",
-    "input": {
-      "query": "hello",
-      "documents": ["hello world", "other"]
-    },
-    "parameters": {
-      "top_n": 2,
-      "return_documents": true
-    }
-  }'
 ```
 
 ### 错误

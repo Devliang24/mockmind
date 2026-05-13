@@ -124,10 +124,10 @@ export function exampleForRoute(route: AdminRoute, selectedModel: string, baseUr
   }
 
   if (route.protocol === "rerank") {
-    const body = rerankRequestBody(route, model);
+    const body = rerankRequestBody(model);
     return {
       docsUrl,
-      required: rerankRequiredFields(route),
+      required: ["model", "query", "documents"],
       requestBody: body,
       responseBody: rerankResponse(route, body),
       curl: curl(baseUrl, route.path, body)
@@ -360,18 +360,8 @@ function miniMaxChatStream(model: string, route: AdminRoute, newline: string): s
   return events.join(newline + newline);
 }
 
-function rerankRequestBody(route: AdminRoute, model: string) {
-  if (route.provider === "aliyun-bailian" && route.path.includes("/api/v1/services/rerank/")) return { model, input: rerankNativeInput(model), parameters: { top_n: 2, return_documents: true } };
+function rerankRequestBody(model: string) {
   return { model, query: "hello", documents: ["hello world", "other"], top_n: 2, return_documents: true };
-}
-
-function rerankNativeInput(model: string) {
-  if (model === "qwen3-vl-rerank") return { query: { text: "找一张蓝天图片" }, documents: [{ text: "蓝天白云的照片" }, { text: "城市夜景" }] };
-  return { query: "hello", documents: ["hello world", "other"] };
-}
-
-function rerankRequiredFields(route: AdminRoute): string[] {
-  return route.provider === "aliyun-bailian" && route.path.includes("/api/v1/services/rerank/") ? ["model", "input.query", "input.documents"] : ["model", "query", "documents"];
 }
 
 function rerankResponse(route: AdminRoute, body: { model: string }) {
