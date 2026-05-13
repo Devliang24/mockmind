@@ -7,6 +7,15 @@ export type ModelPricing = {
   note?: string;
 };
 
+const zhipuGlm51Pricing: ModelPricing = {
+  input: "¥6 / ¥8",
+  output: "¥24 / ¥28",
+  unit: "1M tokens",
+  source: "智谱开放平台价格",
+  url: "https://open.bigmodel.cn/pricing",
+  note: "按输入长度 <32K / ≥32K 阶梯"
+};
+
 export const modelPricing: Record<string, ModelPricing> = {
   "gpt-5.5": { input: "¥34.28", output: "¥205.69", unit: "1M tokens", source: "OpenAI API Pricing", url: "https://openai.com/api/pricing/", note: "按 USD/CNY 6.8562 换算" },
   "gpt-5.4": { input: "¥17.14", output: "¥102.84", unit: "1M tokens", source: "OpenAI API Pricing", url: "https://openai.com/api/pricing/", note: "按 USD/CNY 6.8562 换算" },
@@ -25,6 +34,9 @@ export const modelPricing: Record<string, ModelPricing> = {
   "qwen3.6-plus": { input: "¥2", output: "¥12", unit: "1M tokens", source: "阿里云百炼模型计费", url: "https://help.aliyun.com/zh/model-studio/models", note: "中国内地最低价" },
   "qwen3.6-flash": { input: "¥1.2", output: "¥7.2", unit: "1M tokens", source: "阿里云百炼模型计费", url: "https://help.aliyun.com/zh/model-studio/models", note: "中国内地最低价" },
   "qwen3.5-plus": { input: "¥0.8", output: "¥4.8", unit: "1M tokens", source: "阿里云百炼模型计费", url: "https://help.aliyun.com/zh/model-studio/models", note: "中国内地最低价" },
+  "qwen3-rerank": { input: "¥0.5", output: "¥0", unit: "1M tokens", source: "阿里云百炼模型计费", url: "https://help.aliyun.com/zh/model-studio/model-pricing", note: "文本排序输出不计费 · 中国内地" },
+  "glm-5.1": zhipuGlm51Pricing,
+  "GLM-5.1": zhipuGlm51Pricing,
   "MiniMax-M2.7": { input: "¥2.06", output: "¥8.23", unit: "M tokens", source: "MiniMax Pay as You Go", url: "https://platform.minimax.io/docs/guides/pricing-paygo", note: "按 USD/CNY 6.8562 换算" },
   "MiniMax-M2.7-highspeed": { input: "¥4.11", output: "¥16.45", unit: "M tokens", source: "MiniMax Pay as You Go", url: "https://platform.minimax.io/docs/guides/pricing-paygo", note: "按 USD/CNY 6.8562 换算" },
   "MiniMax-M2.5": { input: "¥2.06", output: "¥8.23", unit: "M tokens", source: "MiniMax Pay as You Go", url: "https://platform.minimax.io/docs/guides/pricing-paygo", note: "按 USD/CNY 6.8562 换算" },

@@ -61,6 +61,9 @@ describe("web ui", () => {
     expect(js.body).toContain("价格：官网未列出输入/输出单价");
     expect(js.body).toContain("价格：输入");
     expect(js.body).toContain("¥3.43");
+    expect(js.body).toContain("¥0.5");
+    expect(js.body).toContain("按输入长度 <32K / ≥32K 阶梯");
+    expect(js.body).toContain("文本排序输出不计费");
     expect(js.body).toContain("text/image/video input");
     expect(js.body).toContain("gpt-5.5");
     expect(js.body).toContain("claude-opus-4-7");
