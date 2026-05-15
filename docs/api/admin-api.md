@@ -31,7 +31,7 @@ Example:
   "server": { "host": "127.0.0.1", "port": 4000 },
   "auth": { "mode": "permissive" },
   "providers": { "enabled": "all" },
-  "providersCount": 8,
+  "providersCount": 9,
   "modelsCount": 1,
   "scenariosCount": 1,
   "requestsCount": 0,
@@ -59,6 +59,7 @@ Response fields:
 - `providers[].defaultModels`: default model ids shipped with the provider preset.
 - `providers[].latestModels`: preferred model ids for current examples.
 - `providers[].configuredModels`: model ids from the active config for this provider.
+- `providers[].modelVersions`: optional provider-owned model version labels, currently used by Azure OpenAI / Microsoft Foundry.
 - `providers[].routes`: human-readable route summaries.
 - `groups`: provider ids grouped by provider group.
 
@@ -68,6 +69,26 @@ Example:
 {
   "mode": "all",
   "providers": [
+    {
+      "provider": "azure",
+      "displayName": "Azure OpenAI / Microsoft Foundry",
+      "groups": ["international", "openai-compatible", "azure", "enterprise"],
+      "auth": {
+        "scheme": "api-key-or-authorization-bearer",
+        "label": "api-key: 123456 或 Authorization: Bearer 123456",
+        "headers": ["api-key", "Authorization"],
+        "query": []
+      },
+      "defaultModels": ["gpt-5.4-mini"],
+      "latestModels": ["gpt-5.4", "gpt-5.4-mini", "gpt-5.3-codex"],
+      "configuredModels": ["gpt-5.4-mini"],
+      "modelVersions": {
+        "gpt-5.4": "2026-03-05",
+        "gpt-5.4-mini": "2026-03-17",
+        "gpt-5.3-codex": "2026-02-24"
+      },
+      "routes": ["POST /openai/v1/chat/completions Azure OpenAI Chat Completions"]
+    },
     {
       "provider": "openai",
       "displayName": "OpenAI",
@@ -86,9 +107,11 @@ Example:
   ],
   "groups": {
     "chinese": [],
-    "international": ["openai"],
-    "openai-compatible": ["openai"],
-    "native": []
+    "international": ["openai", "azure"],
+    "openai-compatible": ["openai", "azure"],
+    "native": [],
+    "azure": ["azure"],
+    "enterprise": ["azure"]
   }
 }
 ```

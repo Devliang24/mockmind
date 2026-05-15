@@ -7,11 +7,14 @@ describe("provider registry", () => {
     expect(providerRegistry.map((item) => item.provider)).toContain("anthropic");
     expect(providerRegistry.map((item) => item.provider)).toContain("gemini");
     expect(providerRegistry.map((item) => item.provider)).toContain("aliyun-bailian");
+    expect(providerRegistry.map((item) => item.provider)).toContain("azure");
   });
 
   it("exposes provider groups for admin metadata", () => {
     expect(providerGroups().international).toContain("anthropic");
     expect(providerGroups().chinese).toContain("aliyun-bailian");
     expect(providerGroups().native).toContain("gemini");
+    expect(providerGroups().azure).toContain("azure");
+    expect(providerGroups().enterprise).toContain("azure");
   });
 });

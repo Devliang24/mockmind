@@ -56,6 +56,7 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
       defaultModels: registration.defaultModels,
       latestModels: registration.latestModels ?? registration.defaultModels,
       configuredModels: context.config.models.filter((model) => model.provider === registration.provider).map((model) => model.id),
+      modelVersions: registration.modelVersions,
       routes: providerRouteSummaries(registration)
     })),
     groups: providerGroups()

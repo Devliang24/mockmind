@@ -53,6 +53,7 @@ describe("web ui", () => {
     expect(js.body).toContain("drawer-body");
     expect(js.body).toContain("drawer-close");
     expect(js.body).toContain("x-goog-api-key");
+    expect(js.body).toContain("api-key: 123456");
     expect(js.body).toContain("responseBody");
     expect(js.body).toContain("chatcmpl_mock_");
     expect(js.body).toContain("finish_reason");
@@ -71,6 +72,8 @@ describe("web ui", () => {
     expect(js.body).toContain("claude-opus-4-7");
     expect(js.body).toContain("claude-sonnet-4-6");
     expect(js.body).toContain("gemini-3-pro-preview");
+    expect(js.body).toContain("Azure version ");
+    expect(js.body).toContain("Azure 实际按区域和部署类型计费");
     expect(js.body).toContain("qwen3.6-plus");
     expect(js.body).toContain("https://docs.bigmodel.cn/cn/coding-plan/tool/others");
     expect(js.body).toContain("query");
@@ -140,6 +143,8 @@ describe("web ui", () => {
     expect(routes[0]).toMatchObject({ provider: expect.any(String), displayName: expect.any(String), method: expect.any(String), path: expect.any(String), protocol: expect.any(String), endpoint: expect.any(String) });
     expect(routes[0].auth).toMatchObject({ label: expect.any(String), headers: expect.any(Array) });
     expect(routes.some((route: { provider: string; protocol: string }) => route.provider === "openai" && route.protocol === "openai-compatible")).toBe(true);
+    expect(routes.some((route: { provider: string; path: string }) => route.provider === "azure" && route.path === "/openai/v1/chat/completions")).toBe(true);
+    expect(routes.some((route: { provider: string; path: string }) => route.provider === "azure" && route.path === "/openai/v1/responses")).toBe(true);
     expect(routes.some((route: { provider: string; path: string }) => route.provider === "zhipu" && route.path === "/api/coding/paas/v4/chat/completions")).toBe(true);
     expect(routes.some((route: { provider: string; path: string }) => route.provider === "aliyun-bailian" && route.path === "/compatible-api/v1/reranks")).toBe(true);
     expect(routes.some((route: { provider: string; path: string }) => route.provider === "aliyun-bailian" && route.path === "/api/v1/services/rerank/text-rerank/text-rerank")).toBe(false);
@@ -152,6 +157,7 @@ describe("web ui", () => {
     const response = await app.inject({ method: "GET", url: "/__admin/providers" });
     expect(response.statusCode).toBe(200);
     const openai = response.json().providers.find((provider: { provider: string }) => provider.provider === "openai");
+    const azure = response.json().providers.find((provider: { provider: string }) => provider.provider === "azure");
     const anthropic = response.json().providers.find((provider: { provider: string }) => provider.provider === "anthropic");
     const gemini = response.json().providers.find((provider: { provider: string }) => provider.provider === "gemini");
     const deepseek = response.json().providers.find((provider: { provider: string }) => provider.provider === "deepseek");
@@ -160,6 +166,13 @@ describe("web ui", () => {
     expect(openai.latestModels).toEqual(["gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano"]);
     expect(openai.auth.label).toBe("Authorization: Bearer 123456");
     expect(openai.latestModels).toHaveLength(4);
+    expect(azure.latestModels).toEqual(["gpt-5.4", "gpt-5.4-mini", "gpt-5.3-codex"]);
+    expect(azure.auth).toMatchObject({ scheme: "api-key-or-authorization-bearer", label: "api-key: 123456 或 Authorization: Bearer 123456" });
+    expect(azure.modelVersions).toMatchObject({
+      "gpt-5.4": "2026-03-05",
+      "gpt-5.4-mini": "2026-03-17",
+      "gpt-5.3-codex": "2026-02-24"
+    });
     expect(anthropic.latestModels).toEqual(["claude-opus-4-7", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"]);
     expect(anthropic.auth.label).toBe("x-api-key: 123456");
     expect(gemini.latestModels).toEqual(["gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.5-flash-lite"]);

@@ -1,5 +1,6 @@
 export type Provider =
   | "openai"
+  | "azure"
   | "deepseek"
   | "moonshot"
   | "aliyun-bailian"
@@ -84,7 +85,7 @@ export type MockMindConfig = {
   };
   providers: {
     /** Metadata only: MockMind starts all implemented protocols by default. */
-    enabled: "all" | "openai-compatible" | "chinese" | "international" | Provider[];
+    enabled: "all" | "openai-compatible" | "chinese" | "international" | "azure" | "enterprise" | Provider[];
   };
   auth: {
     mode: "disabled" | "permissive" | "strict";

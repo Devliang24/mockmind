@@ -20,6 +20,7 @@ export const modelPricing: Record<string, ModelPricing> = {
   "gpt-5.5": { input: "¥34.28", output: "¥205.69", unit: "1M tokens", source: "OpenAI API Pricing", url: "https://openai.com/api/pricing/", note: "按 USD/CNY 6.8562 换算" },
   "gpt-5.4": { input: "¥17.14", output: "¥102.84", unit: "1M tokens", source: "OpenAI API Pricing", url: "https://openai.com/api/pricing/", note: "按 USD/CNY 6.8562 换算" },
   "gpt-5.4-mini": { input: "¥5.14", output: "¥30.85", unit: "1M tokens", source: "OpenAI API Pricing", url: "https://openai.com/api/pricing/", note: "按 USD/CNY 6.8562 换算" },
+  "gpt-5.3-codex": { input: "¥17.14", output: "¥102.84", unit: "1M tokens", source: "OpenAI API Pricing", url: "https://openai.com/api/pricing/", note: "参考 gpt-5.4 价格 · 按 USD/CNY 6.8562 换算" },
   "claude-opus-4-7": { input: "¥34.28", output: "¥171.41", unit: "MTok", source: "Claude API Pricing", url: "https://platform.claude.com/docs/en/about-claude/pricing", note: "按 USD/CNY 6.8562 换算" },
   "claude-sonnet-4-6": { input: "¥20.57", output: "¥102.84", unit: "MTok", source: "Claude API Pricing", url: "https://platform.claude.com/docs/en/about-claude/pricing", note: "按 USD/CNY 6.8562 换算" },
   "claude-haiku-4-5-20251001": { input: "¥6.86", output: "¥34.28", unit: "MTok", source: "Claude API Pricing", url: "https://platform.claude.com/docs/en/about-claude/pricing", note: "按 USD/CNY 6.8562 换算" },
@@ -44,9 +45,14 @@ export const modelPricing: Record<string, ModelPricing> = {
   "MiniMax-M2.5-highspeed": { input: "¥4.11", output: "¥16.45", unit: "M tokens", source: "MiniMax Pay as You Go", url: "https://platform.minimax.io/docs/guides/pricing-paygo", note: "按 USD/CNY 6.8562 换算" }
 };
 
-export function priceLabel(model: string): string {
+export function priceLabel(model: string, provider?: string, version?: string): string {
   const price = modelPricing[model];
   if (!price) return "价格：官网未列出输入/输出单价";
   const usage = price.output ? `输入 ${price.input} · 输出 ${price.output} / ${price.unit}` : `输入 ${price.input} / ${price.unit}`;
-  return `价格：${usage}${price.note ? ` · ${price.note}` : ""}`;
+  const note = [
+    price.note,
+    provider === "azure" && version ? `Azure version ${version}` : undefined,
+    provider === "azure" ? "Azure 实际按区域和部署类型计费" : undefined
+  ].filter(Boolean).join(" · ");
+  return `价格：${usage}${note ? ` · ${note}` : ""}`;
 }

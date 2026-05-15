@@ -1,5 +1,6 @@
 export type Provider =
   | "openai"
+  | "azure"
   | "deepseek"
   | "moonshot"
   | "aliyun-bailian"
@@ -8,9 +9,9 @@ export type Provider =
   | "gemini"
   | "minimax";
 
-export type ProviderGroup = "chinese" | "international" | "openai-compatible" | "native";
+export type ProviderGroup = "chinese" | "international" | "openai-compatible" | "native" | "azure" | "enterprise";
 
-export type ProviderAuthScheme = "authorization-bearer" | "x-api-key" | "x-goog-api-key-or-query-key";
+export type ProviderAuthScheme = "authorization-bearer" | "x-api-key" | "x-goog-api-key-or-query-key" | "api-key-or-authorization-bearer";
 
 export type ProviderAuthInfo = {
   scheme: ProviderAuthScheme;
@@ -71,7 +72,7 @@ export type AdminOverviewResponse = {
     mode: "disabled" | "permissive" | "strict";
   };
   providers: {
-    enabled: "all" | "openai-compatible" | "chinese" | "international" | Provider[];
+    enabled: "all" | "openai-compatible" | "chinese" | "international" | "azure" | "enterprise" | Provider[];
   };
   providersCount: number;
   modelsCount: number;
@@ -94,6 +95,7 @@ export type AdminProvidersResponse = {
     defaultModels: string[];
     latestModels: string[];
     configuredModels: string[];
+    modelVersions?: Record<string, string>;
     routes: string[];
   }>;
   groups: Record<ProviderGroup, Provider[]>;

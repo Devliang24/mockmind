@@ -17,6 +17,8 @@ auth:
 models:
   - id: gpt-5.5
     provider: openai
+  - id: gpt-5.4-mini
+    provider: azure
   - id: deepseek-v4-flash
     provider: deepseek
   - id: deepseek-v4-pro
@@ -81,6 +83,16 @@ scenarios:
         - Hello
         - ', '
         - streaming world!
+
+  - id: azure-basic
+    provider: azure
+    endpoint: /openai/v1/chat/completions
+    match:
+      model: gpt-5.4-mini
+      messagesContain: hello
+    response:
+      type: text
+      content: Hello from mock Azure OpenAI.
 
   - id: deepseek-reasoning
     provider: deepseek

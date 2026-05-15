@@ -98,17 +98,17 @@ components:
   schemas:
     ProviderId:
       type: string
-      enum: [openai, deepseek, moonshot, aliyun-bailian, zhipu, anthropic, gemini, minimax]
+      enum: [openai, azure, deepseek, moonshot, aliyun-bailian, zhipu, anthropic, gemini, minimax]
     ProviderGroup:
       type: string
-      enum: [chinese, international, openai-compatible, native]
+      enum: [chinese, international, openai-compatible, native, azure, enterprise]
     ProviderAuth:
       type: object
       required: [scheme, label, headers, query]
       properties:
         scheme:
           type: string
-          enum: [authorization-bearer, x-api-key, x-goog-api-key-or-query-key]
+          enum: [authorization-bearer, x-api-key, x-goog-api-key-or-query-key, api-key-or-authorization-bearer]
         label:
           type: string
         headers:
@@ -164,7 +164,7 @@ components:
             enabled:
               oneOf:
                 - type: string
-                  enum: [all, openai-compatible, chinese, international]
+                  enum: [all, openai-compatible, chinese, international, azure, enterprise]
                 - type: array
                   items:
                     $ref: "#/components/schemas/ProviderId"
@@ -214,6 +214,10 @@ components:
           type: array
           items:
             type: string
+        modelVersions:
+          type: object
+          additionalProperties:
+            type: string
         routes:
           type: array
           items:
@@ -231,7 +235,7 @@ components:
             $ref: "#/components/schemas/AdminProvider"
         groups:
           type: object
-          required: [chinese, international, openai-compatible, native]
+          required: [chinese, international, openai-compatible, native, azure, enterprise]
           properties:
             chinese:
               type: array
@@ -246,6 +250,14 @@ components:
               items:
                 $ref: "#/components/schemas/ProviderId"
             native:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProviderId"
+            azure:
+              type: array
+              items:
+                $ref: "#/components/schemas/ProviderId"
+            enterprise:
               type: array
               items:
                 $ref: "#/components/schemas/ProviderId"

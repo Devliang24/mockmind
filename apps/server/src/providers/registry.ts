@@ -3,6 +3,7 @@ import type { Provider } from "../core/scenario/types.js";
 import type { ServerContext } from "../server/context.js";
 import { aliyunBailianProvider } from "./aliyun-bailian/index.js";
 import { anthropicProvider } from "./anthropic/index.js";
+import { azureProvider } from "./azure/index.js";
 import { deepseekProvider } from "./deepseek/index.js";
 import { geminiProvider } from "./gemini/index.js";
 import { moonshotProvider } from "./moonshot/index.js";
@@ -16,6 +17,7 @@ export type { ProviderGroup, ProviderRegistration, ProviderRoute } from "./types
 
 export const providerRegistry: ProviderRegistration[] = [
   openaiProvider,
+  azureProvider,
   deepseekProvider,
   moonshotProvider,
   zhipuProvider,
@@ -39,7 +41,9 @@ export function providerGroups(): Record<ProviderGroup, Provider[]> {
     chinese: providersInGroup("chinese"),
     international: providersInGroup("international"),
     "openai-compatible": providersInGroup("openai-compatible"),
-    native: providersInGroup("native")
+    native: providersInGroup("native"),
+    azure: providersInGroup("azure"),
+    enterprise: providersInGroup("enterprise")
   };
 }
 

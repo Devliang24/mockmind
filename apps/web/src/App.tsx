@@ -15,7 +15,7 @@ type ConsoleView = "provider" | "requests";
 type ProviderView = AdminProvidersResponse["providers"][number];
 type LoadState = "loading" | "ready" | "error";
 
-const providerOrder = ["openai", "anthropic", "gemini", "deepseek", "moonshot", "zhipu", "aliyun-bailian", "minimax"];
+const providerOrder = ["openai", "azure", "anthropic", "gemini", "deepseek", "moonshot", "zhipu", "aliyun-bailian", "minimax"];
 const protocolOrder = [
   "openai-compatible",
   "openai-responses",
@@ -353,8 +353,9 @@ function ProtocolModelPanel({
               <span className="model-meta">
                 <span>{provider.provider}</span>
                 <span>{protocolLabel(activeProtocol)}</span>
+                {provider.modelVersions?.[model] ? <span>Azure version {provider.modelVersions[model]}</span> : null}
               </span>
-              <span className="model-price">{priceLabel(model)}</span>
+              <span className="model-price">{priceLabel(model, provider.provider, provider.modelVersions?.[model])}</span>
             </div>
           );
         })}

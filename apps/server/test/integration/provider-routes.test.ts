@@ -7,6 +7,7 @@ const config: MockMindConfig = {
   providers: { enabled: "all" },
   auth: { mode: "permissive", apiKeys: ["123456"] },
   models: [
+    { id: "gpt-5.4-mini", provider: "azure" },
     { id: "deepseek-v4-pro", provider: "deepseek" },
     { id: "kimi-k2.6", provider: "moonshot" },
     { id: "glm-5.1", provider: "zhipu" },
@@ -15,6 +16,7 @@ const config: MockMindConfig = {
   defaults: { latencyMs: 0, streamChunkDelayMs: 0 },
   fallback: { enabled: true, response: { type: "text", content: "fallback" } },
   scenarios: [
+    { id: "azure", provider: "azure", endpoint: "/openai/v1/chat/completions", priority: 0, match: { model: "gpt-5.4-mini" }, response: { type: "text", content: "azure" } },
     { id: "deepseek", provider: "deepseek", endpoint: "/chat/completions", priority: 0, match: { model: "deepseek-v4-pro" }, response: { type: "text", reasoningContent: "reasoning", content: "deepseek" } },
     { id: "moonshot", provider: "moonshot", endpoint: "/v1/chat/completions", priority: 0, match: { model: "kimi-k2.6" }, response: { type: "text", content: "moonshot" } },
     { id: "zhipu", provider: "zhipu", endpoint: "/api/paas/v4/chat/completions", priority: 0, match: { model: "glm-5.1" }, response: { type: "text", content: "zhipu" } },
@@ -23,6 +25,30 @@ const config: MockMindConfig = {
 };
 
 describe("provider official routes", () => {
+  it("serves Azure OpenAI-compatible route", async () => {
+    const { app } = await createMockMindServer(config);
+    const response = await app.inject({ method: "POST", url: "/openai/v1/chat/completions", payload: { model: "gpt-5.4-mini", messages: [{ role: "user", content: "hello" }] } });
+    expect(response.json().choices[0].message.content).toBe("azure (model: gpt-5.4-mini)");
+    await app.close();
+  });
+
+  it("keeps OpenAI GPT models on the OpenAI route unless the Azure route is used", async () => {
+    const { app } = await createMockMindServer(config);
+    const response = await app.inject({ method: "POST", url: "/v1/chat/completions", payload: { model: "gpt-5.4-mini", messages: [{ role: "user", content: "hello" }] } });
+    const requests = await app.inject({ method: "GET", url: "/__admin/requests" });
+    expect(response.json().choices[0].message.content).toBe("fallback (model: gpt-5.4-mini)");
+    expect(requests.json()[0]).toMatchObject({ provider: "openai", endpoint: "/v1/chat/completions", model: "gpt-5.4-mini" });
+    await app.close();
+  });
+
+  it("serves Azure Responses route", async () => {
+    const { app } = await createMockMindServer(config);
+    const response = await app.inject({ method: "POST", url: "/openai/v1/responses", payload: { model: "gpt-5.4", input: "hello" } });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().model).toBe("gpt-5.4");
+    await app.close();
+  });
+
   it("serves DeepSeek OpenAI-compatible route", async () => {
     const { app } = await createMockMindServer(config);
     const response = await app.inject({ method: "POST", url: "/chat/completions", payload: { model: "deepseek-v4-pro", messages: [{ role: "user", content: "hello" }] } });
@@ -71,6 +97,7 @@ describe("provider official routes", () => {
     "/zhipu/v1/chat/completions",
     "/minimax/v1/text/chatcompletion_v2",
     "/anthropic/v1/messages",
+    "/azure/openai/v1/chat/completions",
     "/gemini/v1beta/models/gemini-3-flash-preview:generateContent",
     "/dashscope/api/v1/services/aigc/text-generation/generation"
   ])("does not serve non-official alias %s", async (url) => {

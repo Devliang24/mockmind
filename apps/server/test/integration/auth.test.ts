@@ -24,6 +24,21 @@ describe("provider official auth", () => {
     await app.close();
   });
 
+  it("accepts Azure api-key and Bearer auth", async () => {
+    const { app } = await createMockMindServer(config);
+    const payload = { model: "gpt-5.4-mini", messages: [{ role: "user", content: "hello" }] };
+    const acceptedApiKey = await app.inject({ method: "POST", url: "/openai/v1/chat/completions", headers: { "api-key": "123456" }, payload });
+    const acceptedBearer = await app.inject({ method: "POST", url: "/openai/v1/chat/completions", headers: { authorization: "Bearer 123456" }, payload });
+    const rejectedWrong = await app.inject({ method: "POST", url: "/openai/v1/chat/completions", headers: { "api-key": "wrong" }, payload });
+    const rejectedMissing = await app.inject({ method: "POST", url: "/openai/v1/chat/completions", payload });
+    expect(acceptedApiKey.statusCode).toBe(200);
+    expect(acceptedBearer.statusCode).toBe(200);
+    expect(rejectedWrong.statusCode).toBe(401);
+    expect(rejectedMissing.statusCode).toBe(401);
+    expect(rejectedWrong.json().error.type).toBe("authentication_error");
+    await app.close();
+  });
+
   it("accepts Anthropic x-api-key auth and rejects Bearer", async () => {
     const { app } = await createMockMindServer(config);
     const payload = { model: "claude-sonnet-4-6", max_tokens: 128, messages: [{ role: "user", content: "hello" }] };

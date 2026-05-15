@@ -71,6 +71,8 @@ export async function handleOpenAICompatibleChat(
 
 function defaultContent(provider: Provider): string {
   switch (provider) {
+    case "azure":
+      return "This is a mock Azure OpenAI / Microsoft Foundry response.";
     case "deepseek":
       return "This is a mock DeepSeek response.";
     case "moonshot":

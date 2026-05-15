@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import type { Provider } from "../core/scenario/types.js";
 import type { ServerContext } from "../server/context.js";
 
-export type ProviderGroup = "chinese" | "international" | "openai-compatible" | "native";
+export type ProviderGroup = "chinese" | "international" | "openai-compatible" | "native" | "azure" | "enterprise";
 
 export type ProviderRoute = {
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -19,6 +19,7 @@ export type ProviderPreset = {
   groups: ProviderGroup[];
   defaultModels: string[];
   latestModels?: string[];
+  modelVersions?: Record<string, string>;
   modelPatterns?: RegExp[];
   routes: ProviderRoute[];
 };

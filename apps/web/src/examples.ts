@@ -15,6 +15,7 @@ export type RouteExample = {
 
 const providerDocs: Record<string, string> = {
   openai: "https://platform.openai.com/docs/api-reference",
+  azure: "https://learn.microsoft.com/azure/ai-foundry/openai/latest",
   deepseek: "https://api-docs.deepseek.com/api/create-chat-completion",
   moonshot: "https://platform.kimi.ai/docs/api/overview",
   zhipu: "https://docs.bigmodel.cn/api-reference",
@@ -161,7 +162,7 @@ function exampleModel(route: AdminRoute, selectedModel: string): string {
 function streamExampleFor(baseUrl: string, route: AdminRoute, body: Record<string, unknown>, responseText: string): RouteExample["stream"] {
   if (route.method === "GET") return undefined;
   return {
-    curl: curl(baseUrl, route.path, body, undefined, route.method),
+    curl: curl(baseUrl, route.path, body, jsonAuthHeaders(route), route.method),
     responseText
   };
 }
@@ -172,7 +173,7 @@ function openAIExample(baseUrl: string, route: AdminRoute, docsUrl: string, requ
     required,
     requestBody,
     responseBody,
-    curl: curl(baseUrl, route.path, requestBody, undefined, route.method)
+    curl: curl(baseUrl, route.path, requestBody, jsonAuthHeaders(route), route.method)
   };
 }
 
@@ -386,7 +387,12 @@ function shortProviderName(displayName: string): string {
 function authHeaders(route: AdminRoute): string[] {
   if (route.auth.scheme === "x-api-key") return ["x-api-key: 123456"];
   if (route.auth.scheme === "x-goog-api-key-or-query-key") return ["x-goog-api-key: 123456"];
+  if (route.auth.scheme === "api-key-or-authorization-bearer") return ["api-key: 123456"];
   return ["Authorization: Bearer 123456"];
+}
+
+function jsonAuthHeaders(route: AdminRoute): string[] {
+  return [...authHeaders(route), "Content-Type: application/json"];
 }
 
 function nonStreamBody<T extends Record<string, unknown>>(body: T): T & { stream: false } {

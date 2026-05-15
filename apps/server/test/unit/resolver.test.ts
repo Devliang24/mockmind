@@ -16,6 +16,7 @@ describe("OpenAI-compatible resolver", () => {
   });
 
   it("only resolves providers that officially expose the endpoint", () => {
+    expect(resolveOpenAICompatibleProvider("gpt-5.4-mini", "/v1/chat/completions")).toBe("openai");
     expect(resolveOpenAICompatibleProvider("kimi-k2.6", "/v1/chat/completions")).toBe("moonshot");
     expect(resolveOpenAICompatibleProvider("deepseek-v4-pro", "/v1/chat/completions")).toBe("openai");
     expect(resolveOpenAICompatibleProvider("deepseek-v4-pro", "/chat/completions")).toBe("deepseek");

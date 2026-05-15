@@ -41,10 +41,13 @@ describe("Admin API contracts", () => {
       chinese: expect.any(Array),
       international: expect.any(Array),
       "openai-compatible": expect.any(Array),
-      native: expect.any(Array)
+      native: expect.any(Array),
+      azure: expect.any(Array),
+      enterprise: expect.any(Array)
     });
 
     const openai = body.providers.find((provider) => provider.provider === "openai");
+    const azure = body.providers.find((provider) => provider.provider === "azure");
     expect(openai).toMatchObject({
       provider: "openai",
       displayName: expect.any(String),
@@ -61,6 +64,26 @@ describe("Admin API contracts", () => {
       routes: expect.any(Array)
     });
     expect(openai?.routes.some((route) => route.includes("/v1/chat/completions"))).toBe(true);
+    expect(azure).toMatchObject({
+      provider: "azure",
+      displayName: "Azure OpenAI / Microsoft Foundry",
+      groups: expect.arrayContaining(["international", "openai-compatible", "azure", "enterprise"]),
+      auth: {
+        scheme: "api-key-or-authorization-bearer",
+        label: expect.any(String),
+        headers: expect.arrayContaining(["api-key", "Authorization"]),
+        query: []
+      },
+      defaultModels: ["gpt-5.4-mini"],
+      latestModels: ["gpt-5.4", "gpt-5.4-mini", "gpt-5.3-codex"],
+      modelVersions: {
+        "gpt-5.4": "2026-03-05",
+        "gpt-5.4-mini": "2026-03-17",
+        "gpt-5.3-codex": "2026-02-24"
+      },
+      routes: expect.any(Array)
+    });
+    expect(azure?.routes.some((route) => route.includes("/openai/v1/chat/completions"))).toBe(true);
 
     await app.close();
   });
@@ -94,6 +117,21 @@ describe("Admin API contracts", () => {
       scheme: "x-goog-api-key-or-query-key",
       headers: expect.arrayContaining(["x-goog-api-key"]),
       query: expect.arrayContaining(["key"])
+    });
+
+    const azureRoute = routes.find((route) => route.provider === "azure" && route.path === "/openai/v1/chat/completions");
+    expect(azureRoute).toMatchObject({
+      provider: "azure",
+      auth: {
+        scheme: "api-key-or-authorization-bearer",
+        headers: expect.arrayContaining(["api-key", "Authorization"]),
+        query: []
+      },
+      method: "POST",
+      path: "/openai/v1/chat/completions",
+      protocol: "openai-compatible",
+      endpoint: "/openai/v1/chat/completions",
+      description: "Azure OpenAI Chat Completions"
     });
 
     await app.close();

@@ -139,9 +139,11 @@ npm run docs:validate
 - `GET /health`
 - `GET /v1/models`
 - `POST /v1/chat/completions`
+- `POST /openai/v1/chat/completions`
 - `POST /chat/completions`
 - `POST /v1/embeddings`
 - `POST /v1/responses`
+- `POST /openai/v1/responses`
 - `POST /compatible-mode/v1/responses`
 - `POST /v1/images/generations`
 - `POST /v1/audio/speech`
@@ -166,6 +168,7 @@ npm run docs:validate
 - `POST /api/paas/v4/rerank`
 - `POST /compatible-api/v1/reranks`
 - OpenAI 兼容的文本、流式、错误、嵌入向量、工具调用和 Responses API 响应
+- Azure OpenAI / Microsoft Foundry v1 风格路径和 `api-key` / Bearer 鉴权
 - DeepSeek 风格的 `reasoning_content`
 - DeepSeek、Moonshot/Kimi、智谱、阿里百炼和 MiniMax 的官方 OpenAI 兼容路径
 - MiniMax 原生聊天补全
@@ -185,6 +188,7 @@ npm run docs:validate
 | OpenAI Chat Completions | `/v1/chat/completions` | [OpenAI Chat Completions API](https://platform.openai.com/docs/api-reference/chat/create) |
 | OpenAI Responses | `/v1/responses` | [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses/create) |
 | OpenAI Images / Audio / Moderations / Files / Batch | `/v1/images/generations`, `/v1/audio/*`, `/v1/moderations`, `/v1/files`, `/v1/batches` | [OpenAI API Reference](https://platform.openai.com/docs/api-reference) |
+| Azure OpenAI / Microsoft Foundry v1 | `/openai/v1/chat/completions`, `/openai/v1/responses` | [Azure OpenAI API v1](https://learn.microsoft.com/azure/ai-foundry/openai/latest) |
 | DeepSeek Chat Completions | `/chat/completions` | [DeepSeek Create Chat Completion](https://api-docs.deepseek.com/api/create-chat-completion) |
 | Moonshot / Kimi OpenAI-compatible | `/v1/chat/completions` | [Kimi API Overview](https://platform.kimi.ai/docs/api/overview) |
 | Zhipu GLM Chat Completions / Coding Plan / Embeddings / Rerank | `/api/paas/v4/chat/completions`, `/api/coding/paas/v4/chat/completions`, `/api/paas/v4/embeddings`, `/api/paas/v4/rerank` | [智谱 AI 对话补全](https://docs.bigmodel.cn/api-reference), [智谱 Coding Plan 其他工具配置](https://docs.bigmodel.cn/cn/coding-plan/tool/others) |
@@ -203,6 +207,7 @@ Web UI 和 Provider Registry 默认展示每家供应商最多 4 个可用于当
 | Provider | 模型 |
 |---|---|
 | OpenAI | `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` |
+| Azure OpenAI / Microsoft Foundry | `gpt-5.4` (version `2026-03-05`), `gpt-5.4-mini` (version `2026-03-17`), `gpt-5.3-codex` (version `2026-02-24`) |
 | Anthropic | `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001` |
 | Gemini | `gemini-3-pro-preview`, `gemini-3-flash-preview`, `gemini-2.5-flash`, `gemini-2.5-flash-lite` |
 | DeepSeek | `deepseek-v4-pro`, `deepseek-v4-flash` |

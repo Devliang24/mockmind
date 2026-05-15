@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const providerSchema = z.enum([
   "openai",
+  "azure",
   "deepseek",
   "moonshot",
   "aliyun-bailian",
@@ -68,6 +69,8 @@ export const configSchema = z.object({
       z.literal("openai-compatible"),
       z.literal("chinese"),
       z.literal("international"),
+      z.literal("azure"),
+      z.literal("enterprise"),
       z.array(providerSchema)
     ]).default("all")
   }).prefault({}),
