@@ -168,7 +168,7 @@ npm run docs:validate
 - `POST /api/paas/v4/rerank`
 - `POST /compatible-api/v1/reranks`
 - OpenAI 兼容的文本、流式、错误、嵌入向量、工具调用和 Responses API 响应
-- Azure OpenAI / Microsoft Foundry v1 风格路径和 `api-key` / Bearer 鉴权
+- Azure OpenAI / Microsoft Foundry 路径和 `api-key` 鉴权
 - DeepSeek 风格的 `reasoning_content`
 - DeepSeek、Moonshot/Kimi、智谱、阿里百炼和 MiniMax 的官方 OpenAI 兼容路径
 - MiniMax 原生聊天补全

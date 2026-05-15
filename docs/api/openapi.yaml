@@ -108,7 +108,7 @@ components:
       properties:
         scheme:
           type: string
-          enum: [authorization-bearer, x-api-key, x-goog-api-key-or-query-key, api-key-or-authorization-bearer]
+          enum: [authorization-bearer, api-key, x-api-key, x-goog-api-key-or-query-key]
         label:
           type: string
         headers:

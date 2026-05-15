@@ -386,8 +386,8 @@ function shortProviderName(displayName: string): string {
 
 function authHeaders(route: AdminRoute): string[] {
   if (route.auth.scheme === "x-api-key") return ["x-api-key: 123456"];
+  if (route.auth.scheme === "api-key") return ["api-key: 123456"];
   if (route.auth.scheme === "x-goog-api-key-or-query-key") return ["x-goog-api-key: 123456"];
-  if (route.auth.scheme === "api-key-or-authorization-bearer") return ["api-key: 123456"];
   return ["Authorization: Bearer 123456"];
 }
 

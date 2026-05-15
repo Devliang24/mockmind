@@ -11,7 +11,7 @@ export type Provider =
 
 export type ProviderGroup = "chinese" | "international" | "openai-compatible" | "native" | "azure" | "enterprise";
 
-export type ProviderAuthScheme = "authorization-bearer" | "x-api-key" | "x-goog-api-key-or-query-key" | "api-key-or-authorization-bearer";
+export type ProviderAuthScheme = "authorization-bearer" | "api-key" | "x-api-key" | "x-goog-api-key-or-query-key";
 
 export type ProviderAuthInfo = {
   scheme: ProviderAuthScheme;

@@ -69,9 +69,9 @@ describe("Admin API contracts", () => {
       displayName: "Azure OpenAI / Microsoft Foundry",
       groups: expect.arrayContaining(["international", "openai-compatible", "azure", "enterprise"]),
       auth: {
-        scheme: "api-key-or-authorization-bearer",
+        scheme: "api-key",
         label: expect.any(String),
-        headers: expect.arrayContaining(["api-key", "Authorization"]),
+        headers: ["api-key"],
         query: []
       },
       defaultModels: ["gpt-5.4-mini"],
@@ -123,8 +123,8 @@ describe("Admin API contracts", () => {
     expect(azureRoute).toMatchObject({
       provider: "azure",
       auth: {
-        scheme: "api-key-or-authorization-bearer",
-        headers: expect.arrayContaining(["api-key", "Authorization"]),
+        scheme: "api-key",
+        headers: ["api-key"],
         query: []
       },
       method: "POST",

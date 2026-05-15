@@ -167,7 +167,7 @@ describe("web ui", () => {
     expect(openai.auth.label).toBe("Authorization: Bearer 123456");
     expect(openai.latestModels).toHaveLength(4);
     expect(azure.latestModels).toEqual(["gpt-5.4", "gpt-5.4-mini", "gpt-5.3-codex"]);
-    expect(azure.auth).toMatchObject({ scheme: "api-key-or-authorization-bearer", label: "api-key: 123456 或 Authorization: Bearer 123456" });
+    expect(azure.auth).toMatchObject({ scheme: "api-key", label: "api-key: 123456", headers: ["api-key"] });
     expect(azure.modelVersions).toMatchObject({
       "gpt-5.4": "2026-03-05",
       "gpt-5.4-mini": "2026-03-17",

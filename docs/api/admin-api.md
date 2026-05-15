@@ -74,9 +74,9 @@ Example:
       "displayName": "Azure OpenAI / Microsoft Foundry",
       "groups": ["international", "openai-compatible", "azure", "enterprise"],
       "auth": {
-        "scheme": "api-key-or-authorization-bearer",
-        "label": "api-key: 123456 或 Authorization: Bearer 123456",
-        "headers": ["api-key", "Authorization"],
+        "scheme": "api-key",
+        "label": "api-key: 123456",
+        "headers": ["api-key"],
         "query": []
       },
       "defaultModels": ["gpt-5.4-mini"],

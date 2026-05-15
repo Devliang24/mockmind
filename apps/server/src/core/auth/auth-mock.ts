@@ -5,7 +5,7 @@ export function checkAuth(config: MockMindConfig, request: FastifyRequest, reply
   return checkProviderAuth(config, request, reply, "openai");
 }
 
-export type ProviderAuthScheme = "authorization-bearer" | "x-api-key" | "x-goog-api-key-or-query-key" | "api-key-or-authorization-bearer";
+export type ProviderAuthScheme = "authorization-bearer" | "api-key" | "x-api-key" | "x-goog-api-key-or-query-key";
 
 export type ProviderAuthInfo = {
   scheme: ProviderAuthScheme;
@@ -47,9 +47,9 @@ export function authInfoForProvider(provider: Provider, apiKey = "123456"): Prov
   }
   if (provider === "azure") {
     return {
-      scheme: "api-key-or-authorization-bearer",
-      label: `api-key: ${apiKey} 或 Authorization: Bearer ${apiKey}`,
-      headers: ["api-key", "Authorization"],
+      scheme: "api-key",
+      label: `api-key: ${apiKey}`,
+      headers: ["api-key"],
       query: []
     };
   }
@@ -63,8 +63,8 @@ export function authInfoForProvider(provider: Provider, apiKey = "123456"): Prov
 
 function providerAuthToken(request: FastifyRequest, scheme: ProviderAuthScheme): string | undefined {
   if (scheme === "authorization-bearer") return bearerToken(headerValue(request, "authorization"));
+  if (scheme === "api-key") return headerValue(request, "api-key");
   if (scheme === "x-api-key") return headerValue(request, "x-api-key");
-  if (scheme === "api-key-or-authorization-bearer") return headerValue(request, "api-key") ?? bearerToken(headerValue(request, "authorization"));
   return headerValue(request, "x-goog-api-key") ?? queryValue(request, "key");
 }
 
