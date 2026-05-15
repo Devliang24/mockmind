@@ -83,7 +83,7 @@ describe("Admin API contracts", () => {
       },
       routes: expect.any(Array)
     });
-    expect(azure?.routes.some((route) => route.includes("/openai/v1/chat/completions"))).toBe(true);
+    expect(azure?.routes.some((route) => route.includes("/openai/deployments/:deployment/chat/completions"))).toBe(true);
 
     await app.close();
   });
@@ -119,7 +119,7 @@ describe("Admin API contracts", () => {
       query: expect.arrayContaining(["key"])
     });
 
-    const azureRoute = routes.find((route) => route.provider === "azure" && route.path === "/openai/v1/chat/completions");
+    const azureRoute = routes.find((route) => route.provider === "azure" && route.path === "/openai/deployments/:deployment/chat/completions");
     expect(azureRoute).toMatchObject({
       provider: "azure",
       auth: {
@@ -128,10 +128,10 @@ describe("Admin API contracts", () => {
         query: []
       },
       method: "POST",
-      path: "/openai/v1/chat/completions",
+      path: "/openai/deployments/:deployment/chat/completions",
       protocol: "openai-compatible",
-      endpoint: "/openai/v1/chat/completions",
-      description: "Azure OpenAI Chat Completions"
+      endpoint: "/openai/deployments/:deployment/chat/completions",
+      description: "Azure deployment Chat Completions"
     });
 
     await app.close();

@@ -27,10 +27,11 @@ describe("provider official auth", () => {
   it("accepts Azure api-key and Bearer auth", async () => {
     const { app } = await createMockMindServer(config);
     const payload = { model: "gpt-5.4-mini", messages: [{ role: "user", content: "hello" }] };
-    const acceptedApiKey = await app.inject({ method: "POST", url: "/openai/v1/chat/completions", headers: { "api-key": "123456" }, payload });
-    const acceptedBearer = await app.inject({ method: "POST", url: "/openai/v1/chat/completions", headers: { authorization: "Bearer 123456" }, payload });
-    const rejectedWrong = await app.inject({ method: "POST", url: "/openai/v1/chat/completions", headers: { "api-key": "wrong" }, payload });
-    const rejectedMissing = await app.inject({ method: "POST", url: "/openai/v1/chat/completions", payload });
+    const url = "/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2024-12-01-preview";
+    const acceptedApiKey = await app.inject({ method: "POST", url, headers: { "api-key": "123456" }, payload });
+    const acceptedBearer = await app.inject({ method: "POST", url, headers: { authorization: "Bearer 123456" }, payload });
+    const rejectedWrong = await app.inject({ method: "POST", url, headers: { "api-key": "wrong" }, payload });
+    const rejectedMissing = await app.inject({ method: "POST", url, payload });
     expect(acceptedApiKey.statusCode).toBe(200);
     expect(acceptedBearer.statusCode).toBe(200);
     expect(rejectedWrong.statusCode).toBe(401);

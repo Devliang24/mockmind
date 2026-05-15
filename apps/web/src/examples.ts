@@ -400,10 +400,26 @@ function nonStreamBody<T extends Record<string, unknown>>(body: T): T & { stream
 }
 
 function curl(baseUrl: string, path: string, body: unknown, headers: string[] = authHeadersForPath(path), method: AdminRoute["method"] = "POST"): string {
-  const normalizedPath = path.replace(":modelAndMethod", "gemini-3-flash-preview:generateContent");
+  const normalizedPath = examplePath(path, body);
   if (method === "GET") return `curl ${baseUrl}${normalizedPath}`;
   const headerLines = headers.map((header) => `  -H '${header}' \\`).join("\n");
   return `curl ${baseUrl}${normalizedPath} \\\n${headerLines}\n  -d '${JSON.stringify(body, null, 2)}'`;
+}
+
+function examplePath(path: string, body: unknown): string {
+  const model = modelFromBody(body);
+  const normalized = path
+    .replace(":modelAndMethod", "gemini-3-flash-preview:generateContent")
+    .replace(":deployment", model ?? "gpt-5.4");
+  if (path.startsWith("/openai/deployments/")) return `${normalized}?api-version=2024-12-01-preview`;
+  if (path === "/openai/v1/responses") return `${normalized}?api-version=preview`;
+  return normalized;
+}
+
+function modelFromBody(body: unknown): string | undefined {
+  if (!body || typeof body !== "object") return undefined;
+  const model = (body as Record<string, unknown>).model;
+  return typeof model === "string" ? model : undefined;
 }
 
 function authHeadersForPath(path: string): string[] {

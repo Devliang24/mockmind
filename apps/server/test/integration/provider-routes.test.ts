@@ -16,7 +16,7 @@ const config: MockMindConfig = {
   defaults: { latencyMs: 0, streamChunkDelayMs: 0 },
   fallback: { enabled: true, response: { type: "text", content: "fallback" } },
   scenarios: [
-    { id: "azure", provider: "azure", endpoint: "/openai/v1/chat/completions", priority: 0, match: { model: "gpt-5.4-mini" }, response: { type: "text", content: "azure" } },
+    { id: "azure", provider: "azure", endpoint: "/openai/deployments/gpt-5.4-mini/chat/completions", priority: 0, match: { model: "gpt-5.4-mini" }, response: { type: "text", content: "azure" } },
     { id: "deepseek", provider: "deepseek", endpoint: "/chat/completions", priority: 0, match: { model: "deepseek-v4-pro" }, response: { type: "text", reasoningContent: "reasoning", content: "deepseek" } },
     { id: "moonshot", provider: "moonshot", endpoint: "/v1/chat/completions", priority: 0, match: { model: "kimi-k2.6" }, response: { type: "text", content: "moonshot" } },
     { id: "zhipu", provider: "zhipu", endpoint: "/api/paas/v4/chat/completions", priority: 0, match: { model: "glm-5.1" }, response: { type: "text", content: "zhipu" } },
@@ -27,7 +27,15 @@ const config: MockMindConfig = {
 describe("provider official routes", () => {
   it("serves Azure OpenAI-compatible route", async () => {
     const { app } = await createMockMindServer(config);
-    const response = await app.inject({ method: "POST", url: "/openai/v1/chat/completions", payload: { model: "gpt-5.4-mini", messages: [{ role: "user", content: "hello" }] } });
+    const response = await app.inject({ method: "POST", url: "/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2024-12-01-preview", payload: { model: "gpt-5.4-mini", messages: [{ role: "user", content: "hello" }] } });
+    expect(response.json().choices[0].message.content).toBe("azure (model: gpt-5.4-mini)");
+    await app.close();
+  });
+
+  it("uses the Azure deployment name as model fallback", async () => {
+    const { app } = await createMockMindServer(config);
+    const response = await app.inject({ method: "POST", url: "/openai/deployments/gpt-5.4-mini/chat/completions?api-version=2024-12-01-preview", payload: { messages: [{ role: "user", content: "hello" }] } });
+    expect(response.json().model).toBe("gpt-5.4-mini");
     expect(response.json().choices[0].message.content).toBe("azure (model: gpt-5.4-mini)");
     await app.close();
   });
@@ -98,6 +106,7 @@ describe("provider official routes", () => {
     "/minimax/v1/text/chatcompletion_v2",
     "/anthropic/v1/messages",
     "/azure/openai/v1/chat/completions",
+    "/openai/v1/chat/completions",
     "/gemini/v1beta/models/gemini-3-flash-preview:generateContent",
     "/dashscope/api/v1/services/aigc/text-generation/generation"
   ])("does not serve non-official alias %s", async (url) => {

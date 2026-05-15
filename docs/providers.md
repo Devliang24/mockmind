@@ -7,7 +7,7 @@ MockMind starts all implemented providers by default.
 | Provider | Protocols | Routes | Official API docs |
 |---|---|---|---|
 | OpenAI Compatible | `openai-compatible`, `openai-embeddings`, `openai-responses`, `openai-images`, `openai-audio`, `openai-moderations`, `openai-files`, `openai-batch` | `/v1/models`, `/v1/chat/completions`, `/v1/embeddings`, `/v1/responses`, `/v1/images/generations`, `/v1/audio/*`, `/v1/moderations`, `/v1/files`, `/v1/batches` | [OpenAI Chat Completions API](https://platform.openai.com/docs/api-reference/chat/create) |
-| Azure OpenAI / Microsoft Foundry | `openai-compatible`, `openai-responses` | `/openai/v1/chat/completions`, `/openai/v1/responses` | [Azure OpenAI API v1](https://learn.microsoft.com/azure/ai-foundry/openai/latest) |
+| Azure OpenAI / Microsoft Foundry | `openai-compatible`, `openai-responses` | `/openai/deployments/:deployment/chat/completions`, `/openai/v1/responses` | [Azure OpenAI Chat Completions](https://learn.microsoft.com/azure/ai-services/openai/reference), [Azure OpenAI API v1](https://learn.microsoft.com/azure/ai-foundry/openai/latest) |
 | DeepSeek | `openai-compatible` | `/chat/completions` | [DeepSeek Create Chat Completion](https://api-docs.deepseek.com/api/create-chat-completion) |
 | Moonshot / Kimi | `openai-compatible` | `/v1/chat/completions` | [Kimi API Overview](https://platform.kimi.ai/docs/api/overview) |
 | Zhipu GLM | `openai-compatible`, `openai-embeddings`, `rerank` | `/api/paas/v4/chat/completions`, `/api/coding/paas/v4/chat/completions`, `/api/paas/v4/embeddings`, `/api/paas/v4/rerank` | [智谱 AI 对话补全](https://docs.bigmodel.cn/api-reference), [智谱 Coding Plan 其他工具配置](https://docs.bigmodel.cn/cn/coding-plan/tool/others) |

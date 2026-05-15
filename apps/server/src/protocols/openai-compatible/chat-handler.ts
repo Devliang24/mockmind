@@ -30,19 +30,21 @@ export async function handleOpenAICompatibleChat(
   endpoint: string
 ): Promise<unknown> {
   if (!checkProviderAuth(context.config, request, reply, provider, formatOpenAIError(401, "invalid_api_key", "Invalid API key", "authentication_error"))) return;
-  const validationError = requireFields(request.body, [
+  const body = request.body;
+  const deploymentModel = provider === "azure" ? azureDeploymentFromEndpoint(endpoint) : undefined;
+  const model = body.model ?? deploymentModel;
+  const validationError = requireFields({ ...request.body, model }, [
     { path: "model", validate: isString },
     { path: "messages", validate: isArray }
   ]);
   if (validationError) return reply.code(validationError.status).send(formatOpenAIError(validationError.status, validationError.code, validationError.message, validationError.type));
   const started = Date.now();
-  const body = request.body;
-  const effectiveProvider = provider === "openai" ? resolveOpenAICompatibleProvider(body.model, endpoint) : provider;
+  const effectiveProvider = provider === "openai" ? resolveOpenAICompatibleProvider(model, endpoint) : provider;
   const mockRequest: MockRequest = {
     provider: effectiveProvider,
     endpoint,
     method: request.method,
-    model: body.model,
+    model,
     messages: body.messages,
     stream: Boolean(body.stream),
     tools: body.tools,
@@ -60,13 +62,17 @@ export async function handleOpenAICompatibleChat(
     return reply.code(result.error.status).send(responseBody);
   }
   if (body.stream) {
-    const responseBody = streamResponseBody(result, body.model ?? "mock-model");
+    const responseBody = streamResponseBody(result, model ?? "mock-model");
     context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
-    return sendOpenAIStream(reply, body.model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs, body.stream_options?.include_usage === true);
+    return sendOpenAIStream(reply, model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs, body.stream_options?.include_usage === true);
   }
-  const responseBody = formatChatCompletion(body.model ?? "mock-model", result);
+  const responseBody = formatChatCompletion(model ?? "mock-model", result);
   context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: false, request: mockRequest, responseBody });
   return reply.send(responseBody);
+}
+
+function azureDeploymentFromEndpoint(endpoint: string): string | undefined {
+  return endpoint.match(/^\/openai\/deployments\/([^/]+)\/chat\/completions$/)?.[1];
 }
 
 function defaultContent(provider: Provider): string {

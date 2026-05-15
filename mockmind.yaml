@@ -77,7 +77,7 @@ scenarios:
 
   - id: azure-basic
     provider: azure
-    endpoint: /openai/v1/chat/completions
+    endpoint: /openai/deployments/gpt-5.4-mini/chat/completions
     match:
       model: gpt-5.4-mini
       messagesContain: hello

@@ -87,7 +87,7 @@ Example:
         "gpt-5.4-mini": "2026-03-17",
         "gpt-5.3-codex": "2026-02-24"
       },
-      "routes": ["POST /openai/v1/chat/completions Azure OpenAI Chat Completions"]
+      "routes": ["POST /openai/deployments/:deployment/chat/completions Azure deployment Chat Completions"]
     },
     {
       "provider": "openai",

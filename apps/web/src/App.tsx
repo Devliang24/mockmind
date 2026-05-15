@@ -722,7 +722,7 @@ function isConsoleRouteVisible(route: AdminRoute): boolean {
 function requestCurl(request: AdminRecordedRequest): string {
   const method = request.request.method || "POST";
   const headers = Object.entries(request.request.headers)
-    .filter(([key]) => ["authorization", "x-api-key", "x-goog-api-key", "anthropic-version", "content-type"].includes(key.toLowerCase()))
+    .filter(([key]) => ["authorization", "api-key", "x-api-key", "x-goog-api-key", "anthropic-version", "content-type"].includes(key.toLowerCase()))
     .map(([key, value]) => `  -H '${key}: ${String(value).replace(/'/g, "'\\''")}'`)
     .join(" \\\n");
   const methodPart = method === "GET" ? "" : ` -X ${method}`;

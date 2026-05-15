@@ -139,7 +139,7 @@ npm run docs:validate
 - `GET /health`
 - `GET /v1/models`
 - `POST /v1/chat/completions`
-- `POST /openai/v1/chat/completions`
+- `POST /openai/deployments/:deployment/chat/completions`
 - `POST /chat/completions`
 - `POST /v1/embeddings`
 - `POST /v1/responses`
@@ -188,7 +188,7 @@ npm run docs:validate
 | OpenAI Chat Completions | `/v1/chat/completions` | [OpenAI Chat Completions API](https://platform.openai.com/docs/api-reference/chat/create) |
 | OpenAI Responses | `/v1/responses` | [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses/create) |
 | OpenAI Images / Audio / Moderations / Files / Batch | `/v1/images/generations`, `/v1/audio/*`, `/v1/moderations`, `/v1/files`, `/v1/batches` | [OpenAI API Reference](https://platform.openai.com/docs/api-reference) |
-| Azure OpenAI / Microsoft Foundry v1 | `/openai/v1/chat/completions`, `/openai/v1/responses` | [Azure OpenAI API v1](https://learn.microsoft.com/azure/ai-foundry/openai/latest) |
+| Azure OpenAI / Microsoft Foundry | `/openai/deployments/:deployment/chat/completions?api-version=2024-12-01-preview`, `/openai/v1/responses?api-version=preview` | [Azure OpenAI Chat Completions](https://learn.microsoft.com/azure/ai-services/openai/reference), [Azure OpenAI API v1](https://learn.microsoft.com/azure/ai-foundry/openai/latest) |
 | DeepSeek Chat Completions | `/chat/completions` | [DeepSeek Create Chat Completion](https://api-docs.deepseek.com/api/create-chat-completion) |
 | Moonshot / Kimi OpenAI-compatible | `/v1/chat/completions` | [Kimi API Overview](https://platform.kimi.ai/docs/api/overview) |
 | Zhipu GLM Chat Completions / Coding Plan / Embeddings / Rerank | `/api/paas/v4/chat/completions`, `/api/coding/paas/v4/chat/completions`, `/api/paas/v4/embeddings`, `/api/paas/v4/rerank` | [智谱 AI 对话补全](https://docs.bigmodel.cn/api-reference), [智谱 Coding Plan 其他工具配置](https://docs.bigmodel.cn/cn/coding-plan/tool/others) |

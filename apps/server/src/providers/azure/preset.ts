@@ -12,7 +12,7 @@ export const azurePreset: ProviderPreset = {
     "gpt-5.3-codex": "2026-02-24"
   },
   routes: [
-    { method: "POST", path: "/openai/v1/chat/completions", protocol: "openai-compatible", endpoint: "/openai/v1/chat/completions", description: "Azure OpenAI Chat Completions" },
+    { method: "POST", path: "/openai/deployments/:deployment/chat/completions", protocol: "openai-compatible", endpoint: "/openai/deployments/:deployment/chat/completions", description: "Azure deployment Chat Completions" },
     { method: "POST", path: "/openai/v1/responses", protocol: "openai-responses", endpoint: "/openai/v1/responses", description: "Azure OpenAI Responses" }
   ]
 };
