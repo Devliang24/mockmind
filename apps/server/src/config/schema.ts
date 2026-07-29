@@ -85,7 +85,8 @@ export const configSchema = z.object({
   })).default([]),
   defaults: z.object({
     latencyMs: z.number().int().nonnegative().default(0),
-    streamChunkDelayMs: z.number().int().nonnegative().default(30)
+    streamChunkDelayMs: z.number().int().nonnegative().default(30),
+    maxRequests: z.number().int().nonnegative().default(500)
   }).prefault({}),
   persistence: z.object({
     enabled: z.boolean().default(true),

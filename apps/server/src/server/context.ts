@@ -15,7 +15,10 @@ export function createServerContext(config: MockMindConfig): ServerContext {
   return {
     config,
     scenarios: new ScenarioStore(config),
-    recorder: new RequestRecorder(persistence?.enabled && persistence.driver === "sqlite" ? { sqlitePath: persistence.sqlite.path } : {}),
+    recorder: new RequestRecorder({
+      ...(persistence?.enabled && persistence.driver === "sqlite" ? { sqlitePath: persistence.sqlite.path } : {}),
+      maxRequests: config.defaults.maxRequests
+    }),
     disabledModels
   };
 }

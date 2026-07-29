@@ -18,19 +18,23 @@ export type RecordedRequest = {
 
 export type RequestRecorderOptions = {
   sqlitePath?: string;
+  maxRequests?: number;
 };
 
 export class RequestRecorder {
   private records: RecordedRequest[] = [];
   private nextId = 1;
   private db?: Database.Database;
+  private maxRequests: number;
 
   constructor(options: RequestRecorderOptions = {}) {
+    this.maxRequests = options.maxRequests ?? 0;
     if (options.sqlitePath) {
       this.db = openDatabase(options.sqlitePath);
       migrate(this.db);
       this.records = loadRecords(this.db);
       this.nextId = nextSequence(this.records);
+      this.pruneMemory();
     }
   }
 
@@ -38,6 +42,7 @@ export class RequestRecorder {
     const saved = { ...record, id: `req_${this.nextId++}` };
     this.records.push(saved);
     this.persist(saved);
+    this.prune();
     return saved;
   }
 
@@ -97,6 +102,21 @@ export class RequestRecorder {
       requestJson: JSON.stringify(record.request),
       responseBodyJson: record.responseBody === undefined ? null : JSON.stringify(record.responseBody)
     });
+  }
+
+  private prune(): void {
+    if (this.maxRequests <= 0) return;
+    while (this.records.length > this.maxRequests) {
+      const removed = this.records.shift();
+      if (removed && this.db) {
+        this.db.prepare("DELETE FROM request_records WHERE id = ?").run(removed.id);
+      }
+    }
+  }
+
+  private pruneMemory(): void {
+    if (this.maxRequests <= 0 || this.records.length <= this.maxRequests) return;
+    this.records = this.records.slice(-this.maxRequests);
   }
 }
 
