@@ -162,7 +162,7 @@ describe("Admin API contracts", () => {
     });
 
     expect(models.data).toEqual([
-      { id: "gpt-4o-mini", provider: "openai", displayName: expect.any(String) }
+      { id: "gpt-4o-mini", provider: "openai", displayName: expect.any(String), disabled: false }
     ]);
 
     expect(scenarios).toEqual([

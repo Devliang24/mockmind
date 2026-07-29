@@ -1,4 +1,5 @@
-import type { FastifyRequest } from "fastify";
+import type { FastifyReply, FastifyRequest } from "fastify";
+import type { ServerContext } from "../server/context.js";
 
 export type ValidationError = {
   status: number;
@@ -79,4 +80,17 @@ function getPath(value: unknown, path: string): unknown {
     if (!isRecord(current)) return undefined;
     return current[key];
   }, value);
+}
+
+export function checkModelDisabled(
+  context: ServerContext,
+  model: string | undefined,
+  reply: FastifyReply,
+  formatError: (status: number, code: string, message: string) => unknown
+): boolean {
+  if (model && context.disabledModels.has(model)) {
+    reply.status(403).send(formatError(403, "model_disabled", `Model '${model}' is disabled by the administrator.`));
+    return false;
+  }
+  return true;
 }

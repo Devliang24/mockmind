@@ -80,7 +80,8 @@ export const configSchema = z.object({
   }).prefault({}),
   models: z.array(z.object({
     id: z.string(),
-    provider: providerSchema
+    provider: providerSchema,
+    disabled: z.boolean().optional()
   })).default([]),
   defaults: z.object({
     latencyMs: z.number().int().nonnegative().default(0),

@@ -7,7 +7,7 @@ import { delay } from "../../shared/time.js";
 import { formatMiniMaxChatCompletion, formatMiniMaxError } from "./adapter.js";
 import { sendMiniMaxStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
-import { isArray, isString, requireFields } from "../validation.js";
+import { checkModelDisabled, isArray, isString, requireFields } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
 import { streamResponseBody } from "../stream-summary.js";
 
@@ -28,6 +28,7 @@ export async function handleMiniMaxChat(handlerContext: ProtocolHandlerContext, 
   if (validationError) return reply.code(validationError.status).send(formatMiniMaxError(validationError.code, validationError.message));
   const started = Date.now();
   const body = request.body as MiniMaxBody;
+  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatMiniMaxError(code, message))) return;
   const mockRequest: MockRequest = {
     provider,
     endpoint,

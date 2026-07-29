@@ -5,7 +5,7 @@ import type { MockRequest } from "../../core/scenario/types.js";
 import { requestHeaders, requestQuery } from "../../shared/http.js";
 import { unixSeconds } from "../../shared/time.js";
 import type { ProtocolHandlerContext } from "../types.js";
-import { isString, requireFields, validateJsonObjectBody } from "../validation.js";
+import { checkModelDisabled, isString, requireFields, validateJsonObjectBody } from "../validation.js";
 import { formatOpenAIError } from "./adapter.js";
 
 type Body = Record<string, unknown>;
@@ -101,6 +101,7 @@ async function sendRendered(
 ): Promise<unknown> {
   const { context, provider, endpoint } = handlerContext;
   const body = request.body as Body;
+  if (!checkModelDisabled(context, typeof body.model === "string" ? body.model : undefined, reply, (status, code, message) => formatOpenAIError(status, code, message, "invalid_request_error"))) return;
   const mockRequest: MockRequest = {
     provider,
     endpoint,

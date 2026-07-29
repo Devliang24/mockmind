@@ -7,7 +7,7 @@ import { requestHeaders, requestQuery } from "../../shared/http.js";
 import { delay, unixSeconds } from "../../shared/time.js";
 import { formatOpenAIError, formatResponsesUsage, normalizeOpenAIToolCalls } from "./adapter.js";
 import { sendOpenAIResponsesStream } from "./responses-stream.js";
-import { isString, requireFields } from "../validation.js";
+import { checkModelDisabled, isString, requireFields } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
 import { streamResponseBody } from "../stream-summary.js";
 
@@ -34,6 +34,7 @@ export async function handleOpenAIResponses(
 
   const started = Date.now();
   const body = request.body;
+  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatOpenAIError(status, code, message, "invalid_request_error"))) return;
   const mockRequest: MockRequest = {
     provider,
     endpoint,

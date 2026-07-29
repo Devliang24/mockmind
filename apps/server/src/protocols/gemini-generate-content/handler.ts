@@ -7,7 +7,7 @@ import { delay } from "../../shared/time.js";
 import { formatGeminiContent, formatGeminiError } from "./adapter.js";
 import { sendGeminiStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
-import { isArray, requireFields } from "../validation.js";
+import { checkModelDisabled, isArray, requireFields } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
 import { streamResponseBody } from "../stream-summary.js";
 
@@ -23,6 +23,7 @@ export async function handleGeminiGenerateContent(handlerContext: ProtocolHandle
   const started = Date.now();
   const body = request.body as GeminiBody;
   const model = modelFromEndpoint(endpoint);
+  if (!checkModelDisabled(context, model, reply, (status, code, message) => formatGeminiError(status, message, code))) return;
   const stream = endpoint.endsWith(":streamGenerateContent");
   const mockRequest: MockRequest = {
     provider: "gemini",

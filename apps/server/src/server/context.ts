@@ -6,13 +6,16 @@ export type ServerContext = {
   config: MockMindConfig;
   scenarios: ScenarioStore;
   recorder: RequestRecorder;
+  disabledModels: Set<string>;
 };
 
 export function createServerContext(config: MockMindConfig): ServerContext {
   const persistence = config.persistence;
+  const disabledModels = new Set(config.models.filter((m) => m.disabled).map((m) => m.id));
   return {
     config,
     scenarios: new ScenarioStore(config),
-    recorder: new RequestRecorder(persistence?.enabled && persistence.driver === "sqlite" ? { sqlitePath: persistence.sqlite.path } : {})
+    recorder: new RequestRecorder(persistence?.enabled && persistence.driver === "sqlite" ? { sqlitePath: persistence.sqlite.path } : {}),
+    disabledModels
   };
 }

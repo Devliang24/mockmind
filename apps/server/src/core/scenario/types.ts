@@ -76,6 +76,7 @@ export type Scenario = {
 export type ModelConfig = {
   id: string;
   provider: Provider;
+  disabled?: boolean;
 };
 
 export type MockMindConfig = {

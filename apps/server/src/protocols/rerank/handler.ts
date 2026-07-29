@@ -5,7 +5,7 @@ import type { MockRequest } from "../../core/scenario/types.js";
 import { requestHeaders, requestQuery } from "../../shared/http.js";
 import { delay } from "../../shared/time.js";
 import type { ProtocolHandlerContext } from "../types.js";
-import { isArray, isRecord, isString, requireFields } from "../validation.js";
+import { checkModelDisabled, isArray, isRecord, isString, requireFields } from "../validation.js";
 import { estimateTokenCount } from "../usage.js";
 
 type RerankBody = {
@@ -40,6 +40,7 @@ export async function handleRerank(handlerContext: ProtocolHandlerContext, reque
   if (!isValidQuery(rerankInput.query) || !isArray(rerankInput.documents)) {
     return reply.code(400).send(formatRerankError(provider, "invalid_request", "Missing or invalid required field: query/documents or input.query/input.documents."));
   }
+  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatRerankError(provider, code, message))) return;
   const mockRequest: MockRequest = {
     provider,
     endpoint,

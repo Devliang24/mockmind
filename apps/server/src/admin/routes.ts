@@ -37,9 +37,23 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
   app.get("/__admin/models", async (): Promise<AdminModelsResponse> => ({
     data: context.config.models.map((model) => ({
       ...model,
-      displayName: providerRegistry.find((registration) => registration.provider === model.provider)?.displayName ?? model.provider
+      displayName: providerRegistry.find((registration) => registration.provider === model.provider)?.displayName ?? model.provider,
+      disabled: context.disabledModels.has(model.id)
     }))
   }));
+  app.patch("/__admin/models/:id", async (request): Promise<{ ok: boolean; id: string; disabled: boolean }> => {
+    const { id } = request.params as { id: string };
+    const body = request.body as { disabled?: boolean };
+    if (typeof body.disabled !== "boolean") {
+      throw { statusCode: 400, message: "Missing required boolean field: disabled." };
+    }
+    if (body.disabled) {
+      context.disabledModels.add(id);
+    } else {
+      context.disabledModels.delete(id);
+    }
+    return { ok: true, id, disabled: body.disabled };
+  });
   app.get("/__admin/scenarios", async (): Promise<AdminScenario[]> => context.scenarios.list().map((scenario) => ({
     ...scenario,
     match: scenario.match,

@@ -24,6 +24,7 @@ export type AdminModel = {
   id: string;
   provider: Provider;
   displayName: string;
+  disabled?: boolean;
 };
 
 export type AdminScenario = {

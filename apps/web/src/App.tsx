@@ -6,7 +6,7 @@ import type {
   AdminRoute,
   AdminScenario
 } from "@mockmind/shared";
-import { loadConsoleData, type ConsoleData } from "./api/client";
+import { loadConsoleData, toggleModel, type ConsoleData } from "./api/client";
 import { exampleForRoute, type RouteExample } from "./examples";
 import { priceLabel } from "./model-pricing";
 import { embeddingModelForProvider, rerankModelsForProvider } from "./provider-models";
@@ -71,8 +71,14 @@ export function App() {
     protocolRoutes[0] ??
     providerRoutes[0];
   const providerModels = useMemo(() => modelsForProviderProtocol(selectedProvider, data?.models, activeProtocol), [activeProtocol, data?.models, selectedProvider]);
+  const disabledModelIds = useMemo(() => new Set((data?.models.data ?? []).filter((m) => m.disabled).map((m) => m.id)), [data?.models.data]);
   const activeModel = selectedModel && providerModels.includes(selectedModel) ? selectedModel : providerModels[0] ?? "mock-model";
   const selectedRequest = data?.requests.find((request) => request.id === selectedRequestId);
+
+  async function handleToggleModel(modelId: string, disabled: boolean) {
+    await toggleModel(modelId, disabled);
+    await refresh();
+  }
 
   useEffect(() => {
     if (!selectedProviderId && selectedProvider?.provider) setSelectedProviderId(selectedProvider.provider);
@@ -152,6 +158,7 @@ export function App() {
               activeProtocol={activeProtocol}
               baseUrl={baseUrl}
               copiedKey={copiedKey}
+              disabledModelIds={disabledModelIds}
               onCopy={(text, key) => void copy(text, key)}
               onModelSelect={setSelectedModel}
               onProtocolSelect={(protocol) => {
@@ -159,6 +166,7 @@ export function App() {
                 setSelectedRouteKey(undefined);
               }}
               onRouteSelect={(route) => setSelectedRouteKey(routeKey(route))}
+              onToggleModel={(modelId, disabled) => void handleToggleModel(modelId, disabled)}
               provider={selectedProvider}
               providerModels={providerModels}
               providerRoutes={providerRoutes}
@@ -186,11 +194,13 @@ function ProviderView({
   selectedRoute,
   providerModels,
   activeModel,
+  disabledModelIds,
   baseUrl,
   copiedKey,
   onProtocolSelect,
   onRouteSelect,
   onModelSelect,
+  onToggleModel,
   onCopy
 }: {
   provider: ProviderView;
@@ -201,11 +211,13 @@ function ProviderView({
   selectedRoute: AdminRoute;
   providerModels: string[];
   activeModel: string;
+  disabledModelIds: Set<string>;
   baseUrl: string;
   copiedKey?: string;
   onProtocolSelect: (protocol: string) => void;
   onRouteSelect: (route: AdminRoute) => void;
   onModelSelect: (model: string) => void;
+  onToggleModel: (modelId: string, disabled: boolean) => void;
   onCopy: (text: string, key: string) => void;
 }) {
   const example = exampleForRoute(selectedRoute, activeModel, baseUrl);
@@ -228,9 +240,11 @@ function ProviderView({
         activeModel={activeModel}
         activeProtocol={activeProtocol}
         copiedKey={copiedKey}
+        disabledModelIds={disabledModelIds}
         models={providerModels}
         onCopy={onCopy}
         onModelSelect={onModelSelect}
+        onToggleModel={onToggleModel}
         provider={provider}
       />
       <EndpointDetail activeModel={activeModel} baseUrl={baseUrl} onRouteSelect={onRouteSelect} protocolRoutes={protocolRoutes} selectedRoute={selectedRoute} />
@@ -296,16 +310,20 @@ function ProtocolModelPanel({
   activeProtocol,
   models,
   activeModel,
+  disabledModelIds,
   copiedKey,
   onModelSelect,
+  onToggleModel,
   onCopy
 }: {
   provider: ProviderView;
   activeProtocol: string;
   models: string[];
   activeModel: string;
+  disabledModelIds: Set<string>;
   copiedKey?: string;
   onModelSelect: (model: string) => void;
+  onToggleModel: (modelId: string, disabled: boolean) => void;
   onCopy: (text: string, key: string) => void;
 }) {
   return (
@@ -319,6 +337,7 @@ function ProtocolModelPanel({
       <div className="model-picker">
         {models.map((model) => {
           const copyKey = `model:${model}`;
+          const isDisabled = disabledModelIds.has(model);
           return (
             <div
               className={model === activeModel ? "model-chip active" : "model-chip"}
@@ -356,6 +375,15 @@ function ProtocolModelPanel({
                 {provider.modelVersions?.[model] ? <span>Azure version {provider.modelVersions[model]}</span> : null}
               </span>
               <span className="model-price">{priceLabel(model, provider.provider, provider.modelVersions?.[model])}</span>
+              <label className="model-toggle" onClick={(e) => e.stopPropagation()}>
+                <input
+                  type="checkbox"
+                  checked={!isDisabled}
+                  onChange={() => onToggleModel(model, !isDisabled)}
+                  title={isDisabled ? "启用该模型" : "禁用该模型"}
+                />
+                <span className="toggle-label">{isDisabled ? "已禁用" : "启用"}</span>
+              </label>
             </div>
           );
         })}

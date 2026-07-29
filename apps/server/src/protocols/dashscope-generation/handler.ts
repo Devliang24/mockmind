@@ -7,7 +7,7 @@ import { delay } from "../../shared/time.js";
 import { formatDashScopeError, formatDashScopeGeneration } from "./adapter.js";
 import { sendDashScopeStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
-import { isArray, isString, requireFields } from "../validation.js";
+import { checkModelDisabled, isArray, isString, requireFields } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
 import { streamResponseBody } from "../stream-summary.js";
 
@@ -33,6 +33,7 @@ export async function handleDashScopeGeneration(handlerContext: ProtocolHandlerC
   if (validationError) return reply.code(validationError.status).send(formatDashScopeError(validationError.code, validationError.message));
   const started = Date.now();
   const body = request.body as DashScopeBody;
+  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatDashScopeError(code, message))) return;
   const stream = Boolean(body.stream ?? body.parameters?.incremental_output);
   const mockRequest: MockRequest = {
     provider: "aliyun-bailian",

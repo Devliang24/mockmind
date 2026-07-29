@@ -41,3 +41,11 @@ export async function loadConsoleData(): Promise<ConsoleData> {
 
   return { health, overview, providers, routes, models, scenarios, requests };
 }
+
+export async function toggleModel(modelId: string, disabled: boolean): Promise<{ ok: boolean; id: string; disabled: boolean }> {
+  return api(`/__admin/models/${encodeURIComponent(modelId)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ disabled }),
+    headers: { "Content-Type": "application/json" }
+  });
+}

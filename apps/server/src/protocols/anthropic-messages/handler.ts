@@ -7,7 +7,7 @@ import { delay } from "../../shared/time.js";
 import { formatAnthropicError, formatAnthropicMessage } from "./adapter.js";
 import { sendAnthropicStream } from "./stream.js";
 import type { ProtocolHandlerContext } from "../types.js";
-import { isArray, isString, requireFields, requireHeaders } from "../validation.js";
+import { checkModelDisabled, isArray, isString, requireFields, requireHeaders } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
 import { streamResponseBody } from "../stream-summary.js";
 
@@ -30,6 +30,7 @@ export async function handleAnthropicMessages(handlerContext: ProtocolHandlerCon
   if (validationError) return reply.code(validationError.status).send(formatAnthropicError(validationError.code, validationError.message));
   const started = Date.now();
   const body = request.body as AnthropicBody;
+  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatAnthropicError(code, message))) return;
   const mockRequest: MockRequest = {
     provider: "anthropic",
     endpoint,
