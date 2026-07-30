@@ -543,9 +543,15 @@ function SettingsView({
   const [ruleValue, setRuleValue] = useState<number>(0);
 
   const latencyModels = modelsForLatencySettings(providers, models);
-  const targets = ruleType === "provider"
-    ? providers.map((p) => ({ key: p.provider, label: p.displayName, hasRule: p.provider in providerLatencyMs }))
-    : latencyModels.map((m) => ({ key: m.id, label: `${m.id}（${m.provider}）`, hasRule: m.id in modelLatencyMs }));
+  const providerTargets = providers.map((p) => ({ key: p.provider, label: p.displayName, hasRule: p.provider in providerLatencyMs }));
+  const modelTargetGroups = providers
+    .map((p) => ({
+      key: p.provider,
+      label: p.displayName,
+      targets: latencyModels.filter((m) => m.provider === p.provider).map((m) => ({ key: m.id, label: m.id, hasRule: m.id in modelLatencyMs }))
+    }))
+    .filter((group) => group.targets.length > 0);
+  const modelLatencyEntries = sortedModelLatencyEntries(modelLatencyMs, providers, latencyModels);
 
   function addRule() {
     if (!ruleTarget || ruleValue <= 0) return;
@@ -594,11 +600,11 @@ function SettingsView({
           {Object.keys(modelLatencyMs).length > 0 && (
             <>
               <h3>单模型延时</h3>
-              {Object.entries(modelLatencyMs).map(([m, ms]) => (
-                <div className="settings-rule-row" key={m}>
-                  <span className="settings-rule-label">{m}</span>
+              {modelLatencyEntries.map(({ model, providerName, ms }) => (
+                <div className="settings-rule-row" key={model}>
+                  <span className="settings-rule-label">{model}（{providerName}）</span>
                   <span className="settings-rule-value">{ms}ms</span>
-                  <button className="settings-rule-del" onClick={() => { const next = { ...modelLatencyMs }; delete next[m]; onUpdateModelLatencyMs(next); }} type="button">删除</button>
+                  <button className="settings-rule-del" onClick={() => { const next = { ...modelLatencyMs }; delete next[model]; onUpdateModelLatencyMs(next); }} type="button">删除</button>
                 </div>
               ))}
             </>
@@ -611,8 +617,14 @@ function SettingsView({
             </select>
             <select value={ruleTarget} onChange={(e) => setRuleTarget(e.target.value)}>
               <option value="">-- 选择 --</option>
-              {targets.map((t) => (
+              {ruleType === "provider" ? providerTargets.map((t) => (
                 <option key={t.key} value={t.key}>{t.hasRule ? `✓ ${t.label}` : t.label}</option>
+              )) : modelTargetGroups.map((group) => (
+                <optgroup key={group.key} label={group.label}>
+                  {group.targets.map((t) => (
+                    <option key={t.key} value={t.key}>{t.hasRule ? `✓ ${t.label}` : t.label}</option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             <input type="number" value={ruleValue || ""} placeholder="ms" onChange={(e) => setRuleValue(Number(e.target.value) || 0)} />
@@ -865,15 +877,32 @@ function protocolLabel(protocol: string): string {
   );
 }
 
+function sortedModelLatencyEntries(
+  modelLatencyMs: Record<string, number>,
+  providers: ProviderView[],
+  latencyModels: { id: string; provider: string }[]
+): { model: string; provider: string; providerName: string; ms: number }[] {
+  const providerIndex = new Map<string, number>(providers.map((p, index) => [p.provider, index]));
+  return Object.entries(modelLatencyMs)
+    .map(([model, ms]) => {
+      const found = latencyModels.find((m) => m.id === model);
+      const provider = found?.provider ?? "";
+      return { model, provider, providerName: providers.find((p) => p.provider === provider)?.displayName ?? (provider || "未知供应商"), ms };
+    })
+    .sort((a, b) => (providerIndex.get(a.provider) ?? 999) - (providerIndex.get(b.provider) ?? 999) || a.model.localeCompare(b.model));
+}
+
 function modelsForLatencySettings(providers: ProviderView[], models: AdminModelsResponse["data"]): { id: string; provider: string }[] {
-  const byKey = new Map<string, { id: string; provider: string }>();
-  for (const model of models) byKey.set(`${model.provider}:${model.id}`, { id: model.id, provider: model.provider });
+  const byProvider = new Map<string, string[]>();
   for (const provider of providers) {
-    for (const id of unique([...provider.configuredModels, ...provider.latestModels, ...provider.defaultModels])) {
-      byKey.set(`${provider.provider}:${id}`, { id, provider: provider.provider });
-    }
+    byProvider.set(provider.provider, unique([...provider.configuredModels, ...provider.latestModels, ...provider.defaultModels]));
   }
-  return [...byKey.values()];
+  for (const model of models) {
+    const list = byProvider.get(model.provider) ?? [];
+    if (!list.includes(model.id)) list.push(model.id);
+    byProvider.set(model.provider, list);
+  }
+  return [...byProvider.entries()].flatMap(([provider, ids]) => ids.map((id) => ({ id, provider })));
 }
 
 function modelsForProvider(provider: ProviderView | undefined, models: AdminModelsResponse | undefined): string[] {
