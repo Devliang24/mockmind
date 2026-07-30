@@ -632,12 +632,8 @@ tr.endpoint-row.active {
   max-width: 100%;
 }
 
-.settings-rule-add select:first-of-type {
-  width: 90px;
-}
-
-.settings-rule-add select:nth-of-type(2) {
-  min-width: 200px;
+.settings-rule-add select {
+  min-width: 260px;
   flex: 1;
 }
 

@@ -40,8 +40,6 @@ export function App() {
   const [selectedRequestId, setSelectedRequestId] = useState<string>();
   const [copiedKey, setCopiedKey] = useState<string>();
   const [disabledModelStatusCodeDraft, setDisabledModelStatusCodeDraft] = useState<number>(403);
-  const [latencyMsDraft, setLatencyMsDraft] = useState<number>(0);
-  const [providerLatencyMsDraft, setProviderLatencyMsDraft] = useState<Record<string, number>>({});
   const [modelLatencyMsDraft, setModelLatencyMsDraft] = useState<Record<string, number>>({});
 
   async function refresh() {
@@ -50,8 +48,6 @@ export function App() {
       const nextData = await loadConsoleData();
       setData(nextData);
       setDisabledModelStatusCodeDraft(nextData.settings.disabledModelStatusCode);
-      setLatencyMsDraft(nextData.settings.latencyMs);
-      setProviderLatencyMsDraft({ ...nextData.settings.providerLatencyMs });
       setModelLatencyMsDraft({ ...nextData.settings.modelLatencyMs });
       setLoadState("ready");
       setError(undefined);
@@ -92,8 +88,6 @@ export function App() {
     try {
       await saveSettings({
         disabledModelStatusCode: disabledModelStatusCodeDraft,
-        latencyMs: latencyMsDraft,
-        providerLatencyMs: filterPositive(providerLatencyMsDraft),
         modelLatencyMs: filterPositive(modelLatencyMsDraft)
       });
       await refresh();
@@ -180,14 +174,10 @@ export function App() {
           ) : view === "settings" ? (
             <SettingsView
               disabledModelStatusCode={disabledModelStatusCodeDraft}
-              latencyMs={latencyMsDraft}
-              providerLatencyMs={providerLatencyMsDraft}
               modelLatencyMs={modelLatencyMsDraft}
               providers={data?.providers.providers ?? []}
               models={data?.models.data ?? []}
               onChangeDisabledModelStatusCode={setDisabledModelStatusCodeDraft}
-              onChangeLatencyMs={setLatencyMsDraft}
-              onUpdateProviderLatencyMs={setProviderLatencyMsDraft}
               onUpdateModelLatencyMs={setModelLatencyMsDraft}
               onSave={handleSaveSettings}
             />
@@ -515,35 +505,25 @@ function ExampleSections({ example }: { example: RouteExample }) {
 
 function SettingsView({
   disabledModelStatusCode,
-  latencyMs,
-  providerLatencyMs,
   modelLatencyMs,
   providers,
   models,
   onChangeDisabledModelStatusCode,
-  onChangeLatencyMs,
-  onUpdateProviderLatencyMs,
   onUpdateModelLatencyMs,
   onSave
 }: {
   disabledModelStatusCode: number;
-  latencyMs: number;
-  providerLatencyMs: Record<string, number>;
   modelLatencyMs: Record<string, number>;
   providers: ProviderView[];
   models: AdminModelsResponse["data"];
   onChangeDisabledModelStatusCode: (value: number) => void;
-  onChangeLatencyMs: (value: number) => void;
-  onUpdateProviderLatencyMs: (map: Record<string, number>) => void;
   onUpdateModelLatencyMs: (map: Record<string, number>) => void;
   onSave: () => void;
 }) {
-  const [ruleType, setRuleType] = useState<"provider" | "model">("provider");
   const [ruleTarget, setRuleTarget] = useState<string>("");
   const [ruleValue, setRuleValue] = useState<number>(0);
 
   const latencyModels = modelsForLatencySettings(providers, models);
-  const providerTargets = providers.map((p) => ({ key: p.provider, label: p.displayName, hasRule: p.provider in providerLatencyMs }));
   const modelTargetGroups = providers
     .map((p) => ({
       key: p.provider,
@@ -555,11 +535,7 @@ function SettingsView({
 
   function addRule() {
     if (!ruleTarget || ruleValue <= 0) return;
-    if (ruleType === "provider") {
-      onUpdateProviderLatencyMs({ ...providerLatencyMs, [ruleTarget]: ruleValue });
-    } else {
-      onUpdateModelLatencyMs({ ...modelLatencyMs, [ruleTarget]: ruleValue });
-    }
+    onUpdateModelLatencyMs({ ...modelLatencyMs, [ruleTarget]: ruleValue });
     setRuleTarget("");
     setRuleValue(0);
   }
@@ -576,30 +552,12 @@ function SettingsView({
         </label>
 
         <div className="settings-section">
-          <h2>模型响应延时</h2>
-          <p className="settings-hint">优先级：单模型 &gt; 供应商 &gt; 全局。</p>
-
-          <label className="settings-field">
-            <span>全局延时（ms）</span>
-            <input type="number" value={latencyMs} onChange={(event) => onChangeLatencyMs(Number(event.target.value))} />
-          </label>
-
-          {Object.keys(providerLatencyMs).length > 0 && (
-            <>
-              <h3>供应商延时</h3>
-              {Object.entries(providerLatencyMs).map(([p, ms]) => (
-                <div className="settings-rule-row" key={p}>
-                  <span className="settings-rule-label">{providers.find((x) => x.provider === p)?.displayName ?? p}</span>
-                  <span className="settings-rule-value">{ms}ms</span>
-                  <button className="settings-rule-del" onClick={() => { const next = { ...providerLatencyMs }; delete next[p]; onUpdateProviderLatencyMs(next); }} type="button">删除</button>
-                </div>
-              ))}
-            </>
-          )}
+          <h2>单模型响应延时</h2>
+          <p className="settings-hint">只对选中的模型生效。重复添加同一模型会更新延时。</p>
 
           {Object.keys(modelLatencyMs).length > 0 && (
             <>
-              <h3>单模型延时</h3>
+              <h3>已设延时</h3>
               {modelLatencyEntries.map(({ model, providerName, ms }) => (
                 <div className="settings-rule-row" key={model}>
                   <span className="settings-rule-label">{model}（{providerName}）</span>
@@ -611,15 +569,9 @@ function SettingsView({
           )}
 
           <div className="settings-rule-add">
-            <select value={ruleType} onChange={(e) => { setRuleType(e.target.value as "provider" | "model"); setRuleTarget(""); }}>
-              <option value="provider">供应商</option>
-              <option value="model">模型</option>
-            </select>
             <select value={ruleTarget} onChange={(e) => setRuleTarget(e.target.value)}>
-              <option value="">-- 选择 --</option>
-              {ruleType === "provider" ? providerTargets.map((t) => (
-                <option key={t.key} value={t.key}>{t.hasRule ? `✓ ${t.label}` : t.label}</option>
-              )) : modelTargetGroups.map((group) => (
+              <option value="">-- 选择模型 --</option>
+              {modelTargetGroups.map((group) => (
                 <optgroup key={group.key} label={group.label}>
                   {group.targets.map((t) => (
                     <option key={t.key} value={t.key}>{t.hasRule ? `✓ ${t.label}` : t.label}</option>

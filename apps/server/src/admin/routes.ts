@@ -37,18 +37,10 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
   app.get("/__admin/config", async () => context.config);
   app.get("/__admin/settings", async (): Promise<AdminSettingsResponse> => adminSettings(context));
   app.patch("/__admin/settings", async (request): Promise<AdminSettingsResponse> => {
-    const body = request.body as { disabledModelStatusCode?: unknown; latencyMs?: unknown; providerLatencyMs?: unknown; modelLatencyMs?: unknown };
+    const body = request.body as { disabledModelStatusCode?: unknown; modelLatencyMs?: unknown };
     if (body.disabledModelStatusCode !== undefined) {
       if (typeof body.disabledModelStatusCode !== "number" || Number.isNaN(body.disabledModelStatusCode)) throw { statusCode: 400, message: "disabledModelStatusCode must be a number." };
       context.systemSettings.disabledModelStatusCode = body.disabledModelStatusCode;
-    }
-    if (body.latencyMs !== undefined) {
-      if (typeof body.latencyMs !== "number" || Number.isNaN(body.latencyMs)) throw { statusCode: 400, message: "latencyMs must be a number." };
-      context.systemSettings.latencyMs = body.latencyMs;
-    }
-    if (body.providerLatencyMs !== undefined) {
-      if (!isNumberRecord(body.providerLatencyMs)) throw { statusCode: 400, message: "providerLatencyMs must be a number map." };
-      context.systemSettings.providerLatencyMs = body.providerLatencyMs;
     }
     if (body.modelLatencyMs !== undefined) {
       if (!isNumberRecord(body.modelLatencyMs)) throw { statusCode: 400, message: "modelLatencyMs must be a number map." };
@@ -118,8 +110,6 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
 function adminSettings(context: ServerContext): AdminSettingsResponse {
   return {
     disabledModelStatusCode: context.systemSettings.disabledModelStatusCode,
-    latencyMs: context.systemSettings.latencyMs,
-    providerLatencyMs: context.systemSettings.providerLatencyMs,
     modelLatencyMs: context.systemSettings.modelLatencyMs
   };
 }

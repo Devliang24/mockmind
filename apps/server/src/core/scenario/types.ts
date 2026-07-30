@@ -98,7 +98,6 @@ export type MockMindConfig = {
     streamChunkDelayMs: number;
     maxRequests?: number;
     disabledModelStatusCode?: number;
-    providerLatencyMs?: Record<string, number>;
     modelLatencyMs?: Record<string, number>;
   };
   persistence?: {

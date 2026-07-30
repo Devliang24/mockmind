@@ -5,8 +5,6 @@ import type { ServerContext } from "../../src/server/context.js";
 
 const context = {
   systemSettings: {
-    latencyMs: 10,
-    providerLatencyMs: { anthropic: 20 },
     modelLatencyMs: { "claude-sonnet-4-6": 30 },
     disabledModelStatusCode: 403
   }
@@ -17,9 +15,9 @@ function request(provider: MockRequest["provider"], model?: string): MockRequest
 }
 
 describe("latencyForRequest", () => {
-  it("uses model, provider, then global latency", () => {
+  it("uses only single-model latency rules", () => {
     expect(latencyForRequest(context, request("anthropic", "claude-sonnet-4-6"))).toBe(30);
-    expect(latencyForRequest(context, request("anthropic", "claude-other"))).toBe(20);
-    expect(latencyForRequest(context, request("openai", "gpt-4o-mini"))).toBe(10);
+    expect(latencyForRequest(context, request("anthropic", "claude-other"))).toBe(0);
+    expect(latencyForRequest(context, request("openai", "gpt-4o-mini"))).toBe(0);
   });
 });
