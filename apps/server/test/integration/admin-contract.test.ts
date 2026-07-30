@@ -225,15 +225,15 @@ describe("Admin API contracts", () => {
 
     const settingsResponse = await app.inject({ method: "GET", url: "/__admin/settings" });
     expect(settingsResponse.statusCode).toBe(200);
-    expect(settingsResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 403, latencyMs: 0 });
+    expect(settingsResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 403, latencyMs: 0, providerLatencyMs: {}, modelLatencyMs: {} });
 
     const updateResponse = await app.inject({
       method: "PATCH",
       url: "/__admin/settings",
-      payload: { disabledModelStatusCode: 451, latencyMs: 25 }
+      payload: { disabledModelStatusCode: 451, latencyMs: 25, providerLatencyMs: { anthropic: 30 }, modelLatencyMs: { "claude-sonnet-4-6": 45 } }
     });
     expect(updateResponse.statusCode).toBe(200);
-    expect(updateResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 451, latencyMs: 25 });
+    expect(updateResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 451, latencyMs: 25, providerLatencyMs: { anthropic: 30 }, modelLatencyMs: { "claude-sonnet-4-6": 45 } });
 
     const started = Date.now();
     const delayed = await app.inject({

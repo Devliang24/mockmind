@@ -11,6 +11,7 @@ import { sendOpenAIStream } from "./stream.js";
 import { withEstimatedUsage } from "../usage.js";
 import { resolveOpenAICompatibleProvider } from "./resolver.js";
 import { streamResponseBody } from "../stream-summary.js";
+import { latencyForRequest } from "../latency.js";
 
 export type OpenAICompatibleChatBody = {
   model?: string;
@@ -55,7 +56,8 @@ export async function handleOpenAICompatibleChat(
   };
   const found = context.scenarios.find(mockRequest);
   const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: defaultContent(effectiveProvider) }, mockRequest), body.messages);
-  if (context.systemSettings.latencyMs > 0) await delay(context.systemSettings.latencyMs);
+  const latencyMs = latencyForRequest(context, mockRequest);
+  if (latencyMs > 0) await delay(latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
     const responseBody = formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type);

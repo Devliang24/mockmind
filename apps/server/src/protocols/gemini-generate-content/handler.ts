@@ -10,6 +10,7 @@ import type { ProtocolHandlerContext } from "../types.js";
 import { checkModelDisabled, isArray, requireFields } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
 import { streamResponseBody } from "../stream-summary.js";
+import { latencyForRequest } from "../latency.js";
 
 type GeminiBody = {
   contents?: unknown[];
@@ -38,7 +39,8 @@ export async function handleGeminiGenerateContent(handlerContext: ProtocolHandle
   };
   const found = context.scenarios.find(mockRequest);
   const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: "Hello from mock Gemini." }, mockRequest), body.contents);
-  if (context.systemSettings.latencyMs > 0) await delay(context.systemSettings.latencyMs);
+  const latencyMs = latencyForRequest(context, mockRequest);
+  if (latencyMs > 0) await delay(latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
     const responseBody = formatGeminiError(result.error.status, result.error.message, result.error.code);

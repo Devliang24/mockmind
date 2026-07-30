@@ -10,6 +10,8 @@ export type ServerContext = {
   systemSettings: {
     disabledModelStatusCode: number;
     latencyMs: number;
+    providerLatencyMs: Record<string, number>;
+    modelLatencyMs: Record<string, number>;
   };
 };
 
@@ -26,7 +28,9 @@ export function createServerContext(config: MockMindConfig): ServerContext {
     disabledModels,
     systemSettings: {
       disabledModelStatusCode: config.defaults.disabledModelStatusCode ?? 403,
-      latencyMs: config.defaults.latencyMs
+      latencyMs: config.defaults.latencyMs,
+      providerLatencyMs: { ...(config.defaults.providerLatencyMs ?? {}) },
+      modelLatencyMs: { ...(config.defaults.modelLatencyMs ?? {}) }
     }
   };
 }

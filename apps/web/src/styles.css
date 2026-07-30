@@ -526,7 +526,8 @@ tr.endpoint-row.active {
   font-size: 13px;
 }
 
-.settings-field input {
+.settings-field input,
+.settings-field textarea {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -534,6 +535,12 @@ tr.endpoint-row.active {
   font: inherit;
   background: var(--panel);
   color: var(--text);
+}
+
+.settings-field textarea {
+  min-height: 96px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
 }
 
 .settings-save {

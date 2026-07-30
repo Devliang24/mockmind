@@ -10,6 +10,7 @@ import type { ProtocolHandlerContext } from "../types.js";
 import { checkModelDisabled, isArray, isString, requireFields } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
 import { streamResponseBody } from "../stream-summary.js";
+import { latencyForRequest } from "../latency.js";
 
 type MiniMaxBody = {
   model?: string;
@@ -43,7 +44,8 @@ export async function handleMiniMaxChat(handlerContext: ProtocolHandlerContext, 
   };
   const found = context.scenarios.find(mockRequest);
   const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: "你好，我是模拟的 MiniMax 响应。" }, mockRequest), body.messages);
-  if (context.systemSettings.latencyMs > 0) await delay(context.systemSettings.latencyMs);
+  const latencyMs = latencyForRequest(context, mockRequest);
+  if (latencyMs > 0) await delay(latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
     const responseBody = formatMiniMaxError(result.error.code, result.error.message);

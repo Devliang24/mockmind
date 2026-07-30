@@ -7,6 +7,7 @@ import { delay } from "../../shared/time.js";
 import type { ProtocolHandlerContext } from "../types.js";
 import { checkModelDisabled, isArray, isRecord, isString, requireFields } from "../validation.js";
 import { estimateTokenCount } from "../usage.js";
+import { latencyForRequest } from "../latency.js";
 
 type RerankBody = {
   model?: string;
@@ -54,7 +55,8 @@ export async function handleRerank(handlerContext: ProtocolHandlerContext, reque
   const found = context.scenarios.find(mockRequest);
   const usage = estimateTokenCount([rerankInput.query, rerankInput.documents]);
   const result = renderResult(found.result ?? { type: "json", json: formatRerankResponse(provider, rerankInput, usage) }, mockRequest);
-  if (context.systemSettings.latencyMs > 0) await delay(context.systemSettings.latencyMs);
+  const latencyMs = latencyForRequest(context, mockRequest);
+  if (latencyMs > 0) await delay(latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
     const responseBody = formatRerankError(provider, result.error.code ?? "mock_error", result.error.message);

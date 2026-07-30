@@ -41,6 +41,8 @@ export function App() {
   const [copiedKey, setCopiedKey] = useState<string>();
   const [disabledModelStatusCodeDraft, setDisabledModelStatusCodeDraft] = useState<number>(403);
   const [latencyMsDraft, setLatencyMsDraft] = useState<number>(0);
+  const [providerLatencyMsDraft, setProviderLatencyMsDraft] = useState<string>("{}");
+  const [modelLatencyMsDraft, setModelLatencyMsDraft] = useState<string>("{}");
 
   async function refresh() {
     try {
@@ -49,6 +51,8 @@ export function App() {
       setData(nextData);
       setDisabledModelStatusCodeDraft(nextData.settings.disabledModelStatusCode);
       setLatencyMsDraft(nextData.settings.latencyMs);
+      setProviderLatencyMsDraft(prettyJson(nextData.settings.providerLatencyMs));
+      setModelLatencyMsDraft(prettyJson(nextData.settings.modelLatencyMs));
       setLoadState("ready");
       setError(undefined);
     } catch (cause) {
@@ -85,8 +89,17 @@ export function App() {
   }
 
   async function handleSaveSettings() {
-    await saveSettings({ disabledModelStatusCode: disabledModelStatusCodeDraft, latencyMs: latencyMsDraft });
-    await refresh();
+    try {
+      await saveSettings({
+        disabledModelStatusCode: disabledModelStatusCodeDraft,
+        latencyMs: latencyMsDraft,
+        providerLatencyMs: parseNumberMap(providerLatencyMsDraft),
+        modelLatencyMs: parseNumberMap(modelLatencyMsDraft)
+      });
+      await refresh();
+    } catch (cause) {
+      window.alert(cause instanceof Error ? cause.message : String(cause));
+    }
   }
 
   useEffect(() => {
@@ -168,8 +181,12 @@ export function App() {
             <SettingsView
               disabledModelStatusCode={disabledModelStatusCodeDraft}
               latencyMs={latencyMsDraft}
+              providerLatencyMs={providerLatencyMsDraft}
+              modelLatencyMs={modelLatencyMsDraft}
               onChangeDisabledModelStatusCode={setDisabledModelStatusCodeDraft}
               onChangeLatencyMs={setLatencyMsDraft}
+              onChangeProviderLatencyMs={setProviderLatencyMsDraft}
+              onChangeModelLatencyMs={setModelLatencyMsDraft}
               onSave={handleSaveSettings}
             />
           ) : (
@@ -497,14 +514,22 @@ function ExampleSections({ example }: { example: RouteExample }) {
 function SettingsView({
   disabledModelStatusCode,
   latencyMs,
+  providerLatencyMs,
+  modelLatencyMs,
   onChangeDisabledModelStatusCode,
   onChangeLatencyMs,
+  onChangeProviderLatencyMs,
+  onChangeModelLatencyMs,
   onSave
 }: {
   disabledModelStatusCode: number;
   latencyMs: number;
+  providerLatencyMs: string;
+  modelLatencyMs: string;
   onChangeDisabledModelStatusCode: (value: number) => void;
   onChangeLatencyMs: (value: number) => void;
+  onChangeProviderLatencyMs: (value: string) => void;
+  onChangeModelLatencyMs: (value: string) => void;
   onSave: () => void;
 }) {
   return (
@@ -518,8 +543,16 @@ function SettingsView({
           <input type="number" value={disabledModelStatusCode} onChange={(event) => onChangeDisabledModelStatusCode(Number(event.target.value))} />
         </label>
         <label className="settings-field">
-          <span>模型响应延时（ms）</span>
+          <span>全部模型响应延时（ms）</span>
           <input type="number" value={latencyMs} onChange={(event) => onChangeLatencyMs(Number(event.target.value))} />
+        </label>
+        <label className="settings-field">
+          <span>供应商延时 JSON</span>
+          <textarea value={providerLatencyMs} onChange={(event) => onChangeProviderLatencyMs(event.target.value)} rows={5} />
+        </label>
+        <label className="settings-field">
+          <span>单模型延时 JSON</span>
+          <textarea value={modelLatencyMs} onChange={(event) => onChangeModelLatencyMs(event.target.value)} rows={5} />
         </label>
         <button className="settings-save" onClick={onSave} type="button">
           保存
@@ -817,6 +850,15 @@ function prettyJson(value: unknown): string {
   if (value === null) return "null";
   if (value === undefined) return "undefined";
   return JSON.stringify(value, null, 2);
+}
+
+function parseNumberMap(value: string): Record<string, number> {
+  const parsed = JSON.parse(value || "{}");
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("延时设置必须是 JSON 对象。");
+  for (const [key, item] of Object.entries(parsed)) {
+    if (typeof item !== "number" || Number.isNaN(item)) throw new Error(`${key} 的延时必须是数字。`);
+  }
+  return parsed as Record<string, number>;
 }
 
 function unique<T>(items: T[]): T[] {

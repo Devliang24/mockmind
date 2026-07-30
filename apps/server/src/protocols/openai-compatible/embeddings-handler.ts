@@ -8,6 +8,7 @@ import { formatEmbedding, formatOpenAIError } from "./adapter.js";
 import type { ProtocolHandlerContext } from "../types.js";
 import { checkModelDisabled, isString, requireFields } from "../validation.js";
 import { estimateTokenCount } from "../usage.js";
+import { latencyForRequest } from "../latency.js";
 
 type EmbeddingBody = {
   model?: string;
@@ -40,7 +41,8 @@ export async function handleOpenAIEmbeddings(
   };
   const found = context.scenarios.find(mockRequest);
   const result = renderResult(found.result ?? { type: "embedding", embedding: [0.0123, -0.0456, 0.0789] }, mockRequest);
-  if (context.systemSettings.latencyMs > 0) await delay(context.systemSettings.latencyMs);
+  const latencyMs = latencyForRequest(context, mockRequest);
+  if (latencyMs > 0) await delay(latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
     const responseBody = formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type);

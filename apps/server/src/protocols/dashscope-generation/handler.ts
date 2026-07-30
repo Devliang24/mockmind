@@ -10,6 +10,7 @@ import type { ProtocolHandlerContext } from "../types.js";
 import { checkModelDisabled, isArray, isString, requireFields } from "../validation.js";
 import { withEstimatedUsage } from "../usage.js";
 import { streamResponseBody } from "../stream-summary.js";
+import { latencyForRequest } from "../latency.js";
 
 type DashScopeBody = {
   model?: string;
@@ -48,7 +49,8 @@ export async function handleDashScopeGeneration(handlerContext: ProtocolHandlerC
   };
   const found = context.scenarios.find(mockRequest);
   const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: "你好，我是模拟的 DashScope 原生响应。" }, mockRequest), body.input?.messages);
-  if (context.systemSettings.latencyMs > 0) await delay(context.systemSettings.latencyMs);
+  const latencyMs = latencyForRequest(context, mockRequest);
+  if (latencyMs > 0) await delay(latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
     const responseBody = formatDashScopeError(result.error.code, result.error.message);
