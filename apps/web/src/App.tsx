@@ -6,12 +6,12 @@ import type {
   AdminRoute,
   AdminScenario
 } from "@mockmind/shared";
-import { loadConsoleData, toggleModel, type ConsoleData } from "./api/client";
+import { loadConsoleData, saveSettings, toggleModel, type ConsoleData } from "./api/client";
 import { exampleForRoute, type RouteExample } from "./examples";
 import { priceLabel } from "./model-pricing";
 import { embeddingModelForProvider, rerankModelsForProvider } from "./provider-models";
 
-type ConsoleView = "provider" | "requests";
+type ConsoleView = "provider" | "requests" | "settings";
 type ProviderView = AdminProvidersResponse["providers"][number];
 type LoadState = "loading" | "ready" | "error";
 
@@ -39,12 +39,14 @@ export function App() {
   const [selectedModel, setSelectedModel] = useState<string>();
   const [selectedRequestId, setSelectedRequestId] = useState<string>();
   const [copiedKey, setCopiedKey] = useState<string>();
+  const [settingsDraft, setSettingsDraft] = useState<number>(403);
 
   async function refresh() {
     try {
       setLoadState("loading");
       const nextData = await loadConsoleData();
       setData(nextData);
+      setSettingsDraft(nextData.settings.disabledModelStatusCode);
       setLoadState("ready");
       setError(undefined);
     } catch (cause) {
@@ -77,6 +79,11 @@ export function App() {
 
   async function handleToggleModel(modelId: string, disabled: boolean) {
     await toggleModel(modelId, disabled);
+    await refresh();
+  }
+
+  async function handleSaveSettings() {
+    await saveSettings({ disabledModelStatusCode: settingsDraft });
     await refresh();
   }
 
@@ -146,12 +153,17 @@ export function App() {
         <button className={view === "requests" ? "nav active" : "nav"} data-view="requests" onClick={() => setView("requests")} type="button">
           请求记录
         </button>
+        <button className={view === "settings" ? "nav active" : "nav"} data-view="settings" onClick={() => setView("settings")} type="button">
+          系统设置
+        </button>
       </aside>
 
       <main className="content">
         <section id="panel" className="panel">
           {view === "requests" ? (
             <RequestsView requests={data.requests} scenarios={data.scenarios} onSelect={setSelectedRequestId} />
+          ) : view === "settings" ? (
+            <SettingsView disabledModelStatusCode={settingsDraft} onChangeDisabledModelStatusCode={setSettingsDraft} onSave={handleSaveSettings} />
           ) : (
             <ProviderView
               activeModel={activeModel}
@@ -469,6 +481,37 @@ function ExampleSections({ example }: { example: RouteExample }) {
       <div className="grid-2 example-row">
         <CodeBlock title="非流式响应 Body" value={prettyJson(example.responseBody)} copyKey="response" />
         {example.stream ? <CodeBlock title="流式响应示例" value={example.stream.responseText} copyKey="stream-response" /> : <p className="muted">该端点暂无流式示例。</p>}
+      </div>
+    </>
+  );
+}
+
+function SettingsView({
+  disabledModelStatusCode,
+  onChangeDisabledModelStatusCode,
+  onSave
+}: {
+  disabledModelStatusCode: number;
+  onChangeDisabledModelStatusCode: (value: number) => void;
+  onSave: () => void;
+}) {
+  return (
+    <>
+      <div className="page-header">
+        <h1>系统设置</h1>
+      </div>
+      <div className="settings-form">
+        <label className="settings-field">
+          <span>禁用模型返回状态码</span>
+          <input
+            type="number"
+            value={disabledModelStatusCode}
+            onChange={(event) => onChangeDisabledModelStatusCode(Number(event.target.value))}
+          />
+        </label>
+        <button className="settings-save" onClick={onSave} type="button">
+          保存
+        </button>
       </div>
     </>
   );

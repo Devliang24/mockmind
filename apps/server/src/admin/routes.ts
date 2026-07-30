@@ -9,7 +9,8 @@ import type {
   AdminResetResponse,
   AdminRoute,
   AdminRoutesResponse,
-  AdminScenario
+  AdminScenario,
+  AdminSettingsResponse
 } from "@mockmind/shared";
 import type { FastifyInstance } from "fastify";
 import { authInfoForProvider } from "../core/auth/auth-mock.js";
@@ -34,6 +35,17 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
     };
   });
   app.get("/__admin/config", async () => context.config);
+  app.get("/__admin/settings", async (): Promise<AdminSettingsResponse> => ({
+    disabledModelStatusCode: context.systemSettings.disabledModelStatusCode
+  }));
+  app.patch("/__admin/settings", async (request): Promise<AdminSettingsResponse> => {
+    const body = request.body as { disabledModelStatusCode?: unknown };
+    if (typeof body.disabledModelStatusCode !== "number" || Number.isNaN(body.disabledModelStatusCode)) {
+      throw { statusCode: 400, message: "Missing required numeric field: disabledModelStatusCode." };
+    }
+    context.systemSettings.disabledModelStatusCode = body.disabledModelStatusCode;
+    return { disabledModelStatusCode: context.systemSettings.disabledModelStatusCode };
+  });
   app.get("/__admin/models", async (): Promise<AdminModelsResponse> => ({
     data: context.config.models.map((model) => ({
       ...model,

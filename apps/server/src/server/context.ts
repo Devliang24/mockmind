@@ -7,6 +7,9 @@ export type ServerContext = {
   scenarios: ScenarioStore;
   recorder: RequestRecorder;
   disabledModels: Set<string>;
+  systemSettings: {
+    disabledModelStatusCode: number;
+  };
 };
 
 export function createServerContext(config: MockMindConfig): ServerContext {
@@ -17,8 +20,11 @@ export function createServerContext(config: MockMindConfig): ServerContext {
     scenarios: new ScenarioStore(config),
     recorder: new RequestRecorder({
       ...(persistence?.enabled && persistence.driver === "sqlite" ? { sqlitePath: persistence.sqlite.path } : {}),
-      maxRequests: config.defaults.maxRequests
+      maxRequests: config.defaults.maxRequests ?? 500
     }),
-    disabledModels
+    disabledModels,
+    systemSettings: {
+      disabledModelStatusCode: config.defaults.disabledModelStatusCode ?? 403
+    }
   };
 }

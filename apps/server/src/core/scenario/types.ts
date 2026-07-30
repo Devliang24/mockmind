@@ -96,7 +96,8 @@ export type MockMindConfig = {
   defaults: {
     latencyMs: number;
     streamChunkDelayMs: number;
-    maxRequests: number;
+    maxRequests?: number;
+    disabledModelStatusCode?: number;
   };
   persistence?: {
     enabled: boolean;

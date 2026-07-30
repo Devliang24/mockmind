@@ -82,6 +82,10 @@ export type AdminOverviewResponse = {
   recentRequests: AdminRecordedRequest[];
 };
 
+export type AdminSettingsResponse = {
+  disabledModelStatusCode: number;
+};
+
 export type AdminModelsResponse = {
   data: AdminModel[];
 };

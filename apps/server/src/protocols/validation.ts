@@ -89,7 +89,8 @@ export function checkModelDisabled(
   formatError: (status: number, code: string, message: string) => unknown
 ): boolean {
   if (model && context.disabledModels.has(model)) {
-    reply.status(403).send(formatError(403, "model_disabled", `Model '${model}' is disabled by the administrator.`));
+    const status = context.systemSettings.disabledModelStatusCode;
+    reply.status(status).send(formatError(status, "model_disabled", `Model '${model}' is disabled by the administrator.`));
     return false;
   }
   return true;

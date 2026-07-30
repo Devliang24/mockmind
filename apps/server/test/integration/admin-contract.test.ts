@@ -5,7 +5,8 @@ import type {
   AdminProvidersResponse,
   AdminRequestsResponse,
   AdminRoutesResponse,
-  AdminScenario
+  AdminScenario,
+  AdminSettingsResponse
 } from "@mockmind/shared";
 import type { MockMindConfig } from "../../src/core/scenario/types.js";
 import { createMockMindServer } from "../../src/server/create-server.js";
@@ -216,6 +217,32 @@ describe("Admin API contracts", () => {
       responseBody: expect.any(Object)
     });
 
+    await app.close();
+  });
+
+  it("exposes and updates system settings and disabled model status code", async () => {
+    const { app } = await createMockMindServer(config);
+
+    const settingsResponse = await app.inject({ method: "GET", url: "/__admin/settings" });
+    expect(settingsResponse.statusCode).toBe(200);
+    expect(settingsResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 403 });
+
+    const updateResponse = await app.inject({
+      method: "PATCH",
+      url: "/__admin/settings",
+      payload: { disabledModelStatusCode: 451 }
+    });
+    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 451 });
+
+    await app.inject({ method: "PATCH", url: "/__admin/models/gpt-4o-mini", payload: { disabled: true } });
+    const denied = await app.inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      payload: { model: "gpt-4o-mini", messages: [{ role: "user", content: "hello" }] }
+    });
+
+    expect(denied.statusCode).toBe(451);
     await app.close();
   });
 });

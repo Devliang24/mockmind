@@ -4,7 +4,8 @@ import type {
   AdminProvidersResponse,
   AdminRequestsResponse,
   AdminRoutesResponse,
-  AdminScenario
+  AdminScenario,
+  AdminSettingsResponse
 } from "@mockmind/shared";
 
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
@@ -26,26 +27,40 @@ export type ConsoleData = {
   models: AdminModelsResponse;
   scenarios: AdminScenario[];
   requests: AdminRequestsResponse;
+  settings: AdminSettingsResponse;
 };
 
 export async function loadConsoleData(): Promise<ConsoleData> {
-  const [health, overview, providers, routes, models, scenarios, requests] = await Promise.all([
+  const [health, overview, providers, routes, models, scenarios, requests, settings] = await Promise.all([
     api<ConsoleData["health"]>("/health"),
     api<AdminOverviewResponse>("/__admin/overview"),
     api<AdminProvidersResponse>("/__admin/providers"),
     api<AdminRoutesResponse>("/__admin/routes"),
     api<AdminModelsResponse>("/__admin/models"),
     api<AdminScenario[]>("/__admin/scenarios"),
-    api<AdminRequestsResponse>("/__admin/requests")
+    api<AdminRequestsResponse>("/__admin/requests"),
+    api<AdminSettingsResponse>("/__admin/settings")
   ]);
 
-  return { health, overview, providers, routes, models, scenarios, requests };
+  return { health, overview, providers, routes, models, scenarios, requests, settings };
 }
 
 export async function toggleModel(modelId: string, disabled: boolean): Promise<{ ok: boolean; id: string; disabled: boolean }> {
   return api(`/__admin/models/${encodeURIComponent(modelId)}`, {
     method: "PATCH",
     body: JSON.stringify({ disabled }),
+    headers: { "Content-Type": "application/json" }
+  });
+}
+
+export async function loadSettings(): Promise<AdminSettingsResponse> {
+  return api<AdminSettingsResponse>("/__admin/settings");
+}
+
+export async function saveSettings(settings: AdminSettingsResponse): Promise<AdminSettingsResponse> {
+  return api<AdminSettingsResponse>("/__admin/settings", {
+    method: "PATCH",
+    body: JSON.stringify(settings),
     headers: { "Content-Type": "application/json" }
   });
 }
