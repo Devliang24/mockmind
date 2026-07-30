@@ -96,6 +96,20 @@ export function App() {
     }
   }
 
+  async function handleUpdateModelLatencyMs(next: Record<string, number>) {
+    setModelLatencyMsDraft(next);
+    try {
+      const saved = await saveSettings({
+        disabledModelStatusCode: disabledModelStatusCodeDraft,
+        modelLatencyMs: filterPositive(next)
+      });
+      setModelLatencyMsDraft({ ...saved.modelLatencyMs });
+    } catch (cause) {
+      window.alert(cause instanceof Error ? cause.message : String(cause));
+      await refresh();
+    }
+  }
+
   useEffect(() => {
     if (!selectedProviderId && selectedProvider?.provider) setSelectedProviderId(selectedProvider.provider);
   }, [selectedProvider?.provider, selectedProviderId]);
@@ -178,7 +192,7 @@ export function App() {
               providers={data?.providers.providers ?? []}
               models={data?.models.data ?? []}
               onChangeDisabledModelStatusCode={setDisabledModelStatusCodeDraft}
-              onUpdateModelLatencyMs={setModelLatencyMsDraft}
+              onUpdateModelLatencyMs={(next) => void handleUpdateModelLatencyMs(next)}
               onSave={handleSaveSettings}
             />
           ) : (
@@ -517,7 +531,7 @@ function SettingsView({
   providers: ProviderView[];
   models: AdminModelsResponse["data"];
   onChangeDisabledModelStatusCode: (value: number) => void;
-  onUpdateModelLatencyMs: (map: Record<string, number>) => void;
+  onUpdateModelLatencyMs: (map: Record<string, number>) => void | Promise<void>;
   onSave: () => void;
 }) {
   const [ruleTarget, setRuleTarget] = useState<string>("");
@@ -535,7 +549,7 @@ function SettingsView({
 
   function addRule() {
     if (!ruleTarget || ruleValue <= 0) return;
-    onUpdateModelLatencyMs({ ...modelLatencyMs, [ruleTarget]: ruleValue });
+    void onUpdateModelLatencyMs({ ...modelLatencyMs, [ruleTarget]: ruleValue });
     setRuleTarget("");
     setRuleValue(0);
   }
@@ -562,7 +576,7 @@ function SettingsView({
                 <div className="settings-rule-row" key={model}>
                   <span className="settings-rule-label">{model}（{providerName}）</span>
                   <span className="settings-rule-value">{ms}ms</span>
-                  <button className="settings-rule-del" onClick={() => { const next = { ...modelLatencyMs }; delete next[model]; onUpdateModelLatencyMs(next); }} type="button">删除</button>
+                  <button className="settings-rule-del" onClick={() => { const next = { ...modelLatencyMs }; delete next[model]; void onUpdateModelLatencyMs(next); }} type="button">删除</button>
                 </div>
               ))}
             </>
