@@ -41,8 +41,8 @@ export function App() {
   const [copiedKey, setCopiedKey] = useState<string>();
   const [disabledModelStatusCodeDraft, setDisabledModelStatusCodeDraft] = useState<number>(403);
   const [latencyMsDraft, setLatencyMsDraft] = useState<number>(0);
-  const [providerLatencyMsDraft, setProviderLatencyMsDraft] = useState<string>("{}");
-  const [modelLatencyMsDraft, setModelLatencyMsDraft] = useState<string>("{}");
+  const [providerLatencyMsDraft, setProviderLatencyMsDraft] = useState<Record<string, number>>({});
+  const [modelLatencyMsDraft, setModelLatencyMsDraft] = useState<Record<string, number>>({});
 
   async function refresh() {
     try {
@@ -51,8 +51,8 @@ export function App() {
       setData(nextData);
       setDisabledModelStatusCodeDraft(nextData.settings.disabledModelStatusCode);
       setLatencyMsDraft(nextData.settings.latencyMs);
-      setProviderLatencyMsDraft(prettyJson(nextData.settings.providerLatencyMs));
-      setModelLatencyMsDraft(prettyJson(nextData.settings.modelLatencyMs));
+      setProviderLatencyMsDraft({ ...nextData.settings.providerLatencyMs });
+      setModelLatencyMsDraft({ ...nextData.settings.modelLatencyMs });
       setLoadState("ready");
       setError(undefined);
     } catch (cause) {
@@ -93,8 +93,8 @@ export function App() {
       await saveSettings({
         disabledModelStatusCode: disabledModelStatusCodeDraft,
         latencyMs: latencyMsDraft,
-        providerLatencyMs: parseNumberMap(providerLatencyMsDraft),
-        modelLatencyMs: parseNumberMap(modelLatencyMsDraft)
+        providerLatencyMs: filterPositive(providerLatencyMsDraft),
+        modelLatencyMs: filterPositive(modelLatencyMsDraft)
       });
       await refresh();
     } catch (cause) {
@@ -183,10 +183,12 @@ export function App() {
               latencyMs={latencyMsDraft}
               providerLatencyMs={providerLatencyMsDraft}
               modelLatencyMs={modelLatencyMsDraft}
+              providers={data?.providers.providers ?? []}
+              models={data?.models.data ?? []}
               onChangeDisabledModelStatusCode={setDisabledModelStatusCodeDraft}
               onChangeLatencyMs={setLatencyMsDraft}
-              onChangeProviderLatencyMs={setProviderLatencyMsDraft}
-              onChangeModelLatencyMs={setModelLatencyMsDraft}
+              onChangeProviderLatencyMs={(p, v) => setProviderLatencyMsDraft((prev) => ({ ...prev, [p]: v }))}
+              onChangeModelLatencyMs={(m, v) => setModelLatencyMsDraft((prev) => ({ ...prev, [m]: v }))}
               onSave={handleSaveSettings}
             />
           ) : (
@@ -516,6 +518,8 @@ function SettingsView({
   latencyMs,
   providerLatencyMs,
   modelLatencyMs,
+  providers,
+  models,
   onChangeDisabledModelStatusCode,
   onChangeLatencyMs,
   onChangeProviderLatencyMs,
@@ -524,12 +528,14 @@ function SettingsView({
 }: {
   disabledModelStatusCode: number;
   latencyMs: number;
-  providerLatencyMs: string;
-  modelLatencyMs: string;
+  providerLatencyMs: Record<string, number>;
+  modelLatencyMs: Record<string, number>;
+  providers: { provider: string; displayName: string }[];
+  models: { id: string; provider: string }[];
   onChangeDisabledModelStatusCode: (value: number) => void;
   onChangeLatencyMs: (value: number) => void;
-  onChangeProviderLatencyMs: (value: string) => void;
-  onChangeModelLatencyMs: (value: string) => void;
+  onChangeProviderLatencyMs: (provider: string, value: number) => void;
+  onChangeModelLatencyMs: (modelId: string, value: number) => void;
   onSave: () => void;
 }) {
   return (
@@ -542,18 +548,46 @@ function SettingsView({
           <span>禁用模型返回状态码</span>
           <input type="number" value={disabledModelStatusCode} onChange={(event) => onChangeDisabledModelStatusCode(Number(event.target.value))} />
         </label>
-        <label className="settings-field">
-          <span>全部模型响应延时（ms）</span>
-          <input type="number" value={latencyMs} onChange={(event) => onChangeLatencyMs(Number(event.target.value))} />
-        </label>
-        <label className="settings-field">
-          <span>供应商延时 JSON</span>
-          <textarea value={providerLatencyMs} onChange={(event) => onChangeProviderLatencyMs(event.target.value)} rows={5} />
-        </label>
-        <label className="settings-field">
-          <span>单模型延时 JSON</span>
-          <textarea value={modelLatencyMs} onChange={(event) => onChangeModelLatencyMs(event.target.value)} rows={5} />
-        </label>
+
+        <div className="settings-section">
+          <h2>模型响应延时</h2>
+          <p className="settings-hint">优先级：单模型 &gt; 供应商 &gt; 全局。留空或 0 = 沿用上级。</p>
+
+          <label className="settings-field">
+            <span>全局（ms）</span>
+            <input type="number" value={latencyMs} onChange={(event) => onChangeLatencyMs(Number(event.target.value))} />
+          </label>
+
+          <h3>供应商</h3>
+          {providers.map((p) => (
+            <label className="settings-field settings-field-indent" key={p.provider}>
+              <span>{p.displayName}</span>
+              <input
+                type="number"
+                value={providerLatencyMs[p.provider] ?? ""}
+                onChange={(event) => onChangeProviderLatencyMs(p.provider, Number(event.target.value) || 0)}
+              />
+            </label>
+          ))}
+
+          <h3>单模型</h3>
+          {groupModelsByProvider(models).map((group) => (
+            <div className="settings-model-group" key={group.provider}>
+              <div className="settings-model-provider">{providers.find((p) => p.provider === group.provider)?.displayName ?? group.provider}</div>
+              {group.models.map((m) => (
+                <label className="settings-field settings-field-indent" key={m.id}>
+                  <span>{m.id}</span>
+                  <input
+                    type="number"
+                    value={modelLatencyMs[m.id] ?? ""}
+                    onChange={(event) => onChangeModelLatencyMs(m.id, Number(event.target.value) || 0)}
+                  />
+                </label>
+              ))}
+            </div>
+          ))}
+        </div>
+
         <button className="settings-save" onClick={onSave} type="button">
           保存
         </button>
@@ -852,13 +886,22 @@ function prettyJson(value: unknown): string {
   return JSON.stringify(value, null, 2);
 }
 
-function parseNumberMap(value: string): Record<string, number> {
-  const parsed = JSON.parse(value || "{}");
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("延时设置必须是 JSON 对象。");
-  for (const [key, item] of Object.entries(parsed)) {
-    if (typeof item !== "number" || Number.isNaN(item)) throw new Error(`${key} 的延时必须是数字。`);
+function filterPositive(map: Record<string, number>): Record<string, number> {
+  const result: Record<string, number> = {};
+  for (const [key, value] of Object.entries(map)) {
+    if (value > 0) result[key] = value;
   }
-  return parsed as Record<string, number>;
+  return result;
+}
+
+function groupModelsByProvider(models: { id: string; provider: string }[]): { provider: string; models: { id: string }[] }[] {
+  const groups = new Map<string, { id: string }[]>();
+  for (const m of models) {
+    const group = groups.get(m.provider);
+    if (group) group.push({ id: m.id });
+    else groups.set(m.provider, [{ id: m.id }]);
+  }
+  return [...groups.entries()].map(([provider, entries]) => ({ provider, models: entries }));
 }
 
 function unique<T>(items: T[]): T[] {

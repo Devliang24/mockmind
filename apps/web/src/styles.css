@@ -515,7 +515,7 @@ tr.endpoint-row.active {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 360px;
+  max-width: 540px;
 }
 
 .settings-field {
@@ -555,6 +555,46 @@ tr.endpoint-row.active {
 
 .settings-save:hover {
   background: var(--panel-2);
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-section h2 {
+  margin: 8px 0 0;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.settings-section h3 {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.settings-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.settings-field-indent {
+  margin-left: 16px;
+}
+
+.settings-model-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-model-provider {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
 }
 
 .grid-2 {
