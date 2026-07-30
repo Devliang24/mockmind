@@ -515,7 +515,7 @@ tr.endpoint-row.active {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 540px;
+  max-width: 640px;
 }
 
 .settings-field {
@@ -629,6 +629,16 @@ tr.endpoint-row.active {
   font-size: 13px;
   background: var(--panel);
   color: var(--text);
+  max-width: 100%;
+}
+
+.settings-rule-add select:first-of-type {
+  width: 90px;
+}
+
+.settings-rule-add select:nth-of-type(2) {
+  min-width: 200px;
+  flex: 1;
 }
 
 .settings-rule-add input {
