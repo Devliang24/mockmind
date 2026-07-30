@@ -39,14 +39,16 @@ export function App() {
   const [selectedModel, setSelectedModel] = useState<string>();
   const [selectedRequestId, setSelectedRequestId] = useState<string>();
   const [copiedKey, setCopiedKey] = useState<string>();
-  const [settingsDraft, setSettingsDraft] = useState<number>(403);
+  const [disabledModelStatusCodeDraft, setDisabledModelStatusCodeDraft] = useState<number>(403);
+  const [latencyMsDraft, setLatencyMsDraft] = useState<number>(0);
 
   async function refresh() {
     try {
       setLoadState("loading");
       const nextData = await loadConsoleData();
       setData(nextData);
-      setSettingsDraft(nextData.settings.disabledModelStatusCode);
+      setDisabledModelStatusCodeDraft(nextData.settings.disabledModelStatusCode);
+      setLatencyMsDraft(nextData.settings.latencyMs);
       setLoadState("ready");
       setError(undefined);
     } catch (cause) {
@@ -83,7 +85,7 @@ export function App() {
   }
 
   async function handleSaveSettings() {
-    await saveSettings({ disabledModelStatusCode: settingsDraft });
+    await saveSettings({ disabledModelStatusCode: disabledModelStatusCodeDraft, latencyMs: latencyMsDraft });
     await refresh();
   }
 
@@ -163,7 +165,13 @@ export function App() {
           {view === "requests" ? (
             <RequestsView requests={data.requests} scenarios={data.scenarios} onSelect={setSelectedRequestId} />
           ) : view === "settings" ? (
-            <SettingsView disabledModelStatusCode={settingsDraft} onChangeDisabledModelStatusCode={setSettingsDraft} onSave={handleSaveSettings} />
+            <SettingsView
+              disabledModelStatusCode={disabledModelStatusCodeDraft}
+              latencyMs={latencyMsDraft}
+              onChangeDisabledModelStatusCode={setDisabledModelStatusCodeDraft}
+              onChangeLatencyMs={setLatencyMsDraft}
+              onSave={handleSaveSettings}
+            />
           ) : (
             <ProviderView
               activeModel={activeModel}
@@ -488,11 +496,15 @@ function ExampleSections({ example }: { example: RouteExample }) {
 
 function SettingsView({
   disabledModelStatusCode,
+  latencyMs,
   onChangeDisabledModelStatusCode,
+  onChangeLatencyMs,
   onSave
 }: {
   disabledModelStatusCode: number;
+  latencyMs: number;
   onChangeDisabledModelStatusCode: (value: number) => void;
+  onChangeLatencyMs: (value: number) => void;
   onSave: () => void;
 }) {
   return (
@@ -503,11 +515,11 @@ function SettingsView({
       <div className="settings-form">
         <label className="settings-field">
           <span>禁用模型返回状态码</span>
-          <input
-            type="number"
-            value={disabledModelStatusCode}
-            onChange={(event) => onChangeDisabledModelStatusCode(Number(event.target.value))}
-          />
+          <input type="number" value={disabledModelStatusCode} onChange={(event) => onChangeDisabledModelStatusCode(Number(event.target.value))} />
+        </label>
+        <label className="settings-field">
+          <span>模型响应延时（ms）</span>
+          <input type="number" value={latencyMs} onChange={(event) => onChangeLatencyMs(Number(event.target.value))} />
         </label>
         <button className="settings-save" onClick={onSave} type="button">
           保存

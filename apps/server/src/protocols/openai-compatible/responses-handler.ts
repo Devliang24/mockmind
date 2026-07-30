@@ -50,7 +50,7 @@ export async function handleOpenAIResponses(
   };
   const found = context.scenarios.find(mockRequest);
   const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: "This is a mock OpenAI Responses API response." }, mockRequest), body.input);
-  if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
+  if (context.systemSettings.latencyMs > 0) await delay(context.systemSettings.latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
     const responseBody = formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type);

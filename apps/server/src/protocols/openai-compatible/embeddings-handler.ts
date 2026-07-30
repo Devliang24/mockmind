@@ -40,7 +40,7 @@ export async function handleOpenAIEmbeddings(
   };
   const found = context.scenarios.find(mockRequest);
   const result = renderResult(found.result ?? { type: "embedding", embedding: [0.0123, -0.0456, 0.0789] }, mockRequest);
-  if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
+  if (context.systemSettings.latencyMs > 0) await delay(context.systemSettings.latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
     const responseBody = formatOpenAIError(result.error.status, result.error.code, result.error.message, result.error.type);

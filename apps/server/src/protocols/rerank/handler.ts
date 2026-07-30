@@ -54,7 +54,7 @@ export async function handleRerank(handlerContext: ProtocolHandlerContext, reque
   const found = context.scenarios.find(mockRequest);
   const usage = estimateTokenCount([rerankInput.query, rerankInput.documents]);
   const result = renderResult(found.result ?? { type: "json", json: formatRerankResponse(provider, rerankInput, usage) }, mockRequest);
-  if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
+  if (context.systemSettings.latencyMs > 0) await delay(context.systemSettings.latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
     const responseBody = formatRerankError(provider, result.error.code ?? "mock_error", result.error.message);

@@ -43,7 +43,7 @@ export async function handleMiniMaxChat(handlerContext: ProtocolHandlerContext, 
   };
   const found = context.scenarios.find(mockRequest);
   const result = withEstimatedUsage(renderResult(found.result ?? { type: "text", content: "你好，我是模拟的 MiniMax 响应。" }, mockRequest), body.messages);
-  if (context.config.defaults.latencyMs > 0) await delay(context.config.defaults.latencyMs);
+  if (context.systemSettings.latencyMs > 0) await delay(context.systemSettings.latencyMs);
   const status = result.error?.status ?? 200;
   if (result.type === "error" && result.error) {
     const responseBody = formatMiniMaxError(result.error.code, result.error.message);

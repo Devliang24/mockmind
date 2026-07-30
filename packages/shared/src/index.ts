@@ -84,6 +84,7 @@ export type AdminOverviewResponse = {
 
 export type AdminSettingsResponse = {
   disabledModelStatusCode: number;
+  latencyMs: number;
 };
 
 export type AdminModelsResponse = {

@@ -225,15 +225,24 @@ describe("Admin API contracts", () => {
 
     const settingsResponse = await app.inject({ method: "GET", url: "/__admin/settings" });
     expect(settingsResponse.statusCode).toBe(200);
-    expect(settingsResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 403 });
+    expect(settingsResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 403, latencyMs: 0 });
 
     const updateResponse = await app.inject({
       method: "PATCH",
       url: "/__admin/settings",
-      payload: { disabledModelStatusCode: 451 }
+      payload: { disabledModelStatusCode: 451, latencyMs: 25 }
     });
     expect(updateResponse.statusCode).toBe(200);
-    expect(updateResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 451 });
+    expect(updateResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 451, latencyMs: 25 });
+
+    const started = Date.now();
+    const delayed = await app.inject({
+      method: "POST",
+      url: "/v1/chat/completions",
+      payload: { model: "gpt-4o-mini", messages: [{ role: "user", content: "hello" }] }
+    });
+    expect(delayed.statusCode).toBe(200);
+    expect(Date.now() - started).toBeGreaterThanOrEqual(20);
 
     await app.inject({ method: "PATCH", url: "/__admin/models/gpt-4o-mini", payload: { disabled: true } });
     const denied = await app.inject({
