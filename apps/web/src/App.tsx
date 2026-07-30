@@ -530,8 +530,8 @@ function SettingsView({
   latencyMs: number;
   providerLatencyMs: Record<string, number>;
   modelLatencyMs: Record<string, number>;
-  providers: { provider: string; displayName: string }[];
-  models: { id: string; provider: string }[];
+  providers: ProviderView[];
+  models: AdminModelsResponse["data"];
   onChangeDisabledModelStatusCode: (value: number) => void;
   onChangeLatencyMs: (value: number) => void;
   onUpdateProviderLatencyMs: (map: Record<string, number>) => void;
@@ -542,9 +542,10 @@ function SettingsView({
   const [ruleTarget, setRuleTarget] = useState<string>("");
   const [ruleValue, setRuleValue] = useState<number>(0);
 
+  const latencyModels = modelsForLatencySettings(providers, models);
   const targets = ruleType === "provider"
     ? providers.map((p) => ({ key: p.provider, label: p.displayName, hasRule: p.provider in providerLatencyMs }))
-    : models.map((m) => ({ key: m.id, label: `${m.id}（${m.provider}）`, hasRule: m.id in modelLatencyMs }));
+    : latencyModels.map((m) => ({ key: m.id, label: `${m.id}（${m.provider}）`, hasRule: m.id in modelLatencyMs }));
 
   function addRule() {
     if (!ruleTarget || ruleValue <= 0) return;
@@ -862,6 +863,17 @@ function protocolLabel(protocol: string): string {
       rerank: "Rerank"
     }[protocol] ?? protocol
   );
+}
+
+function modelsForLatencySettings(providers: ProviderView[], models: AdminModelsResponse["data"]): { id: string; provider: string }[] {
+  const byKey = new Map<string, { id: string; provider: string }>();
+  for (const model of models) byKey.set(`${model.provider}:${model.id}`, { id: model.id, provider: model.provider });
+  for (const provider of providers) {
+    for (const id of unique([...provider.configuredModels, ...provider.latestModels, ...provider.defaultModels])) {
+      byKey.set(`${provider.provider}:${id}`, { id, provider: provider.provider });
+    }
+  }
+  return [...byKey.values()];
 }
 
 function modelsForProvider(provider: ProviderView | undefined, models: AdminModelsResponse | undefined): string[] {
