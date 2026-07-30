@@ -542,9 +542,9 @@ function SettingsView({
   const [ruleTarget, setRuleTarget] = useState<string>("");
   const [ruleValue, setRuleValue] = useState<number>(0);
 
-  const providerTargets = providers.filter((p) => !(p.provider in providerLatencyMs));
-  const modelTargets = models.filter((m) => !(m.id in modelLatencyMs));
-  const targets = ruleType === "provider" ? providerTargets.map((p) => ({ key: p.provider, label: p.displayName })) : modelTargets.map((m) => ({ key: m.id, label: `${m.id}（${m.provider}）` }));
+  const targets = ruleType === "provider"
+    ? providers.map((p) => ({ key: p.provider, label: p.displayName, hasRule: p.provider in providerLatencyMs }))
+    : models.map((m) => ({ key: m.id, label: `${m.id}（${m.provider}）`, hasRule: m.id in modelLatencyMs }));
 
   function addRule() {
     if (!ruleTarget || ruleValue <= 0) return;
@@ -611,7 +611,7 @@ function SettingsView({
             <select value={ruleTarget} onChange={(e) => setRuleTarget(e.target.value)}>
               <option value="">-- 选择 --</option>
               {targets.map((t) => (
-                <option key={t.key} value={t.key}>{t.label}</option>
+                <option key={t.key} value={t.key}>{t.hasRule ? `✓ ${t.label}` : t.label}</option>
               ))}
             </select>
             <input type="number" value={ruleValue || ""} placeholder="ms" onChange={(e) => setRuleValue(Number(e.target.value) || 0)} />
