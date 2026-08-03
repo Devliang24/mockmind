@@ -97,16 +97,17 @@ export function App() {
     await refresh();
   }
 
-  async function handleSaveSettings() {
+  async function handleUpdateDisabledModelStatusCode() {
     try {
-      await saveSettings({
+      const saved = await saveSettings({
         disabledModelStatusCode: disabledModelStatusCodeDraft,
         modelLatencyMs: filterPositive(modelLatencyMsDraft),
         modelStreamErrors: modelStreamErrorsDraft
       });
-      await refresh();
+      setDisabledModelStatusCodeDraft(saved.disabledModelStatusCode);
     } catch (cause) {
       window.alert(cause instanceof Error ? cause.message : String(cause));
+      await refresh();
     }
   }
 
@@ -223,9 +224,9 @@ export function App() {
               providers={data?.providers.providers ?? []}
               models={data?.models.data ?? []}
               onChangeDisabledModelStatusCode={setDisabledModelStatusCodeDraft}
+              onUpdateDisabledModelStatusCode={() => void handleUpdateDisabledModelStatusCode()}
               onUpdateModelLatencyMs={(next) => void handleUpdateModelLatencyMs(next)}
               onUpdateModelStreamErrors={(next) => void handleUpdateModelStreamErrors(next)}
-              onSave={handleSaveSettings}
             />
           ) : (
             <ProviderView
@@ -556,9 +557,9 @@ function SettingsView({
   providers,
   models,
   onChangeDisabledModelStatusCode,
+  onUpdateDisabledModelStatusCode,
   onUpdateModelLatencyMs,
-  onUpdateModelStreamErrors,
-  onSave
+  onUpdateModelStreamErrors
 }: {
   disabledModelStatusCode: number;
   modelLatencyMs: Record<string, number>;
@@ -566,9 +567,9 @@ function SettingsView({
   providers: ProviderView[];
   models: AdminModelsResponse["data"];
   onChangeDisabledModelStatusCode: (value: number) => void;
+  onUpdateDisabledModelStatusCode: () => void | Promise<void>;
   onUpdateModelLatencyMs: (map: Record<string, number>) => void | Promise<void>;
   onUpdateModelStreamErrors: (map: Record<string, StreamErrorConfig>) => void | Promise<void>;
-  onSave: () => void;
 }) {
   const [ruleTarget, setRuleTarget] = useState<string>("");
   const [ruleValue, setRuleValue] = useState<number>(0);
@@ -611,10 +612,18 @@ function SettingsView({
         <h1>系统设置</h1>
       </div>
       <div className="settings-form">
-        <label className="settings-field">
-          <span>禁用模型返回状态码</span>
-          <input type="number" value={disabledModelStatusCode} onChange={(event) => onChangeDisabledModelStatusCode(Number(event.target.value))} />
-        </label>
+        <div className="settings-field">
+          <label htmlFor="disabled-model-status-code">禁用模型返回状态码</label>
+          <div className="settings-field-control">
+            <input
+              id="disabled-model-status-code"
+              type="number"
+              value={disabledModelStatusCode}
+              onChange={(event) => onChangeDisabledModelStatusCode(Number(event.target.value))}
+            />
+            <button onClick={() => void onUpdateDisabledModelStatusCode()} type="button">应用</button>
+          </div>
+        </div>
 
         <div className="settings-section">
           <h2>单模型响应延时</h2>
@@ -698,9 +707,6 @@ function SettingsView({
           </div>
         </div>
 
-        <button className="settings-save" onClick={onSave} type="button">
-          保存
-        </button>
       </div>
     </>
   );

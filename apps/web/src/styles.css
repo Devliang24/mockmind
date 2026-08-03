@@ -537,24 +537,35 @@ tr.endpoint-row.active {
   color: var(--text);
 }
 
-.settings-field textarea {
-  min-height: 96px;
-  resize: vertical;
-  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+.settings-field-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.settings-save {
-  width: fit-content;
+.settings-field-control input {
+  min-width: 0;
+  flex: 1;
+}
+
+.settings-field-control button {
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--text);
   border-radius: 6px;
   padding: 8px 12px;
   cursor: pointer;
+  font: inherit;
 }
 
-.settings-save:hover {
+.settings-field-control button:hover {
   background: var(--panel-2);
+}
+
+.settings-field textarea {
+  min-height: 96px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
 }
 
 .settings-section {
