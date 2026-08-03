@@ -594,6 +594,12 @@ function SettingsView({
     setRuleValue(0);
   }
 
+  function clearErrorRule() {
+    setErrorRuleTarget("");
+    setErrorRuleCode("");
+    setErrorRuleMessage("");
+  }
+
   function addErrorRule() {
     if (!errorRuleTarget || !errorRuleMessage.trim()) return;
     void onUpdateModelStreamErrors({ ...modelStreamErrors, [errorRuleTarget]: { code: errorRuleCode.trim() || undefined, message: errorRuleMessage.trim() } });
@@ -689,7 +695,10 @@ function SettingsView({
                 </button>
               ))}
             </div>
-            <button onClick={addErrorRule} type="button" disabled={!errorRuleTarget || !errorRuleMessage.trim()}>添加</button>
+            <div className="settings-rule-actions">
+              <button onClick={addErrorRule} type="button" disabled={!errorRuleTarget || !errorRuleMessage.trim()}>添加</button>
+              <button className="settings-rule-clear" onClick={clearErrorRule} type="button" disabled={!errorRuleTarget && !errorRuleCode && !errorRuleMessage}>清空</button>
+            </div>
           </div>
         </div>
 

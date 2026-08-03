@@ -707,6 +707,31 @@ tr.endpoint-row.active {
   color: var(--text);
 }
 
+.settings-rule-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-rule-clear {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.settings-rule-clear:hover {
+  color: #e5534b;
+  border-color: #e5534b;
+}
+
+.settings-rule-clear:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .grid-2 {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
