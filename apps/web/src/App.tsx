@@ -30,6 +30,15 @@ const protocolOrder = [
 ];
 const hiddenConsoleProtocols = new Set(["openai-images", "openai-audio", "openai-moderations", "openai-files", "openai-batch"]);
 
+const STREAM_ERROR_PRESETS: { label: string; code: string; message: string }[] = [
+  { label: "Rate Limit", code: "rate_limit_exceeded", message: "Rate limit exceeded. Please try again later." },
+  { label: "Server Overloaded", code: "server_overloaded", message: "Our servers are currently overloaded. Please try again later." },
+  { label: "Invalid API Key", code: "invalid_api_key", message: "Invalid API key. Please check your API key and try again." },
+  { label: "Model Unavailable", code: "model_unavailable", message: "The requested model is currently unavailable." },
+  { label: "Quota Exceeded", code: "quota_exceeded", message: "You have exceeded your quota. Please check your billing details." },
+  { label: "Timeout", code: "timeout", message: "The request timed out. Please try again." },
+];
+
 export function App() {
   const [data, setData] = useState<ConsoleData | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
@@ -667,6 +676,19 @@ function SettingsView({
             </select>
             <input type="text" value={errorRuleCode} placeholder="错误码（可选）" onChange={(e) => setErrorRuleCode(e.target.value)} />
             <textarea value={errorRuleMessage} placeholder="错误消息" onChange={(e) => setErrorRuleMessage(e.target.value)} rows={3} />
+            <div className="error-presets">
+              {STREAM_ERROR_PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  className="error-preset-chip"
+                  type="button"
+                  onClick={() => { setErrorRuleCode(preset.code); setErrorRuleMessage(preset.message); }}
+                  title={preset.message}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
             <button onClick={addErrorRule} type="button" disabled={!errorRuleTarget || !errorRuleMessage.trim()}>添加</button>
           </div>
         </div>
