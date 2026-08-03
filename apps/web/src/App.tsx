@@ -654,7 +654,7 @@ function SettingsView({
             </>
           )}
 
-          <div className="settings-rule-add">
+          <div className="settings-rule-add settings-rule-add-col">
             <select value={errorRuleTarget} onChange={(e) => setErrorRuleTarget(e.target.value)}>
               <option value="">-- 选择模型 --</option>
               {modelTargetGroups.map((group) => (
@@ -665,8 +665,8 @@ function SettingsView({
                 </optgroup>
               ))}
             </select>
-            <input type="text" value={errorRuleCode} placeholder="错误码（可选）" onChange={(e) => setErrorRuleCode(e.target.value)} style={{ width: "140px" }} />
-            <input type="text" value={errorRuleMessage} placeholder="错误消息" onChange={(e) => setErrorRuleMessage(e.target.value)} style={{ width: "240px" }} />
+            <input type="text" value={errorRuleCode} placeholder="错误码（可选）" onChange={(e) => setErrorRuleCode(e.target.value)} />
+            <textarea value={errorRuleMessage} placeholder="错误消息" onChange={(e) => setErrorRuleMessage(e.target.value)} rows={3} />
             <button onClick={addErrorRule} type="button" disabled={!errorRuleTarget || !errorRuleMessage.trim()}>添加</button>
           </div>
         </div>
