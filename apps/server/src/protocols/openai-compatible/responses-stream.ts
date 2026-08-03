@@ -18,16 +18,6 @@ export async function sendOpenAIResponsesStream(reply: FastifyReply, model: stri
     connection: "keep-alive"
   });
 
-  if (result.streamError) {
-    const response = makeResponse(model, "failed");
-    reply.raw.write(event("response.created", { response }));
-    reply.raw.write(event("response.in_progress", { response: { ...response, status: "in_progress" } }));
-    reply.raw.write(event("error", { error: { type: "server_error", code: result.streamError.code ?? "stream_error", message: result.streamError.message, param: null } }));
-    reply.raw.write(event("response.failed", { response: { ...response, error: { code: result.streamError.code ?? "stream_error", message: result.streamError.message } } }));
-    reply.raw.end();
-    return;
-  }
-
   reply.raw.write(event("response.created", { response: makeResponse(model, "in_progress") }));
 
   if (result.type === "tool_call") {
@@ -45,7 +35,14 @@ export async function sendOpenAIResponsesStream(reply: FastifyReply, model: stri
   }
 
   reply.raw.write(event("response.output_text.done", { text: chunks.join("") }));
-  reply.raw.write(event("response.completed", { response: { ...makeResponse(model, "completed"), usage: formatResponsesUsage(result) } }));
+
+  if (result.streamError) {
+    const response = makeResponse(model, "failed");
+    reply.raw.write(event("error", { error: { type: "server_error", code: result.streamError.code ?? "stream_error", message: result.streamError.message, param: null } }));
+    reply.raw.write(event("response.failed", { response: { ...response, error: { code: result.streamError.code ?? "stream_error", message: result.streamError.message } } }));
+  } else {
+    reply.raw.write(event("response.completed", { response: { ...makeResponse(model, "completed"), usage: formatResponsesUsage(result) } }));
+  }
   reply.raw.write("data: [DONE]\n\n");
   reply.raw.end();
 }

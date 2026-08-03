@@ -23,23 +23,18 @@ export async function sendGeminiStream(reply: FastifyReply, result: MockResult, 
     return;
   }
 
-  if (result.streamError) {
-    reply.raw.write(`data: ${JSON.stringify({ error: { code: 500, message: result.streamError.message, status: result.streamError.code ?? "INTERNAL" } })}\n\n`);
-    reply.raw.end();
-    return;
-  }
-
   const chunks = result.chunks?.length ? result.chunks : [result.content ?? ""];
 
   for (let index = 0; index < chunks.length; index += 1) {
+    const isLast = index === chunks.length - 1;
     reply.raw.write(event({
       candidates: [{
         content: { role: "model", parts: [{ text: chunks[index] }] },
-        finishReason: index === chunks.length - 1 ? "STOP" : undefined,
+        finishReason: (isLast && !result.streamError) ? "STOP" : undefined,
         index: 0,
         safetyRatings: []
       }],
-      ...(index === chunks.length - 1 ? {
+      ...((isLast && !result.streamError) ? {
         usageMetadata: {
           promptTokenCount: result.usage?.promptTokens ?? 0,
           candidatesTokenCount: result.usage?.completionTokens ?? 0,
@@ -48,6 +43,10 @@ export async function sendGeminiStream(reply: FastifyReply, result: MockResult, 
       } : {})
     }));
     if (chunkDelayMs > 0) await delay(chunkDelayMs);
+  }
+
+  if (result.streamError) {
+    reply.raw.write(`data: ${JSON.stringify({ error: { code: 500, message: result.streamError.message, status: result.streamError.code ?? "INTERNAL" } })}\n\n`);
   }
 
   reply.raw.end();

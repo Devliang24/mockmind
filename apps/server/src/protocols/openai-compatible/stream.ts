@@ -21,12 +21,6 @@ export async function sendOpenAIStream(reply: FastifyReply, model: string, resul
     connection: "keep-alive"
   });
 
-  if (result.streamError) {
-    reply.raw.write(`data: ${JSON.stringify({ error: { message: result.streamError.message, code: result.streamError.code ?? "stream_error" } })}\n\n`);
-    reply.raw.end();
-    return;
-  }
-
   reply.raw.write(chunk(model, { role: "assistant" }));
 
   for (const reasoningContent of result.reasoningChunks ?? (result.reasoningContent ? [result.reasoningContent] : [])) {
@@ -53,8 +47,12 @@ export async function sendOpenAIStream(reply: FastifyReply, model: string, resul
     if (chunkDelayMs > 0) await delay(chunkDelayMs);
   }
 
-  reply.raw.write(chunk(model, {}, "stop"));
-  if (includeUsage) reply.raw.write(usageChunk(model, result));
+  if (result.streamError) {
+    reply.raw.write(`data: ${JSON.stringify({ error: { message: result.streamError.message, code: result.streamError.code ?? "stream_error" } })}\n\n`);
+  } else {
+    reply.raw.write(chunk(model, {}, "stop"));
+    if (includeUsage) reply.raw.write(usageChunk(model, result));
+  }
   reply.raw.write("data: [DONE]\n\n");
   reply.raw.end();
 }

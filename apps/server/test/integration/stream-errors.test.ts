@@ -16,7 +16,7 @@ const config: MockMindConfig = {
 };
 
 describe("modelStreamErrors", () => {
-  it("injects OpenAI SSE error frame before stream chunks", async () => {
+  it("injects OpenAI SSE error frame after stream chunks", async () => {
     const { app } = await createMockMindServer(config);
     await app.inject({
       method: "PATCH",
@@ -32,14 +32,16 @@ describe("modelStreamErrors", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.headers["content-type"]).toContain("text/event-stream");
+    expect(response.body).toContain("fallback");
     expect(response.body).toContain('"error"');
     expect(response.body).toContain("mock rate limit");
     expect(response.body).toContain("rate_limit");
-    expect(response.body).not.toContain("fallback");
+    // error must appear after the content chunk
+    expect(response.body.indexOf("fallback")).toBeLessThan(response.body.indexOf("mock rate limit"));
     await app.close();
   });
 
-  it("injects Gemini SSE error frame before stream chunks", async () => {
+  it("injects Gemini SSE error frame after stream chunks", async () => {
     const { app } = await createMockMindServer(config);
     await app.inject({
       method: "PATCH",
@@ -55,9 +57,12 @@ describe("modelStreamErrors", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.headers["content-type"]).toContain("text/event-stream");
+    expect(response.body).toContain("fallback");
     expect(response.body).toContain('"error"');
     expect(response.body).toContain("quota exceeded");
     expect(response.body).toContain("RESOURCE_EXHAUSTED");
+    // error must appear after the content chunk
+    expect(response.body.indexOf("fallback")).toBeLessThan(response.body.indexOf("quota exceeded"));
     await app.close();
   });
 
