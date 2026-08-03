@@ -14,6 +14,12 @@ export async function sendOpenAIResponsesStream(reply: FastifyReply, model: stri
     connection: "keep-alive"
   });
 
+  if (result.streamError) {
+    reply.raw.write(event("error", { error: { code: result.streamError.code ?? "stream_error", message: result.streamError.message } }));
+    reply.raw.end();
+    return;
+  }
+
   reply.raw.write(event("response.created", { response: { id: "resp_mock_0001", object: "response", status: "in_progress", model } }));
 
   if (result.type === "tool_call") {
@@ -28,12 +34,6 @@ export async function sendOpenAIResponsesStream(reply: FastifyReply, model: stri
   for (const text of chunks) {
     reply.raw.write(event("response.output_text.delta", { delta: text }));
     if (chunkDelayMs > 0) await delay(chunkDelayMs);
-  }
-
-  if (result.streamError) {
-    reply.raw.write(event("error", { error: { code: result.streamError.code ?? "stream_error", message: result.streamError.message } }));
-    reply.raw.end();
-    return;
   }
 
   reply.raw.write(event("response.output_text.done", { text: chunks.join("") }));

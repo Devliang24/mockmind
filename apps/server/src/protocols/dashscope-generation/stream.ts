@@ -14,6 +14,12 @@ export async function sendDashScopeStream(reply: FastifyReply, result: MockResul
     connection: "keep-alive"
   });
 
+  if (result.streamError) {
+    reply.raw.write(`event: error\ndata: ${JSON.stringify({ request_id: "req_mock_dashscope_error_0001", code: result.streamError.code ?? "ServiceUnavailable", message: result.streamError.message })}\n\n`);
+    reply.raw.end();
+    return;
+  }
+
   const chunks = result.chunks?.length ? result.chunks : [result.content ?? ""];
   for (const reasoningContent of result.reasoningChunks ?? (result.reasoningContent ? [result.reasoningContent] : [])) {
     reply.raw.write(dashScopeEvent({
@@ -33,12 +39,6 @@ export async function sendDashScopeStream(reply: FastifyReply, result: MockResul
       }
     }));
     if (chunkDelayMs > 0) await delay(chunkDelayMs);
-  }
-
-  if (result.streamError) {
-    reply.raw.write(`event: error\ndata: ${JSON.stringify({ request_id: "req_mock_dashscope_error_0001", code: result.streamError.code ?? "ServiceUnavailable", message: result.streamError.message })}\n\n`);
-    reply.raw.end();
-    return;
   }
 
   reply.raw.write(dashScopeEvent({

@@ -225,7 +225,7 @@ describe("Admin API contracts", () => {
 
     const settingsResponse = await app.inject({ method: "GET", url: "/__admin/settings" });
     expect(settingsResponse.statusCode).toBe(200);
-    expect(settingsResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 403, modelLatencyMs: {} });
+    expect(settingsResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 403, modelLatencyMs: {}, modelStreamErrors: {} });
 
     const updateResponse = await app.inject({
       method: "PATCH",
@@ -233,7 +233,7 @@ describe("Admin API contracts", () => {
       payload: { disabledModelStatusCode: 451, modelLatencyMs: { "gpt-4o-mini": 25 } }
     });
     expect(updateResponse.statusCode).toBe(200);
-    expect(updateResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 451, modelLatencyMs: { "gpt-4o-mini": 25 } });
+    expect(updateResponse.json<AdminSettingsResponse>()).toEqual({ disabledModelStatusCode: 451, modelLatencyMs: { "gpt-4o-mini": 25 }, modelStreamErrors: {} });
 
     const started = Date.now();
     const delayed = await app.inject({

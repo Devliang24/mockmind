@@ -82,9 +82,12 @@ export type AdminOverviewResponse = {
   recentRequests: AdminRecordedRequest[];
 };
 
+export type StreamErrorConfig = { code?: string; message: string };
+
 export type AdminSettingsResponse = {
   disabledModelStatusCode: number;
   modelLatencyMs: Record<string, number>;
+  modelStreamErrors: Record<string, StreamErrorConfig>;
 };
 
 export type AdminModelsResponse = {

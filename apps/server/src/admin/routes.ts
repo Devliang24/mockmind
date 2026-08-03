@@ -37,7 +37,7 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
   app.get("/__admin/config", async () => context.config);
   app.get("/__admin/settings", async (): Promise<AdminSettingsResponse> => adminSettings(context));
   app.patch("/__admin/settings", async (request): Promise<AdminSettingsResponse> => {
-    const body = request.body as { disabledModelStatusCode?: unknown; modelLatencyMs?: unknown };
+    const body = request.body as { disabledModelStatusCode?: unknown; modelLatencyMs?: unknown; modelStreamErrors?: unknown };
     if (body.disabledModelStatusCode !== undefined) {
       if (typeof body.disabledModelStatusCode !== "number" || Number.isNaN(body.disabledModelStatusCode)) throw { statusCode: 400, message: "disabledModelStatusCode must be a number." };
       context.systemSettings.disabledModelStatusCode = body.disabledModelStatusCode;
@@ -45,6 +45,10 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
     if (body.modelLatencyMs !== undefined) {
       if (!isNumberRecord(body.modelLatencyMs)) throw { statusCode: 400, message: "modelLatencyMs must be a number map." };
       context.systemSettings.modelLatencyMs = body.modelLatencyMs;
+    }
+    if (body.modelStreamErrors !== undefined) {
+      if (!isStreamErrorRecord(body.modelStreamErrors)) throw { statusCode: 400, message: "modelStreamErrors must be a map of { code?, message }." };
+      context.systemSettings.modelStreamErrors = body.modelStreamErrors;
     }
     return adminSettings(context);
   });
@@ -110,8 +114,16 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
 function adminSettings(context: ServerContext): AdminSettingsResponse {
   return {
     disabledModelStatusCode: context.systemSettings.disabledModelStatusCode,
-    modelLatencyMs: context.systemSettings.modelLatencyMs
+    modelLatencyMs: context.systemSettings.modelLatencyMs,
+    modelStreamErrors: context.systemSettings.modelStreamErrors
   };
+}
+
+function isStreamErrorRecord(value: unknown): value is Record<string, { code?: string; message: string }> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  return Object.values(value).every(
+    (item) => typeof item === "object" && item !== null && typeof (item as Record<string,unknown>).message === "string"
+  );
 }
 
 function isNumberRecord(value: unknown): value is Record<string, number> {

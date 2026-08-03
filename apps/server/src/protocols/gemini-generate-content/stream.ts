@@ -23,6 +23,12 @@ export async function sendGeminiStream(reply: FastifyReply, result: MockResult, 
     return;
   }
 
+  if (result.streamError) {
+    reply.raw.write(`data: ${JSON.stringify({ error: { code: 500, message: result.streamError.message, status: result.streamError.code ?? "INTERNAL" } })}\n\n`);
+    reply.raw.end();
+    return;
+  }
+
   const chunks = result.chunks?.length ? result.chunks : [result.content ?? ""];
 
   for (let index = 0; index < chunks.length; index += 1) {

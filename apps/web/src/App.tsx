@@ -4,7 +4,9 @@ import type {
   AdminProvidersResponse,
   AdminRecordedRequest,
   AdminRoute,
-  AdminScenario
+  AdminScenario,
+  AdminSettingsResponse,
+  StreamErrorConfig
 } from "@mockmind/shared";
 import { loadConsoleData, saveSettings, toggleModel, type ConsoleData } from "./api/client";
 import { exampleForRoute, type RouteExample } from "./examples";
@@ -41,6 +43,7 @@ export function App() {
   const [copiedKey, setCopiedKey] = useState<string>();
   const [disabledModelStatusCodeDraft, setDisabledModelStatusCodeDraft] = useState<number>(403);
   const [modelLatencyMsDraft, setModelLatencyMsDraft] = useState<Record<string, number>>({});
+  const [modelStreamErrorsDraft, setModelStreamErrorsDraft] = useState<Record<string, StreamErrorConfig>>({});
 
   async function refresh() {
     try {
@@ -49,6 +52,7 @@ export function App() {
       setData(nextData);
       setDisabledModelStatusCodeDraft(nextData.settings.disabledModelStatusCode);
       setModelLatencyMsDraft({ ...nextData.settings.modelLatencyMs });
+      setModelStreamErrorsDraft({ ...nextData.settings.modelStreamErrors });
       setLoadState("ready");
       setError(undefined);
     } catch (cause) {
@@ -88,7 +92,8 @@ export function App() {
     try {
       await saveSettings({
         disabledModelStatusCode: disabledModelStatusCodeDraft,
-        modelLatencyMs: filterPositive(modelLatencyMsDraft)
+        modelLatencyMs: filterPositive(modelLatencyMsDraft),
+        modelStreamErrors: modelStreamErrorsDraft
       });
       await refresh();
     } catch (cause) {
@@ -101,9 +106,25 @@ export function App() {
     try {
       const saved = await saveSettings({
         disabledModelStatusCode: disabledModelStatusCodeDraft,
-        modelLatencyMs: filterPositive(next)
+        modelLatencyMs: filterPositive(next),
+        modelStreamErrors: modelStreamErrorsDraft
       });
       setModelLatencyMsDraft({ ...saved.modelLatencyMs });
+    } catch (cause) {
+      window.alert(cause instanceof Error ? cause.message : String(cause));
+      await refresh();
+    }
+  }
+
+  async function handleUpdateModelStreamErrors(next: Record<string, StreamErrorConfig>) {
+    setModelStreamErrorsDraft(next);
+    try {
+      const saved = await saveSettings({
+        disabledModelStatusCode: disabledModelStatusCodeDraft,
+        modelLatencyMs: filterPositive(modelLatencyMsDraft),
+        modelStreamErrors: next
+      });
+      setModelStreamErrorsDraft({ ...saved.modelStreamErrors });
     } catch (cause) {
       window.alert(cause instanceof Error ? cause.message : String(cause));
       await refresh();
@@ -189,10 +210,12 @@ export function App() {
             <SettingsView
               disabledModelStatusCode={disabledModelStatusCodeDraft}
               modelLatencyMs={modelLatencyMsDraft}
+              modelStreamErrors={modelStreamErrorsDraft}
               providers={data?.providers.providers ?? []}
               models={data?.models.data ?? []}
               onChangeDisabledModelStatusCode={setDisabledModelStatusCodeDraft}
               onUpdateModelLatencyMs={(next) => void handleUpdateModelLatencyMs(next)}
+              onUpdateModelStreamErrors={(next) => void handleUpdateModelStreamErrors(next)}
               onSave={handleSaveSettings}
             />
           ) : (
@@ -520,22 +543,29 @@ function ExampleSections({ example }: { example: RouteExample }) {
 function SettingsView({
   disabledModelStatusCode,
   modelLatencyMs,
+  modelStreamErrors,
   providers,
   models,
   onChangeDisabledModelStatusCode,
   onUpdateModelLatencyMs,
+  onUpdateModelStreamErrors,
   onSave
 }: {
   disabledModelStatusCode: number;
   modelLatencyMs: Record<string, number>;
+  modelStreamErrors: Record<string, StreamErrorConfig>;
   providers: ProviderView[];
   models: AdminModelsResponse["data"];
   onChangeDisabledModelStatusCode: (value: number) => void;
   onUpdateModelLatencyMs: (map: Record<string, number>) => void | Promise<void>;
+  onUpdateModelStreamErrors: (map: Record<string, StreamErrorConfig>) => void | Promise<void>;
   onSave: () => void;
 }) {
   const [ruleTarget, setRuleTarget] = useState<string>("");
   const [ruleValue, setRuleValue] = useState<number>(0);
+  const [errorRuleTarget, setErrorRuleTarget] = useState<string>("");
+  const [errorRuleMessage, setErrorRuleMessage] = useState<string>("");
+  const [errorRuleCode, setErrorRuleCode] = useState<string>("");
 
   const latencyModels = modelsForLatencySettings(providers, models);
   const modelTargetGroups = providers
@@ -546,12 +576,21 @@ function SettingsView({
     }))
     .filter((group) => group.targets.length > 0);
   const modelLatencyEntries = sortedModelLatencyEntries(modelLatencyMs, providers, latencyModels);
+  const streamErrorEntries = sortedStreamErrorEntries(modelStreamErrors, providers, latencyModels);
 
   function addRule() {
     if (!ruleTarget || ruleValue <= 0) return;
     void onUpdateModelLatencyMs({ ...modelLatencyMs, [ruleTarget]: ruleValue });
     setRuleTarget("");
     setRuleValue(0);
+  }
+
+  function addErrorRule() {
+    if (!errorRuleTarget || !errorRuleMessage.trim()) return;
+    void onUpdateModelStreamErrors({ ...modelStreamErrors, [errorRuleTarget]: { code: errorRuleCode.trim() || undefined, message: errorRuleMessage.trim() } });
+    setErrorRuleTarget("");
+    setErrorRuleMessage("");
+    setErrorRuleCode("");
   }
 
   return (
@@ -595,6 +634,40 @@ function SettingsView({
             </select>
             <input type="number" value={ruleValue || ""} placeholder="ms" onChange={(e) => setRuleValue(Number(e.target.value) || 0)} />
             <button onClick={addRule} type="button" disabled={!ruleTarget || ruleValue <= 0}>添加</button>
+          </div>
+        </div>
+
+        <div className="settings-section">
+          <h2>单模型流式错误</h2>
+          <p className="settings-hint">命中后在 SSE 流开始前输出协议错误帧，仅对流式请求生效。</p>
+
+          {Object.keys(modelStreamErrors).length > 0 && (
+            <>
+              <h3>已设错误</h3>
+              {streamErrorEntries.map(({ model, providerName, code, message }) => (
+                <div className="settings-rule-row" key={model}>
+                  <span className="settings-rule-label">{model}（{providerName}）</span>
+                  <span className="settings-rule-value">{code ? `[${code}] ${message}` : message}</span>
+                  <button className="settings-rule-del" onClick={() => { const next = { ...modelStreamErrors }; delete next[model]; void onUpdateModelStreamErrors(next); }} type="button">删除</button>
+                </div>
+              ))}
+            </>
+          )}
+
+          <div className="settings-rule-add">
+            <select value={errorRuleTarget} onChange={(e) => setErrorRuleTarget(e.target.value)}>
+              <option value="">-- 选择模型 --</option>
+              {modelTargetGroups.map((group) => (
+                <optgroup key={group.key} label={group.label}>
+                  {group.targets.map((t) => (
+                    <option key={t.key} value={t.key}>{modelStreamErrors[t.key] ? `✓ ${t.label}` : t.label}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <input type="text" value={errorRuleCode} placeholder="错误码（可选）" onChange={(e) => setErrorRuleCode(e.target.value)} style={{ width: "140px" }} />
+            <input type="text" value={errorRuleMessage} placeholder="错误消息" onChange={(e) => setErrorRuleMessage(e.target.value)} style={{ width: "240px" }} />
+            <button onClick={addErrorRule} type="button" disabled={!errorRuleTarget || !errorRuleMessage.trim()}>添加</button>
           </div>
         </div>
 
@@ -854,6 +927,21 @@ function sortedModelLatencyEntries(
       const found = latencyModels.find((m) => m.id === model);
       const provider = found?.provider ?? "";
       return { model, provider, providerName: providers.find((p) => p.provider === provider)?.displayName ?? (provider || "未知供应商"), ms };
+    })
+    .sort((a, b) => (providerIndex.get(a.provider) ?? 999) - (providerIndex.get(b.provider) ?? 999) || a.model.localeCompare(b.model));
+}
+
+function sortedStreamErrorEntries(
+  modelStreamErrors: Record<string, StreamErrorConfig>,
+  providers: ProviderView[],
+  latencyModels: { id: string; provider: string }[]
+): { model: string; provider: string; providerName: string; code?: string; message: string }[] {
+  const providerIndex = new Map<string, number>(providers.map((p, index) => [p.provider, index]));
+  return Object.entries(modelStreamErrors)
+    .map(([model, err]) => {
+      const found = latencyModels.find((m) => m.id === model);
+      const provider = found?.provider ?? "";
+      return { model, provider, providerName: providers.find((p) => p.provider === provider)?.displayName ?? (provider || "未知供应商"), code: err.code, message: err.message };
     })
     .sort((a, b) => (providerIndex.get(a.provider) ?? 999) - (providerIndex.get(b.provider) ?? 999) || a.model.localeCompare(b.model));
 }

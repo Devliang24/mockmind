@@ -54,6 +54,9 @@ export async function handleAnthropicMessages(handlerContext: ProtocolHandlerCon
     return reply.code(result.error.status).send(responseBody);
   }
   if (body.stream) {
+    if (body.model && context.systemSettings.modelStreamErrors[body.model]) {
+      result.streamError = context.systemSettings.modelStreamErrors[body.model];
+    }
     const responseBody = streamResponseBody(result, body.model ?? "claude-mock");
     context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
     return sendAnthropicStream(reply, body.model ?? "claude-mock", result, context.config.defaults.streamChunkDelayMs);

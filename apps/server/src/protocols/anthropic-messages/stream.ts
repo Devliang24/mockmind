@@ -14,6 +14,12 @@ export async function sendAnthropicStream(reply: FastifyReply, model: string, re
     connection: "keep-alive"
   });
 
+  if (result.streamError) {
+    reply.raw.write(event("error", { type: "error", error: { type: "api_error", message: result.streamError.message } }));
+    reply.raw.end();
+    return;
+  }
+
   reply.raw.write(event("message_start", {
     type: "message_start",
     message: { id: "msg_mock_0001", type: "message", role: "assistant", model, content: [], stop_reason: null, stop_sequence: null, usage: { input_tokens: result.usage?.promptTokens ?? 0, output_tokens: 0 } }

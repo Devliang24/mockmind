@@ -65,6 +65,9 @@ export async function handleOpenAICompatibleChat(
     return reply.code(result.error.status).send(responseBody);
   }
   if (body.stream) {
+    if (model && context.systemSettings.modelStreamErrors[model]) {
+      result.streamError = context.systemSettings.modelStreamErrors[model];
+    }
     const responseBody = streamResponseBody(result, model ?? "mock-model");
     context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
     return sendOpenAIStream(reply, model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs, body.stream_options?.include_usage === true);

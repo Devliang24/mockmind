@@ -48,6 +48,9 @@ export async function handleGeminiGenerateContent(handlerContext: ProtocolHandle
     return reply.code(result.error.status).send(responseBody);
   }
   if (stream) {
+    if (model && context.systemSettings.modelStreamErrors[model]) {
+      result.streamError = context.systemSettings.modelStreamErrors[model];
+    }
     const responseBody = streamResponseBody(result, model ?? "gemini-mock");
     context.recorder.add({ provider: mockRequest.provider, endpoint, model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream, request: mockRequest, responseBody });
     return sendGeminiStream(reply, result, context.config.defaults.streamChunkDelayMs);

@@ -60,6 +60,9 @@ export async function handleOpenAIResponses(
     return reply.code(result.error.status).send(responseBody);
   }
   if (body.stream) {
+    if (body.model && context.systemSettings.modelStreamErrors[body.model]) {
+      result.streamError = context.systemSettings.modelStreamErrors[body.model];
+    }
     const responseBody = streamResponseBody(result, body.model ?? "mock-model");
     context.recorder.add({ provider: mockRequest.provider, endpoint: mockRequest.endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
     return sendOpenAIResponsesStream(reply, body.model ?? "mock-model", result, context.config.defaults.streamChunkDelayMs);

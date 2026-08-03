@@ -53,6 +53,9 @@ export async function handleMiniMaxChat(handlerContext: ProtocolHandlerContext, 
     return reply.code(result.error.status).send(responseBody);
   }
   if (body.stream) {
+    if (body.model && context.systemSettings.modelStreamErrors[body.model]) {
+      result.streamError = context.systemSettings.modelStreamErrors[body.model];
+    }
     const responseBody = streamResponseBody(result, body.model ?? "MiniMax-M2.7");
     context.recorder.add({ provider: mockRequest.provider, endpoint, model: mockRequest.model, matchedScenarioId: found.scenario?.id, status, durationMs: Date.now() - started, stream: true, request: mockRequest, responseBody });
     return sendMiniMaxStream(reply, body.model ?? "MiniMax-M2.7", result, context.config.defaults.streamChunkDelayMs);

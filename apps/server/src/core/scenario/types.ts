@@ -99,6 +99,7 @@ export type MockMindConfig = {
     maxRequests?: number;
     disabledModelStatusCode?: number;
     modelLatencyMs?: Record<string, number>;
+    modelStreamErrors?: Record<string, { code?: string; message: string }>;
   };
   persistence?: {
     enabled: boolean;

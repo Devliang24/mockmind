@@ -13,6 +13,12 @@ export async function sendMiniMaxStream(reply: FastifyReply, model: string, resu
     connection: "keep-alive"
   });
 
+  if (result.streamError) {
+    reply.raw.write(event({ base_resp: { status_code: Number(result.streamError.code) || 1001, status_msg: result.streamError.message } }));
+    reply.raw.end();
+    return;
+  }
+
   for (const reasoningContent of result.reasoningChunks ?? (result.reasoningContent ? [result.reasoningContent] : [])) {
     reply.raw.write(event({
       id: "minimax-mock-0001",
@@ -34,12 +40,6 @@ export async function sendMiniMaxStream(reply: FastifyReply, model: string, resu
       choices: [{ index: 0, delta: { content }, finish_reason: null }]
     }));
     if (chunkDelayMs > 0) await delay(chunkDelayMs);
-  }
-
-  if (result.streamError) {
-    reply.raw.write(event({ base_resp: { status_code: Number(result.streamError.code) || 1001, status_msg: result.streamError.message } }));
-    reply.raw.end();
-    return;
   }
 
   reply.raw.write(event({
