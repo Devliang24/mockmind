@@ -574,7 +574,6 @@ function SettingsView({
   const [ruleValue, setRuleValue] = useState<number>(0);
   const [errorRuleTarget, setErrorRuleTarget] = useState<string>("");
   const [errorRuleMessage, setErrorRuleMessage] = useState<string>("");
-  const [errorRuleCode, setErrorRuleCode] = useState<string>("");
 
   const latencyModels = modelsForLatencySettings(providers, models);
   const modelTargetGroups = providers
@@ -596,16 +595,14 @@ function SettingsView({
 
   function clearErrorRule() {
     setErrorRuleTarget("");
-    setErrorRuleCode("");
     setErrorRuleMessage("");
   }
 
   function addErrorRule() {
     if (!errorRuleTarget || !errorRuleMessage.trim()) return;
-    void onUpdateModelStreamErrors({ ...modelStreamErrors, [errorRuleTarget]: { code: errorRuleCode.trim() || undefined, message: errorRuleMessage.trim() } });
+    void onUpdateModelStreamErrors({ ...modelStreamErrors, [errorRuleTarget]: { message: errorRuleMessage.trim() } });
     setErrorRuleTarget("");
     setErrorRuleMessage("");
-    setErrorRuleCode("");
   }
 
   return (
@@ -680,7 +677,6 @@ function SettingsView({
                 </optgroup>
               ))}
             </select>
-            <input type="text" value={errorRuleCode} placeholder="错误码（可选）" onChange={(e) => setErrorRuleCode(e.target.value)} />
             <textarea value={errorRuleMessage} placeholder="错误消息" onChange={(e) => setErrorRuleMessage(e.target.value)} rows={3} />
             <div className="error-presets">
               {STREAM_ERROR_PRESETS.map((preset) => (
@@ -688,7 +684,7 @@ function SettingsView({
                   key={preset.label}
                   className="error-preset-chip"
                   type="button"
-                  onClick={() => { setErrorRuleCode(preset.code); setErrorRuleMessage(preset.message); }}
+                  onClick={() => { setErrorRuleMessage(preset.message); }}
                   title={preset.message}
                 >
                   {preset.label}
@@ -697,7 +693,7 @@ function SettingsView({
             </div>
             <div className="settings-rule-actions">
               <button onClick={addErrorRule} type="button" disabled={!errorRuleTarget || !errorRuleMessage.trim()}>添加</button>
-              <button className="settings-rule-clear" onClick={clearErrorRule} type="button" disabled={!errorRuleTarget && !errorRuleCode && !errorRuleMessage}>清空</button>
+              <button className="settings-rule-clear" onClick={clearErrorRule} type="button" disabled={!errorRuleTarget && !errorRuleMessage}>清空</button>
             </div>
           </div>
         </div>
