@@ -35,7 +35,7 @@ export async function handleOpenAIResponses(
 
   const started = Date.now();
   const body = request.body;
-  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatOpenAIError(status, code, message, "invalid_request_error"))) return;
+  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatOpenAIError(status, code, message, "invalid_request_error"), { provider, endpoint, startedAtMs: started, stream: Boolean(body.stream) })) return;
   const mockRequest: MockRequest = {
     provider,
     endpoint,

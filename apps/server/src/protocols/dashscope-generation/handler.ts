@@ -34,7 +34,7 @@ export async function handleDashScopeGeneration(handlerContext: ProtocolHandlerC
   if (validationError) return reply.code(validationError.status).send(formatDashScopeError(validationError.code, validationError.message));
   const started = Date.now();
   const body = request.body as DashScopeBody;
-  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatDashScopeError(code, message))) return;
+  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatDashScopeError(code, message), { provider: "aliyun-bailian", endpoint, startedAtMs: started, stream: Boolean(body.stream ?? body.parameters?.incremental_output) })) return;
   const stream = Boolean(body.stream ?? body.parameters?.incremental_output);
   const mockRequest: MockRequest = {
     provider: "aliyun-bailian",

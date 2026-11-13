@@ -31,7 +31,7 @@ export async function handleAnthropicMessages(handlerContext: ProtocolHandlerCon
   if (validationError) return reply.code(validationError.status).send(formatAnthropicError(validationError.code, validationError.message));
   const started = Date.now();
   const body = request.body as AnthropicBody;
-  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatAnthropicError(code, message))) return;
+  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatAnthropicError(code, message), { provider: "anthropic", endpoint, startedAtMs: started, stream: Boolean(body.stream) })) return;
   const mockRequest: MockRequest = {
     provider: "anthropic",
     endpoint,

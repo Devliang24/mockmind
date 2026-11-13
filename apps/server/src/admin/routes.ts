@@ -37,10 +37,14 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
   app.get("/__admin/config", async () => context.config);
   app.get("/__admin/settings", async (): Promise<AdminSettingsResponse> => adminSettings(context));
   app.patch("/__admin/settings", async (request): Promise<AdminSettingsResponse> => {
-    const body = request.body as { disabledModelStatusCode?: unknown; modelLatencyMs?: unknown; modelStreamErrors?: unknown };
+    const body = request.body as { disabledModelStatusCode?: unknown; recordRejectedRequests?: unknown; modelLatencyMs?: unknown; modelStreamErrors?: unknown };
     if (body.disabledModelStatusCode !== undefined) {
       if (typeof body.disabledModelStatusCode !== "number" || Number.isNaN(body.disabledModelStatusCode)) throw { statusCode: 400, message: "disabledModelStatusCode must be a number." };
       context.systemSettings.disabledModelStatusCode = body.disabledModelStatusCode;
+    }
+    if (body.recordRejectedRequests !== undefined) {
+      if (typeof body.recordRejectedRequests !== "boolean") throw { statusCode: 400, message: "recordRejectedRequests must be a boolean." };
+      context.systemSettings.recordRejectedRequests = body.recordRejectedRequests;
     }
     if (body.modelLatencyMs !== undefined) {
       if (!isNumberRecord(body.modelLatencyMs)) throw { statusCode: 400, message: "modelLatencyMs must be a number map." };
@@ -114,6 +118,7 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
 function adminSettings(context: ServerContext): AdminSettingsResponse {
   return {
     disabledModelStatusCode: context.systemSettings.disabledModelStatusCode,
+    recordRejectedRequests: context.systemSettings.recordRejectedRequests,
     modelLatencyMs: context.systemSettings.modelLatencyMs,
     modelStreamErrors: context.systemSettings.modelStreamErrors
   };

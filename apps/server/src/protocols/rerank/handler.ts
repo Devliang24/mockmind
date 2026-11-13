@@ -41,7 +41,7 @@ export async function handleRerank(handlerContext: ProtocolHandlerContext, reque
   if (!isValidQuery(rerankInput.query) || !isArray(rerankInput.documents)) {
     return reply.code(400).send(formatRerankError(provider, "invalid_request", "Missing or invalid required field: query/documents or input.query/input.documents."));
   }
-  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatRerankError(provider, code, message))) return;
+  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatRerankError(provider, code, message), { provider, endpoint, startedAtMs: started })) return;
   const mockRequest: MockRequest = {
     provider,
     endpoint,

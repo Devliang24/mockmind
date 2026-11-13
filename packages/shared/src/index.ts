@@ -90,6 +90,7 @@ export type StreamErrorConfig = { code?: string; message: string };
 
 export type AdminSettingsResponse = {
   disabledModelStatusCode: number;
+  recordRejectedRequests: boolean;
   modelLatencyMs: Record<string, number>;
   modelStreamErrors: Record<string, StreamErrorConfig>;
 };

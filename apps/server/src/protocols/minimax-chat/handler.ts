@@ -29,7 +29,7 @@ export async function handleMiniMaxChat(handlerContext: ProtocolHandlerContext, 
   if (validationError) return reply.code(validationError.status).send(formatMiniMaxError(validationError.code, validationError.message));
   const started = Date.now();
   const body = request.body as MiniMaxBody;
-  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatMiniMaxError(code, message))) return;
+  if (!checkModelDisabled(context, body.model, reply, (status, code, message) => formatMiniMaxError(code, message), { provider, endpoint, startedAtMs: started, stream: Boolean(body.stream) })) return;
   const mockRequest: MockRequest = {
     provider,
     endpoint,

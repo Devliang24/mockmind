@@ -51,6 +51,7 @@ export function App() {
   const [selectedRequestId, setSelectedRequestId] = useState<string>();
   const [copiedKey, setCopiedKey] = useState<string>();
   const [disabledModelStatusCodeDraft, setDisabledModelStatusCodeDraft] = useState<number>(403);
+  const [recordRejectedRequestsDraft, setRecordRejectedRequestsDraft] = useState<boolean>(true);
   const [modelLatencyMsDraft, setModelLatencyMsDraft] = useState<Record<string, number>>({});
   const [modelStreamErrorsDraft, setModelStreamErrorsDraft] = useState<Record<string, StreamErrorConfig>>({});
 
@@ -60,6 +61,7 @@ export function App() {
       const nextData = await loadConsoleData();
       setData(nextData);
       setDisabledModelStatusCodeDraft(nextData.settings.disabledModelStatusCode);
+      setRecordRejectedRequestsDraft(nextData.settings.recordRejectedRequests);
       setModelLatencyMsDraft({ ...nextData.settings.modelLatencyMs });
       setModelStreamErrorsDraft({ ...nextData.settings.modelStreamErrors });
       setLoadState("ready");
@@ -101,10 +103,12 @@ export function App() {
     try {
       const saved = await saveSettings({
         disabledModelStatusCode: disabledModelStatusCodeDraft,
+        recordRejectedRequests: recordRejectedRequestsDraft,
         modelLatencyMs: filterPositive(modelLatencyMsDraft),
         modelStreamErrors: modelStreamErrorsDraft
       });
       setDisabledModelStatusCodeDraft(saved.disabledModelStatusCode);
+      setRecordRejectedRequestsDraft(saved.recordRejectedRequests);
     } catch (cause) {
       window.alert(cause instanceof Error ? cause.message : String(cause));
       await refresh();
@@ -116,6 +120,7 @@ export function App() {
     try {
       const saved = await saveSettings({
         disabledModelStatusCode: disabledModelStatusCodeDraft,
+        recordRejectedRequests: recordRejectedRequestsDraft,
         modelLatencyMs: filterPositive(next),
         modelStreamErrors: modelStreamErrorsDraft
       });
@@ -131,10 +136,27 @@ export function App() {
     try {
       const saved = await saveSettings({
         disabledModelStatusCode: disabledModelStatusCodeDraft,
+        recordRejectedRequests: recordRejectedRequestsDraft,
         modelLatencyMs: filterPositive(modelLatencyMsDraft),
         modelStreamErrors: next
       });
       setModelStreamErrorsDraft({ ...saved.modelStreamErrors });
+    } catch (cause) {
+      window.alert(cause instanceof Error ? cause.message : String(cause));
+      await refresh();
+    }
+  }
+
+  async function handleUpdateRecordRejectedRequests(next: boolean) {
+    setRecordRejectedRequestsDraft(next);
+    try {
+      const saved = await saveSettings({
+        disabledModelStatusCode: disabledModelStatusCodeDraft,
+        recordRejectedRequests: next,
+        modelLatencyMs: filterPositive(modelLatencyMsDraft),
+        modelStreamErrors: modelStreamErrorsDraft
+      });
+      setRecordRejectedRequestsDraft(saved.recordRejectedRequests);
     } catch (cause) {
       window.alert(cause instanceof Error ? cause.message : String(cause));
       await refresh();
@@ -219,12 +241,14 @@ export function App() {
           ) : view === "settings" ? (
             <SettingsView
               disabledModelStatusCode={disabledModelStatusCodeDraft}
+              recordRejectedRequests={recordRejectedRequestsDraft}
               modelLatencyMs={modelLatencyMsDraft}
               modelStreamErrors={modelStreamErrorsDraft}
               providers={data?.providers.providers ?? []}
               models={data?.models.data ?? []}
               onChangeDisabledModelStatusCode={setDisabledModelStatusCodeDraft}
               onUpdateDisabledModelStatusCode={() => void handleUpdateDisabledModelStatusCode()}
+              onUpdateRecordRejectedRequests={(next) => void handleUpdateRecordRejectedRequests(next)}
               onUpdateModelLatencyMs={(next) => void handleUpdateModelLatencyMs(next)}
               onUpdateModelStreamErrors={(next) => void handleUpdateModelStreamErrors(next)}
             />
@@ -552,22 +576,26 @@ function ExampleSections({ example }: { example: RouteExample }) {
 
 function SettingsView({
   disabledModelStatusCode,
+  recordRejectedRequests,
   modelLatencyMs,
   modelStreamErrors,
   providers,
   models,
   onChangeDisabledModelStatusCode,
   onUpdateDisabledModelStatusCode,
+  onUpdateRecordRejectedRequests,
   onUpdateModelLatencyMs,
   onUpdateModelStreamErrors
 }: {
   disabledModelStatusCode: number;
+  recordRejectedRequests: boolean;
   modelLatencyMs: Record<string, number>;
   modelStreamErrors: Record<string, StreamErrorConfig>;
   providers: ProviderView[];
   models: AdminModelsResponse["data"];
   onChangeDisabledModelStatusCode: (value: number) => void;
   onUpdateDisabledModelStatusCode: () => void | Promise<void>;
+  onUpdateRecordRejectedRequests: (next: boolean) => void | Promise<void>;
   onUpdateModelLatencyMs: (map: Record<string, number>) => void | Promise<void>;
   onUpdateModelStreamErrors: (map: Record<string, StreamErrorConfig>) => void | Promise<void>;
 }) {
@@ -622,6 +650,19 @@ function SettingsView({
               onChange={(event) => onChangeDisabledModelStatusCode(Number(event.target.value))}
             />
             <button onClick={() => void onUpdateDisabledModelStatusCode()} type="button">应用</button>
+          </div>
+        </div>
+
+        <div className="settings-field">
+          <label htmlFor="record-rejected-requests">记录被拒请求</label>
+          <div className="settings-field-control">
+            <input
+              id="record-rejected-requests"
+              type="checkbox"
+              checked={recordRejectedRequests}
+              onChange={(event) => void onUpdateRecordRejectedRequests(event.target.checked)}
+            />
+            <span className="settings-hint">开启后，因模型被禁用而拒绝的请求也会写入请求记录（含到达时间戳）。</span>
           </div>
         </div>
 

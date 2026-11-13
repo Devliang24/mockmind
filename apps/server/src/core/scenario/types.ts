@@ -98,6 +98,7 @@ export type MockMindConfig = {
     streamChunkDelayMs: number;
     maxRequests?: number;
     disabledModelStatusCode?: number;
+    recordRejectedRequests?: boolean;
     modelLatencyMs?: Record<string, number>;
     modelStreamErrors?: Record<string, { code?: string; message: string }>;
   };

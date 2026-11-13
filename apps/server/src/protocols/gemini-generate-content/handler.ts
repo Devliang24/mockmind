@@ -24,7 +24,7 @@ export async function handleGeminiGenerateContent(handlerContext: ProtocolHandle
   const started = Date.now();
   const body = request.body as GeminiBody;
   const model = modelFromEndpoint(endpoint);
-  if (!checkModelDisabled(context, model, reply, (status, code, message) => formatGeminiError(status, message, code))) return;
+  if (!checkModelDisabled(context, model, reply, (status, code, message) => formatGeminiError(status, message, code), { provider: "gemini", endpoint, startedAtMs: started, stream: endpoint.endsWith(":streamGenerateContent") })) return;
   const stream = endpoint.endsWith(":streamGenerateContent");
   const mockRequest: MockRequest = {
     provider: "gemini",

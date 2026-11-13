@@ -1,5 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import type { Provider } from "../core/scenario/types.js";
 import type { ServerContext } from "../server/context.js";
+import { requestHeaders, requestQuery } from "../shared/http.js";
 
 export type ValidationError = {
   status: number;
@@ -82,16 +84,49 @@ function getPath(value: unknown, path: string): unknown {
   }, value);
 }
 
+export type RejectedRecordContext = {
+  provider: Provider;
+  endpoint: string;
+  startedAtMs: number;
+  stream?: boolean;
+};
+
 export function checkModelDisabled(
   context: ServerContext,
   model: string | undefined,
   reply: FastifyReply,
-  formatError: (status: number, code: string, message: string) => unknown
+  formatError: (status: number, code: string, message: string) => unknown,
+  record?: RejectedRecordContext
 ): boolean {
-  if (model && context.disabledModels.has(model)) {
-    const status = context.systemSettings.disabledModelStatusCode;
-    reply.status(status).send(formatError(status, "model_disabled", `Model '${model}' is disabled by the administrator.`));
-    return false;
+  if (!model || !context.disabledModels.has(model)) return true;
+
+  const status = context.systemSettings.disabledModelStatusCode;
+  const errorBody = formatError(status, "model_disabled", `Model '${model}' is disabled by the administrator.`);
+
+  // Rejected requests are recorded too, otherwise there is no arrival timestamp for
+  // 503-class failures and retry intervals cannot be measured.
+  if (record && context.systemSettings.recordRejectedRequests) {
+    context.recorder.add({
+      provider: record.provider,
+      endpoint: record.endpoint,
+      model,
+      status,
+      durationMs: Date.now() - record.startedAtMs,
+      stream: record.stream ?? false,
+      request: {
+        provider: record.provider,
+        endpoint: record.endpoint,
+        method: reply.request.method,
+        model,
+        ...(record.stream === undefined ? {} : { stream: record.stream }),
+        rawBody: reply.request.body,
+        headers: requestHeaders(reply.request),
+        query: requestQuery(reply.request)
+      },
+      responseBody: errorBody
+    });
   }
-  return true;
+
+  reply.status(status).send(errorBody);
+  return false;
 }

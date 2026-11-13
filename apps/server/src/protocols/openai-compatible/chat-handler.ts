@@ -40,7 +40,7 @@ export async function handleOpenAICompatibleChat(
   ]);
   if (validationError) return reply.code(validationError.status).send(formatOpenAIError(validationError.status, validationError.code, validationError.message, validationError.type));
   const started = Date.now();
-  if (!checkModelDisabled(context, model, reply, (status, code, message) => formatOpenAIError(status, code, message, "invalid_request_error"))) return;
+  if (!checkModelDisabled(context, model, reply, (status, code, message) => formatOpenAIError(status, code, message, "invalid_request_error"), { provider, endpoint, startedAtMs: started, stream: Boolean(body.stream) })) return;
   const effectiveProvider = provider === "openai" ? resolveOpenAICompatibleProvider(model, endpoint) : provider;
   const mockRequest: MockRequest = {
     provider: effectiveProvider,

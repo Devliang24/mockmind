@@ -101,7 +101,8 @@ async function sendRendered(
 ): Promise<unknown> {
   const { context, provider, endpoint } = handlerContext;
   const body = request.body as Body;
-  if (!checkModelDisabled(context, typeof body.model === "string" ? body.model : undefined, reply, (status, code, message) => formatOpenAIError(status, code, message, "invalid_request_error"))) return;
+  const started = Date.now();
+  if (!checkModelDisabled(context, typeof body.model === "string" ? body.model : undefined, reply, (status, code, message) => formatOpenAIError(status, code, message, "invalid_request_error"), { provider, endpoint, startedAtMs: started })) return;
   const mockRequest: MockRequest = {
     provider,
     endpoint,
