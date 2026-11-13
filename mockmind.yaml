@@ -46,8 +46,9 @@ defaults:
   latencyMs: 30
   streamChunkDelayMs: 25
   # ponytail: 500 (default) is flushed in <2s under the ~300 req/s load on this host,
-  # which drops retry attempts before they can be compared. 5000 ≈ 10MB RAM.
-  maxRequests: 5000
+  # which drops retry attempts before they can be compared. 50000 ≈ 250MB while testing;
+  # drop back to 5000 (or the 500 default) once the retry run is done.
+  maxRequests: 50000
 
 persistence:
   # ponytail: disabled because the deployed container mounts node_modules built on macOS
