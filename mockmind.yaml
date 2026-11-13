@@ -19,6 +19,12 @@ models:
     provider: azure
   - id: deepseek-v4-pro
     provider: deepseek
+  - id: deepseek-v4-1-flash-261017
+    provider: deepseek
+  - id: deepseek-v4.1-flash
+    provider: deepseek
+  - id: deepseek-v4.1-flash-1017
+    provider: deepseek
   - id: kimi-k2.6
     provider: moonshot
   - id: qwen3.6-plus
@@ -41,7 +47,10 @@ defaults:
   streamChunkDelayMs: 25
 
 persistence:
-  enabled: true
+  # ponytail: disabled because the deployed container mounts node_modules built on macOS
+  # (better-sqlite3 native module fails with "invalid ELF header"). Re-enable after
+  # building deps inside the Linux image.
+  enabled: false
   driver: sqlite
   sqlite:
     path: .mockmind/mockmind.sqlite
