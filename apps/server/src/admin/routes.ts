@@ -81,7 +81,28 @@ export async function registerAdminRoutes(app: FastifyInstance, context: ServerC
     match: scenario.match,
     response: scenario.response as Record<string, unknown>
   })));
-  app.get("/__admin/requests", async (): Promise<AdminRequestsResponse> => context.recorder.list() as AdminRecordedRequest[]);
+  app.get("/__admin/requests", async (request): Promise<AdminRequestsResponse> => {
+    const query = request.query as { limit?: string; model?: string; sinceMs?: string };
+    let list = context.recorder.list();
+    if (query.model) {
+      list = list.filter((record) => record.model === query.model);
+    }
+    if (query.sinceMs) {
+      const since = Number(query.sinceMs);
+      if (!Number.isFinite(since)) {
+        throw { statusCode: 400, message: "sinceMs must be a number." };
+      }
+      list = list.filter((record) => record.receivedAtMs >= since);
+    }
+    if (query.limit) {
+      const limit = Number(query.limit);
+      if (!Number.isInteger(limit) || limit <= 0) {
+        throw { statusCode: 400, message: "limit must be a positive integer." };
+      }
+      list = list.slice(-limit);
+    }
+    return list as AdminRecordedRequest[];
+  });
   app.get("/__admin/providers", async (): Promise<AdminProvidersResponse> => ({
     mode: "all",
     providers: providerRegistry.map((registration) => ({
