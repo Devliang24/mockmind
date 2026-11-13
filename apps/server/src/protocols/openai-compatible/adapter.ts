@@ -31,6 +31,13 @@ export function formatChatCompletion(model: string, result: MockResult): unknown
   };
 }
 
+export function formatModelList(modelIds: string[]): unknown {
+  return {
+    object: "list",
+    data: modelIds.map((id) => ({ id, object: "model", owned_by: "mockmind" }))
+  };
+}
+
 export function formatEmbedding(model: string, embedding: number[], promptTokens = 1): unknown {
   return {
     object: "list",

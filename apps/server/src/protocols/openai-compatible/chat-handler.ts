@@ -5,7 +5,7 @@ import type { MockRequest, Provider } from "../../core/scenario/types.js";
 import type { ServerContext } from "../../server/context.js";
 import { requestHeaders, requestQuery } from "../../shared/http.js";
 import { delay } from "../../shared/time.js";
-import { formatChatCompletion, formatOpenAIError } from "./adapter.js";
+import { formatChatCompletion, formatModelList, formatOpenAIError } from "./adapter.js";
 import { checkModelDisabled, isArray, isString, requireFields } from "../validation.js";
 import { sendOpenAIStream } from "./stream.js";
 import { withEstimatedUsage } from "../usage.js";
@@ -31,6 +31,10 @@ export async function handleOpenAICompatibleChat(
   endpoint: string
 ): Promise<unknown> {
   if (!checkProviderAuth(context.config, request, reply, provider, formatOpenAIError(401, "invalid_api_key", "Invalid API key", "authentication_error"))) return;
+  // GET /v1/models shares this handler (no body) and used to 500 on `body.model`
+  if (request.method === "GET" && endpoint === "/v1/models") {
+    return reply.send(formatModelList(context.config.models.map((model) => model.id)));
+  }
   const body = request.body;
   const deploymentModel = provider === "azure" ? azureDeploymentFromEndpoint(endpoint) : undefined;
   const model = body.model ?? deploymentModel;
