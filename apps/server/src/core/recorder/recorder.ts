@@ -11,6 +11,8 @@ export type RecordedRequest = {
   matchedScenarioId?: string;
   status: number;
   durationMs: number;
+  receivedAtMs: number;
+  respondedAtMs: number;
   stream: boolean;
   request: MockRequest;
   responseBody?: unknown;
@@ -38,8 +40,14 @@ export class RequestRecorder {
     }
   }
 
-  add(record: Omit<RecordedRequest, "id">): RecordedRequest {
-    const saved = { ...record, id: `req_${this.nextId++}` };
+  add(record: Omit<RecordedRequest, "id" | "receivedAtMs" | "respondedAtMs">): RecordedRequest {
+    const respondedAtMs = Date.now();
+    const saved = {
+      ...record,
+      receivedAtMs: respondedAtMs - record.durationMs,
+      respondedAtMs,
+      id: `req_${this.nextId++}`
+    };
     this.records.push(saved);
     this.persist(saved);
     this.prune();
@@ -149,7 +157,7 @@ function migrate(db: Database.Database): void {
 
 function loadRecords(db: Database.Database): RecordedRequest[] {
   const rows = db.prepare(`
-    SELECT id, provider, endpoint, model, matched_scenario_id, status, duration_ms, stream, request_json, response_body_json
+    SELECT id, provider, endpoint, model, matched_scenario_id, status, duration_ms, stream, request_json, response_body_json, created_at
     FROM request_records
     ORDER BY sequence ASC
   `).all() as Array<{
@@ -163,6 +171,7 @@ function loadRecords(db: Database.Database): RecordedRequest[] {
     stream: number;
     request_json: string;
     response_body_json: string | null;
+    created_at: string;
   }>;
 
   return rows.map((row) => ({
@@ -173,6 +182,10 @@ function loadRecords(db: Database.Database): RecordedRequest[] {
     matchedScenarioId: row.matched_scenario_id ?? undefined,
     status: row.status,
     durationMs: row.duration_ms,
+    // ponytail: reloaded rows only have second-precision created_at; the store has no
+    // ms column. Add received_at_ms column + migration if sqlite mode needs ms accuracy.
+    receivedAtMs: Date.parse(row.created_at) - row.duration_ms,
+    respondedAtMs: Date.parse(row.created_at),
     stream: Boolean(row.stream),
     request: parseJson(row.request_json) as MockRequest,
     responseBody: row.response_body_json === null ? undefined : parseJson(row.response_body_json)

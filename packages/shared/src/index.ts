@@ -44,6 +44,10 @@ export type AdminRecordedRequest = {
   matchedScenarioId?: string;
   status: number;
   durationMs: number;
+  // ponytail: receivedAtMs is derived as respondedAtMs - durationMs because every handler
+  // already records durationMs; avoids touching 8 protocol handlers. ±1ms error.
+  receivedAtMs: number;
+  respondedAtMs: number;
   stream: boolean;
   request: {
     provider: Provider;
