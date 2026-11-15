@@ -64,6 +64,20 @@ describe("provider official routes", () => {
     await app.close();
   });
 
+  it("serves DeepSeek-style /responses without the /v1 prefix", async () => {
+    const { app } = await createMockMindServer(config);
+
+    const nonStream = await app.inject({ method: "POST", url: "/responses", payload: { model: "deepseek-v4-pro", input: "hello" } });
+    expect(nonStream.statusCode).toBe(200);
+    expect(nonStream.json().object).toBe("response");
+
+    const stream = await app.inject({ method: "POST", url: "/responses", payload: { model: "deepseek-v4-pro", input: "hello", stream: true } });
+    expect(stream.statusCode).toBe(200);
+    expect(stream.body).toContain("response.created");
+
+    await app.close();
+  });
+
   it("serves shared OpenAI-compatible route", async () => {
     const { app } = await createMockMindServer(config);
     const response = await app.inject({ method: "POST", url: "/v1/chat/completions", payload: { model: "kimi-k2.6", messages: [{ role: "user", content: "hello" }] } });
