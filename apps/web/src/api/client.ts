@@ -38,7 +38,8 @@ export async function loadConsoleData(): Promise<ConsoleData> {
     api<AdminRoutesResponse>("/__admin/routes"),
     api<AdminModelsResponse>("/__admin/models"),
     api<AdminScenario[]>("/__admin/scenarios"),
-    api<AdminRequestsResponse>("/__admin/requests"),
+    // Bounded: the recorder can hold tens of thousands of records (hundreds of MB), which hangs the browser.
+    api<AdminRequestsResponse>("/__admin/requests?limit=200"),
     api<AdminSettingsResponse>("/__admin/settings")
   ]);
 

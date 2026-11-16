@@ -33,6 +33,7 @@ describe("web ui", () => {
     expect(js.statusCode).toBe(200);
     expect(js.headers["content-type"]).toContain("application/javascript");
     expect(js.body).toContain("/__admin/overview");
+    expect(js.body).toContain("/__admin/requests?limit=200");
     expect(js.body).toContain("Base URL");
     expect(js.body).toContain("sidebar-brand");
     expect(js.body).toContain("provider-menu");
