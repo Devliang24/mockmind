@@ -22,7 +22,7 @@ MockMind starts all implemented providers by default.
 |---|---|
 | OpenAI | `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano` |
 | Azure OpenAI / Microsoft Foundry | `gpt-5.4` (version `2026-03-05`), `gpt-5.4-mini` (version `2026-03-17`), `gpt-5.3-codex` (version `2026-02-24`) |
-| Anthropic | `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001` |
+| Anthropic | `claude-fable-5-2`, `claude-mythos-5-1`, `claude-opus-5-5`, `claude-sonnet-5-5`, `claude-haiku-5-5`, `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5-20251001` |
 | Gemini | `gemini-3-pro-preview`, `gemini-3-flash-preview`, `gemini-2.5-flash`, `gemini-2.5-flash-lite` |
 | DeepSeek | `deepseek-v4-pro`, `deepseek-v4-flash` |
 | Moonshot / Kimi | `kimi-k2.6`, `kimi-k2.5`, `kimi-k2-thinking`, `kimi-k2-thinking-turbo` |

@@ -174,7 +174,16 @@ describe("web ui", () => {
       "gpt-5.4-mini": "2026-03-17",
       "gpt-5.3-codex": "2026-02-24"
     });
-    expect(anthropic.latestModels).toEqual(["claude-opus-4-7", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"]);
+    expect(anthropic.latestModels).toEqual([
+      "claude-fable-5-2",
+      "claude-mythos-5-1",
+      "claude-opus-5-5",
+      "claude-sonnet-5-5",
+      "claude-haiku-5-5",
+      "claude-opus-4-7",
+      "claude-sonnet-4-6",
+      "claude-haiku-4-5-20251001"
+    ]);
     expect(anthropic.auth.label).toBe("x-api-key: 123456");
     expect(gemini.latestModels).toEqual(["gemini-3-pro-preview", "gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.5-flash-lite"]);
     expect(gemini.auth.label).toBe("x-goog-api-key: 123456 或 ?key=123456");

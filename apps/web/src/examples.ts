@@ -28,6 +28,11 @@ const providerDocs: Record<string, string> = {
 const thinkingModels = new Set([
   "gpt-5.5",
   "gpt-5.4",
+  "claude-fable-5-2",
+  "claude-mythos-5-1",
+  "claude-opus-5-5",
+  "claude-sonnet-5-5",
+  "claude-haiku-5-5",
   "claude-opus-4-7",
   "claude-sonnet-4-6",
   "claude-haiku-4-5-20251001",
