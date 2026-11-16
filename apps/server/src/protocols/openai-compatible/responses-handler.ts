@@ -1,7 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { checkProviderAuth } from "../../core/auth/auth-mock.js";
 import { renderResult } from "../../core/renderer/render.js";
-import type { MockRequest, Provider } from "../../core/scenario/types.js";
+import type { MockRequest, MockResult, Provider } from "../../core/scenario/types.js";
 import type { ServerContext } from "../../server/context.js";
 import { requestHeaders, requestQuery } from "../../shared/http.js";
 import { delay, unixSeconds } from "../../shared/time.js";
@@ -72,18 +72,34 @@ export async function handleOpenAIResponses(
   return reply.send(responseBody);
 }
 
-export function formatResponse(model: string, result: ReturnType<typeof renderResult>): unknown {
-  const output = result.type === "tool_call"
-    ? normalizeOpenAIToolCalls(result).map((toolCall) => ({ type: "function_call", ...toolCall as Record<string, unknown> }))
-    : [{ id: "msg_mock_0001", type: "message", role: "assistant", content: [{ type: "output_text", text: result.content ?? "" }] }];
+// Streaming and non-streaming must produce the same items: gateways persist whatever
+// `output` / `output_item.done` carry, so one source keeps both copies identical.
+export function buildOutput(result: MockResult): Array<Record<string, unknown>> {
+  if (result.type !== "tool_call") return [messageItem("msg_mock_0001", result.content ?? "")];
+  return normalizeOpenAIToolCalls(result).map((toolCall) => {
+    const { id, function: fn } = toolCall as { id?: string; function?: { name?: string; arguments?: string } };
+    return { type: "function_call", id: id ?? "fc_mock_0001", call_id: id ?? "fc_mock_0001", name: fn?.name, arguments: fn?.arguments ?? "{}", status: "completed" };
+  });
+}
 
+export function messageItem(id: string, text: string, status = "completed"): Record<string, unknown> {
+  return {
+    id,
+    type: "message",
+    role: "assistant",
+    status,
+    content: status === "in_progress" ? [] : [{ type: "output_text", text }]
+  };
+}
+
+export function formatResponse(model: string, result: MockResult): unknown {
   return {
     id: "resp_mock_0001",
     object: "response",
     created_at: unixSeconds(),
     status: "completed",
     model,
-    output,
+    output: buildOutput(result),
     output_text: result.type === "tool_call" ? "" : result.content ?? "",
     usage: formatResponsesUsage(result)
   };

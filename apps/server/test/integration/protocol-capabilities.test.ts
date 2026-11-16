@@ -77,6 +77,31 @@ describe("protocol capabilities", () => {
     await app.close();
   });
 
+  it("emits the full Responses stream item chain", async () => {
+    const { app } = await createMockMindServer(config);
+    const response = await app.inject({ method: "POST", url: "/v1/responses", payload: { model: "gpt-4o-mini", input: "hello", stream: true } });
+    const events = [...response.body.matchAll(/^event: (.+)$/gm)].map((match) => match[1]);
+    expect(events).toEqual([
+      "response.created",
+      "response.in_progress",
+      "response.output_item.added",
+      "response.content_part.added",
+      "response.output_text.delta",
+      "response.output_text.done",
+      "response.content_part.done",
+      "response.output_item.done",
+      "response.completed"
+    ]);
+    const completed = response.body.split("event: response.completed\n")[1].split("\n")[0].replace(/^data: /, "");
+    const output = JSON.parse(completed).response.output;
+    expect(output[0].type).toBe("message");
+    expect(output[0].content[0].type).toBe("output_text");
+    expect(output[0].content[0].text).toContain("fallback");
+    expect(response.body).toContain(`"item_id":"${output[0].id}"`);
+    expect(response.body).toContain('"sequence_number":0');
+    await app.close();
+  });
+
   it("returns Anthropic tool_use", async () => {
     const { app } = await createMockMindServer(config);
     const response = await app.inject({ method: "POST", url: "/v1/messages", headers: { "anthropic-version": "2023-06-01" }, payload: { model: "claude-sonnet-4-6", max_tokens: 128, messages: [{ role: "user", content: "weather" }] } });
