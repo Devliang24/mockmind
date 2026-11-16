@@ -27,4 +27,15 @@ describe("GET /v1/models", () => {
     expect(body.data.map((item: { id: string }) => item.id)).toEqual(["gpt-5.5", "claude-sonnet-4-6"]);
     expect(body.data[0]).toMatchObject({ object: "model", owned_by: "mockmind" });
   });
+
+  it("hides models disabled by the administrator", async () => {
+    const { app, context } = await createMockMindServer(makeConfig());
+    context.disabledModels.add("claude-sonnet-4-6");
+
+    const response = await app.inject({ method: "GET", url: "/v1/models" });
+    expect(response.statusCode).toBe(200);
+    expect(response.json().data.map((item: { id: string }) => item.id)).toEqual(["gpt-5.5"]);
+
+    await app.close();
+  });
 });

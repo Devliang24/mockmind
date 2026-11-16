@@ -33,7 +33,8 @@ export async function handleOpenAICompatibleChat(
   if (!checkProviderAuth(context.config, request, reply, provider, formatOpenAIError(401, "invalid_api_key", "Invalid API key", "authentication_error"))) return;
   // GET /v1/models shares this handler (no body) and used to 500 on `body.model`
   if (request.method === "GET" && endpoint === "/v1/models") {
-    return reply.send(formatModelList(context.config.models.map((model) => model.id)));
+    const visible = context.config.models.filter((model) => !context.disabledModels.has(model.id));
+    return reply.send(formatModelList(visible.map((model) => model.id)));
   }
   const body = request.body;
   const deploymentModel = provider === "azure" ? azureDeploymentFromEndpoint(endpoint) : undefined;
